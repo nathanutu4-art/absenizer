@@ -40,7 +40,8 @@ jobs:
 
       - name: Build debug APK
         run: |
-          cd android./gradlew assembleRelease --no-daemon -x lint
+          cd android
+          ./gradlew assembleRelease --no-daemon -x lint
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
