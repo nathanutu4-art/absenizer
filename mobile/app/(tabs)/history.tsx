@@ -1,87 +1,138 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StatusChip } from '../../src/components/StatusChip';
-import { FLAG_LABELS, type FlagType } from '../../src/lib/businessRules';
-import { supabase } from '../../src/lib/supabase';
-import { colors, radius, spacing, typography } from '../../src/theme';
+import { HISTORY_ROWS, HISTORY_SUMMARY, type HistoryRow } from '../../src/data/demo';
+import { colors, fontFamily, radius, spacing } from '../../src/theme';
 
-interface HistoryRow {
-  id: string;
-  date: string;
-  clockIn: string | null;
-  clockOut: string | null;
-  flags: FlagType[];
-}
+const STATUS_TONE: Record<HistoryRow['status'], 'green' | 'yellow' | 'blue' | 'red'> = {
+  Hadir: 'green',
+  Terlambat: 'yellow',
+  Cuti: 'blue',
+  Sakit: 'red',
+  Ijin: 'yellow',
+};
 
-/**
- * Riwayat kehadiran karyawan.
- * TODO (Fase 1): ganti data contoh dengan query ke tabel attendance +
- * attendance_flags milik pengguna yang masuk, urut tanggal menurun.
- */
-const SAMPLE: HistoryRow[] = [
-  {
-    id: '1',
-    date: 'Senin, 12 Okt 2026',
-    clockIn: '08:05',
-    clockOut: '17:02',
-    flags: [],
-  },
-  {
-    id: '2',
-    date: 'Jumat, 9 Okt 2026',
-    clockIn: '08:22',
-    clockOut: '17:00',
-    flags: ['terlambat'],
-  },
-];
+const SUMMARY_TONE: Record<string, 'green' | 'yellow' | 'blue' | 'red'> = {
+  green: 'green',
+  yellow: 'yellow',
+  blue: 'blue',
+  red: 'red',
+};
 
+/** Riwayat — ringkasan bulanan + baris kronologis. */
 export default function HistoryScreen() {
-  const [rows, setRows] = useState<HistoryRow[]>(SAMPLE);
-
-  useEffect(() => {
-    (async () => {
-      // TODO: const { data } = await supabase.from('attendance')...
-      void supabase;
-      setRows(SAMPLE);
-    })();
-  }, []);
-
   return (
     <ScreenContainer>
-      <Text style={[typography.title, styles.heading]}>Riwayat Kehadiran</Text>
-      {rows.map((r) => (
-        <View key={r.id} style={styles.card}>
-          <Text style={typography.subtitle}>{r.date}</Text>
-          <Text style={typography.body}>
-            Masuk: {r.clockIn ?? '-'} • Pulang: {r.clockOut ?? '-'}
-          </Text>
-          <View style={styles.flags}>
-            {r.flags.length === 0 ? (
-              <StatusChip label="Tepat Waktu" tone="success" />
-            ) : (
-              r.flags.map((f) => <StatusChip key={f} flag={f} />)
-            )}
+      <Text style={styles.header}>Riwayat</Text>
+      <Text style={styles.month}>Oktober 2026</Text>
+
+      {/* Strip ringkasan */}
+      <View style={styles.summary}>
+        {HISTORY_SUMMARY.map((s) => (
+          <View key={s.label} style={styles.cell}>
+            <Text style={styles.cellValue}>{s.value}</Text>
+            <Text style={styles.cellLabel}>{s.label}</Text>
+            <View
+              style={[
+                styles.cellBar,
+                { backgroundColor: toneColor(s.tone) },
+              ]}
+            />
           </View>
-          <Text style={typography.caption}>
-            Penanda: {r.flags.map((f) => FLAG_LABELS[f]).join(', ') || 'tidak ada'}
-          </Text>
-        </View>
-      ))}
+        ))}
+      </View>
+
+      {/* Baris riwayat */}
+      <View style={styles.list}>
+        {HISTORY_ROWS.map((row) => (
+          <View key={row.id} style={styles.item}>
+            <View style={styles.dateBlock}>
+              <Text style={styles.dayNum}>{row.dayNum}</Text>
+              <Text style={styles.dateLabel}>{row.dateLabel}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.itemBody}>
+              <View style={styles.itemTop}>
+                <Text style={styles.itemTime}>
+                  {row.clockIn} – {row.clockOut}
+                </Text>
+                <StatusChip label={row.status} tone={STATUS_TONE[row.status]} />
+              </View>
+              {row.flags.length > 0 ? (
+                <View style={styles.flagRow}>
+                  {row.flags.map((f) => (
+                    <StatusChip key={f} label={f} tone="orange" style={styles.flagChip} />
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          </View>
+        ))}
+      </View>
     </ScreenContainer>
   );
 }
 
+function toneColor(tone: string): string {
+  return SUMMARY_TONE[tone] === 'green'
+    ? colors.green
+    : SUMMARY_TONE[tone] === 'yellow'
+      ? colors.yellowRing
+      : SUMMARY_TONE[tone] === 'blue'
+        ? colors.blue
+        : colors.red;
+}
+
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.line,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    gap: spacing.xs,
-    marginBottom: spacing.md,
+  header: {
+    color: colors.ink,
+    fontFamily: fontFamily('800'),
+    fontSize: 19,
+    marginTop: spacing.sm,
+  },
+  month: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 13,
+    marginTop: 2,
+  },
+  summary: {
+    backgroundColor: '#fff',
+    borderRadius: radius.card,
+    flexDirection: 'row',
+    marginTop: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  cell: { alignItems: 'center', flex: 1 },
+  cellValue: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 20 },
+  cellLabel: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 10.5,
+    marginTop: 2,
+  },
+  cellBar: { borderRadius: 2, height: 3, marginTop: 6, width: 26 },
+  list: { marginTop: spacing.md },
+  item: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
     padding: spacing.md,
   },
-  flags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  heading: { marginBottom: spacing.md },
+  dateBlock: { alignItems: 'center', width: 44 },
+  dayNum: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 20 },
+  dateLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 11 },
+  divider: { backgroundColor: colors.line, height: '80%', marginHorizontal: 12, width: 1 },
+  itemBody: { flex: 1 },
+  itemTop: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  itemTime: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  flagRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
+  flagChip: { marginRight: 6 },
 });

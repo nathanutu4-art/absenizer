@@ -1,118 +1,194 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import React from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../../src/components/Avatar';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
+import { GradientView } from '../../src/components/GradientView';
 import { ThemedButton } from '../../src/components/ThemedButton';
-import { supabase } from '../../src/lib/supabase';
-import { colors, radius, spacing, typography } from '../../src/theme';
+import { showToast } from '../../src/components/Toast';
+import { getEmployee, getPicOf } from '../../src/data/demo';
+import { clearSession, getActiveRole, type DemoRole } from '../../src/lib/session';
+import { colors, fontFamily, radius, spacing } from '../../src/theme';
 
-/**
- * Profil karyawan: keterangan karyawan + info PIC.
- * Bila dibuka dengan param `name` (dari halaman Tim), tampilkan profil
- * karyawan tersebut dalam mode lihat-saja.
- *
- * TODO (Fase 1): ambil dari employee_profiles (nomor karyawan, jabatan,
- * tanggal lahir, email, no. telp, tanggal masuk -> lama bekerja) + info PIC.
- */
+const ROLE_EMPLOYEE: Record<DemoRole, string> = {
+  karyawan: 'nadia',
+  pic: 'dimas',
+  hr: 'sari',
+};
+
+/** Profil — data diri + kartu PIC + keluar. */
 export default function ProfileScreen() {
-  const { name } = useLocalSearchParams<{ name?: string }>();
-  const isViewingOther = typeof name === 'string' && name.length > 0;
-  const displayName = isViewingOther ? name : 'Nama Karyawan';
+  const [role, setRole] = useState<DemoRole>('karyawan');
 
-  const rows: Array<[string, string]> = [
-    ['Nomor karyawan', 'K-2024-0117'],
-    ['Jabatan', 'Staf Operasional'],
-    ['Tanggal lahir', '12 Mei 1994'],
-    ['Email', 'karyawan@perusahaan.co.id'],
-    ['No. telepon', '0812-3456-7890'],
-    ['Lama bekerja', '2 tahun 4 bulan'],
+  useEffect(() => {
+    getActiveRole().then(setRole);
+  }, []);
+
+  const me = getEmployee(ROLE_EMPLOYEE[role]);
+  const pic = getPicOf(me);
+
+  const kv: [string, string][] = [
+    ['Nomor Karyawan', me.employeeNo],
+    ['Jabatan', me.position],
+    ['Tanggal Lahir', me.birthDate],
+    ['Email', me.email],
+    ['Telepon', me.phone],
+    ['Lama Bekerja', me.tenure],
   ];
 
   async function handleLogout() {
-    await supabase.auth.signOut();
-    await SecureStore.deleteItemAsync('absenizer_session');
+    await clearSession();
     router.replace('/login');
   }
 
-  function confirmLogout() {
-    Alert.alert('Keluar', 'Yakin ingin keluar dari aplikasi?', [
-      { text: 'Batal', style: 'cancel' },
-      { text: 'Keluar', style: 'destructive', onPress: handleLogout },
-    ]);
-  }
-
   return (
-    <ScreenContainer>
-      <View style={styles.header}>
-        <Avatar name={displayName} size={72} />
-        <Text style={typography.title}>{displayName}</Text>
-      </View>
+    <View style={styles.root}>
+      <ScrollView>
+        <GradientView kind="hero" style={styles.hero}>
+          <SafeAreaView edges={['top']}>
+            <Text style={styles.headerTitle}>Profil</Text>
+            <View style={styles.profileRow}>
+              <Avatar gradientId={me.gradientId} name={me.name} size={76} />
+              <View style={styles.profileText}>
+                <Text style={styles.name}>{me.name}</Text>
+                <Text style={styles.position}>{me.position}</Text>
+                <Text style={styles.empNo}>{me.employeeNo}</Text>
+              </View>
+            </View>
+          </SafeAreaView>
+        </GradientView>
 
-      <Text style={[typography.subtitle, styles.section]}>Keterangan Karyawan</Text>
-      <View style={styles.card}>
-        {rows.map(([label, value]) => (
-          <View key={label} style={styles.row}>
-            <Text style={typography.caption}>{label}</Text>
-            <Text style={typography.body}>{value}</Text>
+        <View style={styles.body}>
+          <View style={styles.kvCard}>
+            {kv.map(([label, value], i) => (
+              <View key={label}>
+                <View style={styles.kvRow}>
+                  <Text style={styles.kvLabel}>{label}</Text>
+                  <Text style={styles.kvValue}>{value}</Text>
+                </View>
+                {i < kv.length - 1 ? <View style={styles.kvDivider} /> : null}
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
 
-      <Text style={[typography.subtitle, styles.section]}>Info PIC</Text>
-      <View style={styles.card}>
-        <View style={styles.row}>
-          <Text style={typography.caption}>Nama</Text>
-          <Text style={typography.body}>Sari Wulandari</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={typography.caption}>Jabatan</Text>
-          <Text style={typography.body}>Supervisor Tim Operasional</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={typography.caption}>Kontak</Text>
-          <Text style={typography.body}>sari@perusahaan.co.id</Text>
-        </View>
-      </View>
+          <View style={styles.picCard}>
+            <Text style={styles.cardTitle}>PIC Saya</Text>
+            <View style={styles.picRow}>
+              <Avatar gradientId={pic.gradientId} name={pic.name} size={46} />
+              <View style={styles.picText}>
+                <Text style={styles.picName}>{pic.name}</Text>
+                <Text style={styles.picPos}>{pic.position}</Text>
+              </View>
+            </View>
+            <View style={styles.picActions}>
+              <TouchableOpacity
+                onPress={() => showToast(`Menghubungi ${pic.name}…`)}
+                style={styles.picBtn}
+              >
+                <Text style={styles.picBtnText}>📞 Hubungi PIC</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => showToast(`Pesan untuk ${pic.name} disiapkan.`)}
+                style={styles.picBtn}
+              >
+                <Text style={styles.picBtnText}>💬 Kirim Pesan</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-      {!isViewingOther ? (
-        <>
           <ThemedButton
-            title="Hubungi PIC"
-            variant="outline"
-            onPress={() =>
-              Alert.alert('Hubungi PIC', 'Membuka kontak Sari Wulandari…')
-            }
-            style={styles.button}
+            onPress={handleLogout}
+            style={styles.logout}
+            title="Keluar dari Akun"
+            variant="dangerOutline"
           />
-          <ThemedButton
-            title="Keluar"
-            variant="danger"
-            onPress={confirmLogout}
-            style={styles.button}
-          />
-        </>
-      ) : null}
-    </ScreenContainer>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: { marginTop: spacing.md },
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.line,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    padding: spacing.md,
+  root: { backgroundColor: colors.bg, flex: 1 },
+  hero: {
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    paddingBottom: spacing.lg,
   },
-  header: { alignItems: 'center', gap: spacing.sm, marginVertical: spacing.md },
-  row: {
-    borderBottomColor: colors.line,
-    borderBottomWidth: 1,
-    gap: 2,
+  headerTitle: {
+    color: '#fff',
+    fontFamily: fontFamily('800'),
+    fontSize: 19,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
-  section: { marginBottom: spacing.sm, marginTop: spacing.lg },
+  profileRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  profileText: { flex: 1, marginLeft: spacing.md },
+  name: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 20 },
+  position: {
+    color: 'rgba(255,255,255,0.85)',
+    fontFamily: fontFamily('500'),
+    fontSize: 13,
+    marginTop: 2,
+  },
+  empNo: {
+    color: 'rgba(255,255,255,0.7)',
+    fontFamily: fontFamily('500'),
+    fontSize: 12,
+    marginTop: 2,
+  },
+  body: { padding: spacing.lg },
+  kvCard: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: spacing.lg,
+  },
+  kvRow: { paddingVertical: 9 },
+  kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12 },
+  kvValue: {
+    color: colors.ink,
+    fontFamily: fontFamily('600'),
+    fontSize: 14,
+    marginTop: 3,
+  },
+  kvDivider: { backgroundColor: colors.line, height: 1 },
+  picCard: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    marginTop: spacing.md,
+    padding: spacing.lg,
+  },
+  cardTitle: {
+    color: colors.ink,
+    fontFamily: fontFamily('800'),
+    fontSize: 15,
+    marginBottom: spacing.sm,
+  },
+  picRow: { alignItems: 'center', flexDirection: 'row' },
+  picText: { flex: 1, marginLeft: 12 },
+  picName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  picPos: {
+    color: colors.ink2,
+    fontFamily: fontFamily('400'),
+    fontSize: 12,
+    marginTop: 2,
+  },
+  picActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  picBtn: {
+    alignItems: 'center',
+    backgroundColor: colors.blueBg,
+    borderRadius: radius.button,
+    flex: 1,
+    paddingVertical: 12,
+  },
+  picBtnText: { color: colors.indigo, fontFamily: fontFamily('700'), fontSize: 13 },
+  logout: {
+    borderColor: '#f3c2c2',
+    marginTop: spacing.lg,
+  },
 });
