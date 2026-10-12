@@ -13,12 +13,19 @@ interface Props {
   /** Bila true, konten bisa di-scroll (default true). */
   scroll?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** Warna latar kustom (mis. layar gelap kamera). */
+  backgroundColor?: string;
 }
 
-/** Pembungkus layar standar: latar aman + padding konsisten. */
-export function ScreenContainer({ children, scroll = true, style }: Props) {
+/** Pembungkus layar standar: latar aman + padding konsisten (mode terang tetap). */
+export function ScreenContainer({
+  children,
+  scroll = true,
+  style,
+  backgroundColor = colors.bg,
+}: Props) {
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor }]}>
       {scroll ? (
         <ScrollView
           contentContainerStyle={[styles.content, style]}
@@ -34,6 +41,6 @@ export function ScreenContainer({ children, scroll = true, style }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { backgroundColor: colors.background, flex: 1 },
+  safe: { flex: 1 },
   content: { padding: spacing.md, paddingBottom: spacing.xl },
 });
