@@ -47,6 +47,32 @@ export default function LoginScreen() {
     }
   }
 
+  /**
+   * Mode demo untuk testing — HANYA untuk build uji coba, hapus sebelum produksi.
+   * Melewati Supabase auth dan menyimpan sesi demo lokal.
+   */
+  async function handleDemoLogin() {
+    setError(null);
+    setLoading(true);
+    try {
+      await SecureStore.setItemAsync(
+        SESSION_KEY,
+        JSON.stringify({
+          demo: true,
+          email: 'demo@perusahaan.co.id',
+          userId: 'demo-user',
+        }),
+      );
+      router.replace('/(tabs)/home');
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : 'Gagal masuk mode demo.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <ScreenContainer>
       <View style={styles.header}>
@@ -85,6 +111,13 @@ export default function LoginScreen() {
         style={styles.button}
         title="Masuk"
       />
+      <ThemedButton
+        loading={loading}
+        onPress={handleDemoLogin}
+        style={styles.demoButton}
+        title="Masuk sebagai Demo"
+        variant="outline"
+      />
       <Text style={[typography.caption, styles.hint]}>
         Belum punya akun? Hubungi Admin HR — akun dibuatkan oleh HR.
       </Text>
@@ -94,6 +127,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   button: { marginTop: spacing.md },
+  demoButton: { marginTop: spacing.sm },
   error: { color: colors.danger, marginTop: spacing.sm },
   header: { gap: spacing.sm, marginBottom: spacing.lg, marginTop: spacing.xl },
   hint: { marginTop: spacing.md, textAlign: 'center' },
