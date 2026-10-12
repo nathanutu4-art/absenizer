@@ -1,44 +1,59 @@
 /**
- * Tema Absenizer — palet dari buku Sanzo Wada "A Dictionary of Color Combinations",
- * Combination No. 218 (terverifikasi dari arsip digital sanzo-wada.dmbk.io):
- *   Helvetia Blue #0057ba, Grayish Lavender #b8b8ff, Deep Violet/Plumbeous #5c7287.
+ * Tema AbsensiKu — token desain dari high-fidelity prototype.
  *
- * Warna status cuti/ijin/sakit adalah warna SEMANTIK yang ditetapkan PRD dan
- * tidak berasal dari palet Wada: merah = sakit, biru = cuti, kuning = ijin.
+ * Primer indigo: #0057ba (indigo), #00468f (indigo-deep), #00325e (indigo-dark).
+ * Teks: #223140 (ink), #5c7287 (ink2), #93a3b1 (ink3).
+ * Latar: #f1f3f6 (bg), garis: #dfe2ea (line).
+ *
+ * Warna status pengajuan: Sakit = merah, Cuti = biru, Ijin = kuning.
  */
 
 export const colors = {
-  // --- Palet Wada No. 218 ---
-  /** Helvetia Blue — warna primer: tombol utama, hero, tab aktif, aksen panel. */
-  primary: '#0057ba',
-  primaryDark: '#004a9e',
-  /** Grayish Lavender — aksen: latar ilustrasi, gradasi avatar, highlight lembut. */
-  accent: '#b8b8ff',
-  accentSoft: '#e4e4ff',
-  /** Deep Violet / Plumbeous — teks pendukung / sekunder. */
-  secondary: '#5c7287',
+  // --- Primer ---
+  indigo: '#0057ba',
+  indigoDeep: '#00468f',
+  indigoDark: '#00325e',
+  /** Ujung terang gradasi tombol primer (#2f7ed0). */
+  indigoBright: '#2f7ed0',
 
-  // --- Netral ---
-  ink: '#101828',
-  inkSoft: '#5c7287',
-  muted: '#98a2b3',
-  line: '#e4e7ec',
-  background: '#f8fafc',
+  // --- Teks & netral ---
+  ink: '#223140',
+  ink2: '#5c7287',
+  ink3: '#93a3b1',
+  line: '#dfe2ea',
+  bg: '#f1f3f6',
   surface: '#ffffff',
 
-  // --- Status kehadiran / pengajuan (semantik PRD, bukan palet Wada) ---
-  /** Merah — status SAKIT. */
-  danger: '#e5484d',
-  dangerSoft: '#fdecec',
-  /** Biru — status CUTI. */
-  info: '#0d75ff',
-  infoSoft: '#e8f1ff',
-  /** Kuning — status IJIN. */
-  warning: '#f5b800',
-  warningSoft: '#fff7e0',
-  success: '#12a150',
-  successSoft: '#e7f6ec',
+  // --- Semantik ---
+  green: '#16a34a',
+  greenBg: '#e8f7ee',
+  red: '#dc2626',
+  redBg: '#fdeeee',
+  blue: '#2563eb',
+  blueBg: '#e9f0fe',
+  yellowText: '#ca8a04',
+  yellowRing: '#eab308',
+  yellowBg: '#fdf6e0',
+  orange: '#ea580c',
+  orangeBg: '#fdeee2',
+
+  // --- Gradasi clock-out ---
+  clockOutFrom: '#f59e0b',
+  clockOutTo: '#d97706',
+
+  // --- Layar gelap (kamera / liveness) ---
+  darkBg: '#0b1220',
+  darkSurface: '#151f31',
 } as const;
+
+/** Warna status pengajuan: Sakit = merah, Cuti = biru, Ijin = kuning. */
+export const leaveStatusColors = {
+  sakit: { fg: colors.red, bg: colors.redBg },
+  cuti: { fg: colors.blue, bg: colors.blueBg },
+  ijin: { fg: colors.yellowText, bg: colors.yellowBg },
+} as const;
+
+export type LeaveKind = keyof typeof leaveStatusColors;
 
 export const spacing = {
   xs: 4,
@@ -49,18 +64,44 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  pill: 999,
+  /** Kartu */
+  card: 20,
+  /** Tombol */
+  button: 14,
+  /** Chip */
+  chip: 999,
+  /** Input */
+  input: 13,
 } as const;
 
+/**
+ * Nama family font Plus Jakarta Sans (dimuat via expo-font di _layout).
+ * Gunakan `fontFamily('700')` untuk weight tertentu.
+ */
+export function fontFamily(weight: '400' | '500' | '600' | '700' | '800'): string {
+  switch (weight) {
+    case '400':
+      return 'PlusJakartaSans_400Regular';
+    case '500':
+      return 'PlusJakartaSans_500Medium';
+    case '600':
+      return 'PlusJakartaSans_600SemiBold';
+    case '700':
+      return 'PlusJakartaSans_700Bold';
+    case '800':
+      return 'PlusJakartaSans_800ExtraBold';
+  }
+}
+
 export const typography = {
-  /** Judul layar */
-  title: { fontSize: 22, fontWeight: '800' as const, color: colors.ink },
-  /** Sub-judul / nama seksi */
-  subtitle: { fontSize: 16, fontWeight: '700' as const, color: colors.ink },
-  body: { fontSize: 14, fontWeight: '400' as const, color: colors.ink },
-  caption: { fontSize: 12, fontWeight: '400' as const, color: colors.inkSoft },
-  button: { fontSize: 16, fontWeight: '700' as const, color: '#ffffff' },
+  heroTitle: {
+    fontSize: 26,
+    fontFamily: fontFamily('800'),
+    color: '#ffffff',
+  },
+  title: { fontSize: 22, fontFamily: fontFamily('800'), color: colors.ink },
+  subtitle: { fontSize: 16, fontFamily: fontFamily('700'), color: colors.ink },
+  body: { fontSize: 14, fontFamily: fontFamily('400'), color: colors.ink },
+  caption: { fontSize: 12, fontFamily: fontFamily('400'), color: colors.ink2 },
+  button: { fontSize: 16, fontFamily: fontFamily('700'), color: '#ffffff' },
 } as const;
