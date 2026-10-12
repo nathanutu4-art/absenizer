@@ -1,72 +1,173 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusChip } from '../../src/components/StatusChip';
 import { ThemedButton } from '../../src/components/ThemedButton';
-import { FLAG_LABELS, type FlagType } from '../../src/lib/businessRules';
-import { colors, spacing, typography } from '../../src/theme';
+import { getEmployee } from '../../src/data/demo';
+import { getActiveRole, type DemoRole } from '../../src/lib/session';
+import { colors, fontFamily, radius, spacing } from '../../src/theme';
+
+const ROLE_EMPLOYEE: Record<DemoRole, string> = {
+  karyawan: 'nadia',
+  pic: 'dimas',
+  hr: 'sari',
+};
 
 /**
- * Langkah 4: layar sukses setelah clock in/out tersimpan.
- * Menampilkan penanda (bila ada) agar karyawan tahu catatannya berpenanda.
+ * Sukses Clock In — struk dengan baris putus-putus + daftar penanda.
  */
 export default function SuccessScreen() {
-  const { kind, flags } = useLocalSearchParams<{
-    kind?: string;
-    flags?: string;
+  const { time, distance, simFace, simFar } = useLocalSearchParams<{
+    time?: string;
+    distance?: string;
+    simFace?: string;
+    simFar?: string;
   }>();
-  const clockKind = kind === 'out' ? 'Out' : 'In';
-  const flagList = (flags ? flags.split(',').filter(Boolean) : []) as FlagType[];
+  const [name, setName] = useState('—');
+
+  useEffect(() => {
+    getActiveRole().then((role) => setName(getEmployee(ROLE_EMPLOYEE[role]).name));
+  }, []);
+
+  const flags: string[] = [];
+  if (simFace) flags.push('Wajah Tidak Cocok');
+  if (simFar) flags.push('Di Luar Area');
+  const clean = flags.length === 0;
+
+  const rows: [string, string][] = [
+    ['Nama', name],
+    ['Mode Kerja', 'WFO'],
+    ['Jarak', distance ?? '120 m'],
+    [
+      'Verifikasi Wajah',
+      simFace ? 'Tidak cocok — diberi penanda' : 'Cocok (96%)',
+    ],
+    ['Status', clean ? 'Tercatat' : 'Tercatat dengan penanda'],
+  ];
 
   return (
-    <ScreenContainer>
-      <View style={styles.center}>
-        <Text style={styles.check}>✓</Text>
-        <Text style={typography.title}>Clock {clockKind} Berhasil</Text>
-        <Text style={typography.body}>
-          Kehadiran Anda telah tercatat
-          {flagList.length > 0 ? ' dengan penanda berikut:' : '.'}
-        </Text>
-        {flagList.length > 0 ? (
-          <View style={styles.flags}>
-            {flagList.map((f) => (
-              <StatusChip key={f} flag={f} />
-            ))}
+    <View style={styles.root}>
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.checkWrap}>
+          <View style={styles.checkCircle}>
+            <Text style={styles.checkGlyph}>✓</Text>
           </View>
-        ) : null}
-        <Text style={typography.caption}>
-          {flagList.length > 0
-            ? `Penanda (${flagList.map((f) => FLAG_LABELS[f]).join(', ')}) diteruskan ke HR/PIC untuk ditinjau.`
-            : 'Tidak ada penanda pada absensi ini.'}
+        </View>
+        <Text style={styles.title}>Clock In Berhasil</Text>
+        <Text style={styles.timestamp}>
+          {time ?? '--.--'} WIB • {todayLong()}
         </Text>
-      </View>
-      <ThemedButton
-        title="Kembali ke Beranda"
-        onPress={() => router.replace('/(tabs)/home')}
-        style={styles.button}
-      />
-    </ScreenContainer>
+
+        <View style={styles.flagRow}>
+          {clean ? (
+            <StatusChip label="Tanpa Penanda" tone="green" />
+          ) : (
+            flags.map((f) => (
+              <StatusChip key={f} label={f} tone="orange" style={styles.flagChip} />
+            ))
+          )}
+        </View>
+
+        {/* Struk */}
+        <View style={styles.receipt}>
+          {rows.map(([label, value], i) => (
+            <View key={label}>
+              <View style={styles.row}>
+                <Text style={styles.rowLabel}>{label}</Text>
+                <Text
+                  style={[
+                    styles.rowValue,
+                    label === 'Verifikasi Wajah' && simFace && styles.rowWarn,
+                  ]}
+                >
+                  {value}
+                </Text>
+              </View>
+              {i < rows.length - 1 ? <View style={styles.dashed} /> : null}
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.ctaWrap}>
+          <ThemedButton
+            onPress={() => router.replace('/(tabs)/home')}
+            title="Kembali ke Beranda"
+          />
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
+function todayLong(): string {
+  return new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Asia/Jakarta',
+  }).format(new Date());
+}
+
 const styles = StyleSheet.create({
-  button: { marginTop: spacing.lg },
-  center: { alignItems: 'center', gap: spacing.sm, marginTop: spacing.xl },
-  check: {
-    backgroundColor: colors.successSoft,
-    borderRadius: 40,
-    color: colors.success,
-    fontSize: 40,
-    height: 80,
-    lineHeight: 80,
-    textAlign: 'center',
-    width: 80,
+  root: { backgroundColor: colors.bg, flex: 1 },
+  safe: { flex: 1, padding: spacing.lg },
+  checkWrap: { alignItems: 'center', marginTop: spacing.xl },
+  checkCircle: {
+    alignItems: 'center',
+    backgroundColor: colors.green,
+    borderRadius: 48,
+    height: 96,
+    justifyContent: 'center',
+    width: 96,
   },
-  flags: {
+  checkGlyph: { color: '#fff', fontSize: 48, fontWeight: '800', marginTop: -4 },
+  title: {
+    color: colors.ink,
+    fontFamily: fontFamily('800'),
+    fontSize: 22,
+    marginTop: spacing.lg,
+    textAlign: 'center',
+  },
+  timestamp: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 13,
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  flagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.xs,
     justifyContent: 'center',
+    marginTop: spacing.md,
   },
+  flagChip: { marginHorizontal: 4 },
+  receipt: {
+    backgroundColor: '#fff',
+    borderRadius: 17,
+    marginTop: spacing.lg,
+    padding: spacing.lg,
+  },
+  row: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  rowLabel: { color: colors.ink2, fontFamily: fontFamily('500'), fontSize: 13 },
+  rowValue: {
+    color: colors.ink,
+    fontFamily: fontFamily('700'),
+    fontSize: 13,
+    textAlign: 'right',
+  },
+  rowWarn: { color: colors.orange },
+  dashed: {
+    borderBottomColor: colors.line,
+    borderBottomWidth: 1,
+    borderStyle: 'dashed',
+  },
+  ctaWrap: { marginTop: spacing.xl },
 });

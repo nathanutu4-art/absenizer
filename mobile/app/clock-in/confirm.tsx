@@ -1,190 +1,294 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import MapView, { Circle, Marker } from 'react-native-maps';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusChip } from '../../src/components/StatusChip';
 import { ThemedButton } from '../../src/components/ThemedButton';
 import {
-  GEOFENCE_RADIUS_M,
-  MOCK_LOCATION_BLOCKS_CLOCK_IN,
-  type FlagType,
-  type WorkMode,
-} from '../../src/lib/businessRules';
-import { distanceMeters, isInsideGeofence } from '../../src/lib/geo';
-import { getPositionWithMockCheck } from '../../src/lib/mockLocation';
-import { colors, radius, spacing, typography } from '../../src/theme';
+  GEOFENCE_M,
+  OFFICE_ADDRESS,
+  OFFICE_NAME,
+} from '../../src/data/demo';
+import { recordClockIn } from '../../src/lib/clockState';
+import { colors, fontFamily, radius, spacing } from '../../src/theme';
 
 /**
- * Langkah 3: konfirmasi lokasi GPS sebelum clock in/out disimpan.
- *
- * Aturan yang diterapkan di sini:
- * - WFO: validasi terhadap 1 titik kantor (radius 1000 m). Di luar radius
- *   TETAP DITERIMA + penanda "Di Luar Area" (BR-06) — tidak ditolak.
- * - WFH: bebas lokasi; koordinat direkam untuk audit (BR-07).
- * - Mock location: SELALU diberi penanda "Fake GPS"; pada MVP tidak
- *   otomatis membatalkan (BR-09) — lihat MOCK_LOCATION_BLOCKS_CLOCK_IN.
- *
- * TODO (Fase 1): ambil titik kantor + work_mode karyawan dari Supabase
- * (company_settings & employee_profiles). Simpan attendance via Supabase
- * atau antrekan offline (offlineQueue) bila tidak ada koneksi.
+ * Konfirmasi GPS — peta simulasi (styled view): pin kantor + pin pengguna +
+ * lingkaran geofence putus-putus. Di luar area TETAP DITERIMA + penanda oranye.
  */
 export default function ConfirmScreen() {
-  const { kind, selfieUri } = useLocalSearchParams<{
-    kind?: string;
-    selfieUri?: string;
-  }>();
-  const clockKind = kind === 'out' ? 'out' : 'in';
+  const { simFace } = useLocalSearchParams<{ simFace?: string }>();
+  const [simFar, setSimFar] = useState(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [workMode] = useState<WorkMode>('WFO'); // TODO: dari Supabase
-  const [office] = useState({ latitude: -6.2, longitude: 106.816666 }); // TODO: dari company_settings
-  const [position, setPosition] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [flags, setFlags] = useState<FlagType[]>([]);
-  const [distance, setDistance] = useState<number | null>(null);
+  const distanceLabel = simFar ? '1,4 km' : '120 m';
+  const areaLabel = simFar ? 'Di Luar Area' : 'Di Dalam Area';
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { position: pos, mock } = await getPositionWithMockCheck();
-        setPosition(pos);
-        const nextFlags: FlagType[] = [];
-        if (mock.isMocked) {
-          // BR-09: flag saja; MOCK_LOCATION_BLOCKS_CLOCK_IN = false.
-          nextFlags.push('fake_gps');
-        }
-        if (workMode === 'WFO') {
-          const d = distanceMeters(pos, office);
-          setDistance(d);
-          if (!isInsideGeofence(pos, office, GEOFENCE_RADIUS_M)) {
-            nextFlags.push('di_luar_area'); // BR-06: diterima + penanda
-          }
-        }
-        setFlags(nextFlags);
-      } catch (e) {
-        setError(
-          e instanceof Error ? e.message : 'Gagal mendapatkan lokasi.',
-        );
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [office, workMode]);
-
-  function submit() {
-    if (MOCK_LOCATION_BLOCKS_CLOCK_IN && flags.includes('fake_gps')) {
-      setError('Terdeteksi fake GPS. Absensi dibatalkan.');
-      return;
-    }
-    // TODO (Fase 1): upload selfie ke Storage + insert attendance;
-    // bila offline -> enqueueClockEvent() lalu sync otomatis saat online.
+  function handleConfirm() {
+    const now = new Intl.DateTimeFormat('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Jakarta',
+    })
+      .format(new Date())
+      .replace(':', '.');
+    const flags: string[] = [];
+    if (simFace) flags.push('Wajah Tidak Cocok');
+    if (simFar) flags.push('Di Luar Area');
+    recordClockIn(now, flags);
     router.push({
       pathname: '/clock-in/success',
       params: {
-        kind: clockKind,
-        flags: flags.join(','),
-        selfieUri: selfieUri ?? '',
+        time: now,
+        distance: distanceLabel,
+        ...(simFace ? { simFace: '1' } : {}),
+        ...(simFar ? { simFar: '1' } : {}),
       },
     });
   }
 
-  if (loading) {
-    return (
-      <ScreenContainer>
-        <Text style={typography.body}>Mengambil lokasi Anda…</Text>
-      </ScreenContainer>
-    );
-  }
-
   return (
-    <ScreenContainer>
-      <Text style={[typography.title, styles.heading]}>
-        Konfirmasi Lokasi — Clock {clockKind === 'in' ? 'In' : 'Out'}
-      </Text>
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-
-      {position ? (
-        <View style={styles.mapWrap}>
-          <MapView
-            style={styles.map}
-            initialRegion={{
-              latitude: position.latitude,
-              longitude: position.longitude,
-              latitudeDelta: 0.02,
-              longitudeDelta: 0.02,
-            }}
-          >
-            <Marker coordinate={position} title="Posisi Anda" />
-            {workMode === 'WFO' ? (
-              <Circle
-                center={office}
-                radius={GEOFENCE_RADIUS_M}
-                strokeColor={colors.primary}
-                fillColor="rgba(0,87,186,0.12)"
-              />
-            ) : null}
-          </MapView>
+    <View style={styles.root}>
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backText}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Konfirmasi GPS</Text>
+          <View style={styles.backBtn} />
         </View>
-      ) : null}
 
-      <View style={styles.info}>
-        <Text style={typography.body}>
-          Mode kerja: <Text style={{ fontWeight: '700' }}>{workMode}</Text>
-        </Text>
-        {workMode === 'WFO' && distance !== null ? (
-          <Text style={typography.body}>
-            Jarak dari kantor: {(distance / 1000).toFixed(2)} km (radius{' '}
-            {GEOFENCE_RADIUS_M / 1000} km)
-          </Text>
-        ) : (
-          <Text style={typography.body}>
-            WFH: bebas absen dari lokasi mana pun.
-          </Text>
-        )}
-      </View>
-
-      {flags.length > 0 ? (
-        <View style={styles.flags}>
-          <Text style={typography.subtitle}>Penanda pada absensi ini:</Text>
-          <View style={styles.flagRow}>
-            {flags.map((f) => (
-              <StatusChip key={f} flag={f} />
-            ))}
+        {/* Peta simulasi */}
+        <View style={styles.mapBox}>
+          {/* lingkaran geofence */}
+          <View style={styles.geofence} />
+          {/* pin kantor */}
+          <View style={styles.officePin}>
+            <Text style={styles.pinGlyph}>🏢</Text>
           </View>
-          <Text style={typography.caption}>
-            Penanda tidak membatalkan absensi — HR/PIC akan meninjaunya.
+          {/* pin pengguna */}
+          <View style={[styles.userPin, simFar && styles.userPinFar]}>
+            <View style={styles.userDot} />
+          </View>
+          <View style={styles.gpsChip}>
+            <Text style={styles.gpsChipText}>📡 GPS Akurat • ± 8 m</Text>
+          </View>
+        </View>
+
+        {/* Statistik jarak */}
+        <View style={styles.stats}>
+          <View style={styles.statCell}>
+            <Text style={styles.statValue}>{distanceLabel}</Text>
+            <Text style={styles.statLabel}>Jarak ke kantor</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCell}>
+            <Text
+              style={[
+                styles.statValue,
+                simFar ? { color: colors.orange } : { color: colors.green },
+              ]}
+            >
+              {areaLabel}
+            </Text>
+            <Text style={styles.statLabel}>Status area</Text>
+          </View>
+        </View>
+
+        {/* Kartu kantor */}
+        <View style={styles.officeCard}>
+          <Text style={styles.officeGlyph}>📍</Text>
+          <View style={styles.officeText}>
+            <Text style={styles.officeName}>{OFFICE_NAME}</Text>
+            <Text style={styles.officeAddress}>{OFFICE_ADDRESS}</Text>
+            <Text style={styles.officeMeta}>
+              Geofence {GEOFENCE_M.toLocaleString('id-ID')} m
+            </Text>
+          </View>
+        </View>
+
+        {/* Simulasi */}
+        <View style={styles.simBox}>
+          <View style={styles.simRow}>
+            <Text style={styles.simLabel}>
+              Simulasi: Posisi di luar area (&gt; 1.000 m)
+            </Text>
+            <Switch
+              onValueChange={setSimFar}
+              trackColor={{ false: colors.line, true: colors.orange }}
+              value={simFar}
+            />
+          </View>
+          <Text style={styles.simHint}>
+            Kehadiran di luar area tetap diterima dengan penanda oranye.
           </Text>
         </View>
-      ) : (
-        <Text style={typography.body}>Lokasi valid. Tanpa penanda.</Text>
-      )}
 
-      <ThemedButton
-        title={`Konfirmasi Clock ${clockKind === 'in' ? 'In' : 'Out'}`}
-        onPress={submit}
-        style={styles.button}
-      />
-    </ScreenContainer>
+        <View style={styles.ctaWrap}>
+          <ThemedButton
+            onPress={handleConfirm}
+            title="Konfirmasi & Clock In"
+          />
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: { marginTop: spacing.lg },
-  error: { color: colors.danger, marginBottom: spacing.sm },
-  flagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
-  flags: { gap: spacing.sm, marginTop: spacing.md },
-  heading: { marginBottom: spacing.md },
-  info: { gap: spacing.xs, marginTop: spacing.md },
-  map: { flex: 1 },
-  mapWrap: {
-    borderRadius: radius.md,
-    height: 240,
+  root: { backgroundColor: colors.bg, flex: 1 },
+  safe: { flex: 1 },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  backBtn: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  backText: { color: colors.ink, fontSize: 24, fontWeight: '700', marginTop: -3 },
+  title: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 17 },
+  mapBox: {
+    alignItems: 'center',
+    backgroundColor: '#e3ecf5',
+    borderRadius: 22,
+    height: 300,
+    justifyContent: 'center',
+    marginHorizontal: spacing.lg,
     marginTop: spacing.sm,
     overflow: 'hidden',
   },
+  geofence: {
+    borderColor: colors.indigo,
+    borderRadius: 130,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    height: 260,
+    position: 'absolute',
+    width: 260,
+  },
+  officePin: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    elevation: 3,
+    height: 48,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    width: 48,
+  },
+  pinGlyph: { fontSize: 24 },
+  userPin: { left: '58%', position: 'absolute', top: '38%' },
+  userPinFar: { left: '82%', top: '12%' },
+  userDot: {
+    backgroundColor: colors.indigo,
+    borderColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 3,
+    elevation: 3,
+    height: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    width: 24,
+  },
+  gpsChip: {
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: radius.chip,
+    bottom: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    position: 'absolute',
+  },
+  gpsChipText: {
+    color: colors.ink,
+    fontFamily: fontFamily('700'),
+    fontSize: 12,
+  },
+  stats: {
+    backgroundColor: '#fff',
+    borderRadius: radius.card,
+    flexDirection: 'row',
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.md,
+  },
+  statCell: { alignItems: 'center', flex: 1 },
+  statValue: {
+    color: colors.ink,
+    fontFamily: fontFamily('800'),
+    fontSize: 18,
+  },
+  statLabel: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 11,
+    marginTop: 4,
+  },
+  statDivider: { backgroundColor: colors.line, width: 1 },
+  officeCard: {
+    backgroundColor: '#fff',
+    borderRadius: radius.card,
+    flexDirection: 'row',
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.md,
+  },
+  officeGlyph: { fontSize: 28, marginRight: 12 },
+  officeText: { flex: 1 },
+  officeName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  officeAddress: {
+    color: colors.ink2,
+    fontFamily: fontFamily('400'),
+    fontSize: 13,
+    marginTop: 2,
+  },
+  officeMeta: {
+    color: colors.ink3,
+    fontFamily: fontFamily('500'),
+    fontSize: 12,
+    marginTop: 4,
+  },
+  simBox: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.md,
+  },
+  simRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  simLabel: {
+    color: colors.ink,
+    flex: 1,
+    fontFamily: fontFamily('600'),
+    fontSize: 13,
+    marginRight: 8,
+  },
+  simHint: {
+    color: colors.ink2,
+    fontFamily: fontFamily('400'),
+    fontSize: 11,
+    marginTop: 6,
+  },
+  ctaWrap: { marginTop: spacing.lg, paddingHorizontal: spacing.lg },
 });

@@ -1,117 +1,190 @@
-import { CameraView, useCameraPermissions } from 'expo-camera';
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
-import { ThemedButton } from '../../src/components/ThemedButton';
-import { colors, spacing, typography } from '../../src/theme';
-
-type ClockKind = 'in' | 'out';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, fontFamily, spacing } from '../../src/theme';
 
 /**
- * Langkah 1 clock in/out: ambil foto selfie.
- *
- * TODO (dev build): expo-camera butuh dev build — tidak berfungsi penuh di
- * Expo Go. Pada perangkat fisik, minta izin kamera lalu tampilkan pratinjau.
+ * Ambil Selfie — layar gelap simulasi kamera (tanpa modul kamera native).
+ * Panduan oval putus-putus + braket sudut + tombol shutter.
  */
 export default function SelfieScreen() {
-  const { kind } = useLocalSearchParams<{ kind?: string }>();
-  const clockKind: ClockKind = kind === 'out' ? 'out' : 'in';
-  const [permission, requestPermission] = useCameraPermissions();
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const cameraRef = useRef<CameraView>(null);
+  const [simFace, setSimFace] = useState(false);
 
-  if (!permission) {
-    return (
-      <ScreenContainer>
-        <Text style={typography.body}>Memuat kamera…</Text>
-      </ScreenContainer>
-    );
-  }
-
-  if (!permission.granted) {
-    return (
-      <ScreenContainer>
-        <Text style={[typography.title, styles.heading]}>
-          Izin Kamera Diperlukan
-        </Text>
-        <Text style={typography.body}>
-          Absenizer membutuhkan akses kamera untuk mengambil foto selfie saat
-          clock {clockKind === 'in' ? 'in' : 'out'}.
-        </Text>
-        <ThemedButton
-          title="Berikan Izin Kamera"
-          onPress={requestPermission}
-          style={styles.button}
-        />
-      </ScreenContainer>
-    );
-  }
-
-  async function takePhoto() {
-    try {
-      const photo = await cameraRef.current?.takePictureAsync({ quality: 0.7 });
-      if (photo?.uri) {
-        setPhotoUri(photo.uri);
-      } else {
-        // Fallback dev: tanpa foto nyata, lanjut dengan penanda.
-        setPhotoUri('dev-placeholder');
-      }
-    } catch {
-      setPhotoUri('dev-placeholder');
-    }
-  }
-
-  function next() {
+  function handleShutter() {
     router.push({
       pathname: '/clock-in/liveness',
-      params: { kind: clockKind, selfieUri: photoUri ?? 'dev-placeholder' },
+      params: simFace ? { simFace: '1' } : {},
     });
   }
 
   return (
-    <ScreenContainer scroll={false}>
-      <Text style={[typography.title, styles.heading]}>
-        Foto Selfie — Clock {clockKind === 'in' ? 'In' : 'Out'}
-      </Text>
-      <Text style={typography.body}>
-        Posisikan wajah Anda di dalam bingkai, lalu ambil foto.
-      </Text>
-      <View style={styles.preview}>
-        {photoUri && photoUri !== 'dev-placeholder' ? (
-          <Text style={typography.body}>Foto diambil ✓</Text>
-        ) : (
-          <CameraView ref={cameraRef} facing="front" style={styles.camera} />
-        )}
-      </View>
-      {photoUri ? (
-        <ThemedButton title="Lanjut" onPress={next} style={styles.button} />
-      ) : (
-        <ThemedButton
-          title="Ambil Foto"
-          onPress={takePhoto}
-          style={styles.button}
-        />
-      )}
-      <ThemedButton
-        title="Ambil Ulang"
-        variant="outline"
-        onPress={() => setPhotoUri(null)}
-        style={styles.button}
-      />
-    </ScreenContainer>
+    <View style={styles.root}>
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Text style={styles.backText}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>Ambil Selfie</Text>
+          <View style={styles.backBtn} />
+        </View>
+
+        {/* Viewfinder simulasi */}
+        <View style={styles.viewfinder}>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>KAMERA DEPAN</Text>
+          </View>
+          {/* panduan oval wajah */}
+          <View style={styles.oval} />
+          {/* braket sudut */}
+          <View style={[styles.corner, styles.tl]} />
+          <View style={[styles.corner, styles.tr]} />
+          <View style={[styles.corner, styles.bl]} />
+          <View style={[styles.corner, styles.br]} />
+          <Text style={styles.hint}>
+            Posisikan wajah di dalam oval
+          </Text>
+        </View>
+
+        {/* Simulasi */}
+        <View style={styles.simBox}>
+          <View style={styles.simRow}>
+            <Text style={styles.simLabel}>Simulasi: Wajah tidak cocok</Text>
+            <Switch
+              onValueChange={setSimFace}
+              trackColor={{ false: '#3a4657', true: colors.orange }}
+              value={simFace}
+            />
+          </View>
+          <Text style={styles.simHint}>
+            Untuk demo — hasil tetap diterima dengan penanda.
+          </Text>
+        </View>
+
+        {/* Shutter */}
+        <View style={styles.shutterRow}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={handleShutter}
+            style={styles.shutterOuter}
+          >
+            <View style={styles.shutterInner} />
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: { marginTop: spacing.md },
-  camera: { flex: 1 },
-  heading: { marginBottom: spacing.sm },
-  preview: {
-    backgroundColor: colors.ink,
+  root: { backgroundColor: '#101018', flex: 1 },
+  safe: { flex: 1 },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  backBtn: {
+    alignItems: 'center',
+    backgroundColor: '#1c2436',
     borderRadius: 12,
-    flex: 1,
-    marginTop: spacing.md,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  backText: { color: '#fff', fontSize: 24, fontWeight: '700', marginTop: -3 },
+  title: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 17 },
+  viewfinder: {
+    alignItems: 'center',
+    backgroundColor: '#1a2233',
+    borderRadius: 26,
+    height: 400,
+    justifyContent: 'center',
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.sm,
     overflow: 'hidden',
+  },
+  tag: {
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    borderRadius: 8,
+    left: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    position: 'absolute',
+    top: 14,
+  },
+  tagText: {
+    color: '#fff',
+    fontFamily: fontFamily('700'),
+    fontSize: 11,
+    letterSpacing: 1,
+  },
+  oval: {
+    borderColor: 'rgba(255,255,255,0.75)',
+    borderRadius: 98,
+    borderStyle: 'dashed',
+    borderWidth: 2.5,
+    height: 252,
+    width: 196,
+  },
+  corner: {
+    borderColor: colors.indigoBright,
+    height: 34,
+    position: 'absolute',
+    width: 34,
+  },
+  tl: { borderLeftWidth: 4, borderTopWidth: 4, left: 18, top: 18 },
+  tr: { borderRightWidth: 4, borderTopWidth: 4, right: 18, top: 18 },
+  bl: { borderLeftWidth: 4, borderBottomWidth: 4, bottom: 18, left: 18 },
+  br: { borderRightWidth: 4, borderBottomWidth: 4, bottom: 18, right: 18 },
+  hint: {
+    bottom: 22,
+    color: 'rgba(255,255,255,0.75)',
+    fontFamily: fontFamily('500'),
+    fontSize: 13,
+    position: 'absolute',
+  },
+  simBox: {
+    backgroundColor: '#1c2436',
+    borderRadius: 15,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.md,
+    padding: spacing.md,
+  },
+  simRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  simLabel: { color: '#fff', fontFamily: fontFamily('600'), fontSize: 13 },
+  simHint: {
+    color: 'rgba(255,255,255,0.55)',
+    fontFamily: fontFamily('400'),
+    fontSize: 11,
+    marginTop: 6,
+  },
+  shutterRow: { alignItems: 'center', marginTop: spacing.lg },
+  shutterOuter: {
+    alignItems: 'center',
+    borderColor: '#fff',
+    borderRadius: 37,
+    borderWidth: 4,
+    height: 74,
+    justifyContent: 'center',
+    width: 74,
+  },
+  shutterInner: {
+    backgroundColor: '#fff',
+    borderRadius: 27,
+    height: 54,
+    width: 54,
   },
 });

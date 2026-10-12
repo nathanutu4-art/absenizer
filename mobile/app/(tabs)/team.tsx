@@ -1,169 +1,259 @@
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Avatar } from '../../src/components/Avatar';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
-import { colors, radius, spacing, typography } from '../../src/theme';
+import { StatusChip } from '../../src/components/StatusChip';
+import { EMPLOYEES, type Employee } from '../../src/data/demo';
+import { colors, fontFamily, radius, spacing } from '../../src/theme';
 
-interface AwayPerson {
-  id: string;
-  name: string;
-  kind: 'cuti' | 'ijin' | 'sakit';
-  detail: string;
+const STATUS_LABEL: Record<Employee['status'], string> = {
+  hadir: 'Hadir',
+  sakit: 'Sakit',
+  cuti: 'Cuti',
+  ijin: 'Ijin',
+};
+
+const STATUS_TONE = {
+  hadir: 'green',
+  sakit: 'red',
+  cuti: 'blue',
+  ijin: 'yellow',
+} as const;
+
+const PASTELS = ['#e9f0fe', '#fdf6e0', '#e8f7ee', '#fdeee2', '#fdeeee', '#eef2ff'];
+
+interface Birthday {
+  employee: Employee;
+  daysLeft: number;
+  turningAge: number;
+  dateLabel: string;
 }
 
-interface BirthdayPerson {
-  id: string;
-  name: string;
-  date: string;
-  ageTurning: number;
-  daysAway: number;
+function upcomingBirthdays(): Birthday[] {
+  const now = new Date();
+  const list: Birthday[] = EMPLOYEES.map((e) => {
+    const [y = 0, m = 1, d = 1] = e.birthISO.split('-').map(Number);
+    const thisYear = new Date(now.getFullYear(), m - 1, d);
+    const next =
+      thisYear.getTime() >= new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+        ? thisYear
+        : new Date(now.getFullYear() + 1, m - 1, d);
+    const daysLeft = Math.round(
+      (next.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) /
+        86400000,
+    );
+    const turningAge = next.getFullYear() - y;
+    const dateLabel = new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'short',
+    }).format(next);
+    return { employee: e, daysLeft, turningAge, dateLabel };
+  });
+  return list.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 6);
 }
 
-/**
- * Tim / Employee Info — dapat dilihat SEMUA karyawan (bukan khusus HR).
- * Bagian atas: avatar lingkaran untuk yang sedang cuti/ijin/sakit
- * (border merah = sakit, biru = cuti, kuning = ijin) + kotak 1:1 ulang tahun.
- * Klik nama/avatar membuka detail profil karyawan.
- *
- * TODO (Fase 3/4): ganti data contoh dengan query leave_requests (status
- * disetujui & tanggal mencakup hari ini) dan employee_profiles (ulang tahun).
- */
-const AWAY: AwayPerson[] = [
-  { id: 'e1', name: 'Sari Wulandari', kind: 'cuti', detail: 'Cuti • 12–16 Okt' },
-  { id: 'e2', name: 'Maya Putri', kind: 'sakit', detail: 'Sakit • 12 Okt' },
-  { id: 'e3', name: 'Fitri Rahmawati', kind: 'ijin', detail: 'Ijin • ½ hari' },
-];
-
-const BIRTHDAYS: BirthdayPerson[] = [
-  { id: 'e4', name: 'Dedi Kurniawan', date: '30 Nov', ageTurning: 32, daysAway: 49 },
-  { id: 'e5', name: 'Joko Prasetyo', date: '25 Des', ageTurning: 31, daysAway: 74 },
-  { id: 'e6', name: 'Rina Marlina', date: '5 Jan', ageTurning: 27, daysAway: 85 },
-];
-
-const DIRECTORY = [
-  'Sari Wulandari',
-  'Maya Putri',
-  'Fitri Rahmawati',
-  'Dedi Kurniawan',
-  'Joko Prasetyo',
-  'Rina Marlina',
-  'Rizky Ramadhan',
-  'Ayu Lestari',
-];
-
-const LEGEND = [
-  { kind: 'sakit', label: 'Sakit', color: colors.danger },
-  { kind: 'cuti', label: 'Cuti', color: colors.info },
-  { kind: 'ijin', label: 'Ijin', color: colors.warning },
-] as const;
-
+/** Info Karyawan — tidak masuk, ulang tahun terdekat, direktori. */
 export default function TeamScreen() {
-  const [away] = useState(AWAY);
-  const [birthdays] = useState(BIRTHDAYS);
-
-  function openDetail(name: string) {
-    // TODO: teruskan employee id asli; layar detail mengambil dari Supabase.
-    router.push({ pathname: '/(tabs)/profile', params: { name } });
-  }
+  const [query, setQuery] = useState('');
+  const birthdays = useMemo(upcomingBirthdays, []);
+  const away = EMPLOYEES.filter((e) => e.status !== 'hadir');
+  const directory = EMPLOYEES.filter((e) =>
+    e.name.toLowerCase().includes(query.toLowerCase()),
+  );
 
   return (
     <ScreenContainer>
-      <Text style={[typography.title, styles.heading]}>Tim</Text>
+      <Text style={styles.header}>Info Karyawan</Text>
 
-      <Text style={typography.subtitle}>Sedang Cuti / Ijin / Sakit</Text>
-      <View style={styles.legendRow}>
-        {LEGEND.map((l) => (
-          <View key={l.kind} style={styles.legendItem}>
-            <View style={[styles.dot, { backgroundColor: l.color }]} />
-            <Text style={typography.caption}>{l.label}</Text>
+      {/* Sedang tidak masuk */}
+      <Text style={styles.sectionTitle}>Sedang Tidak Masuk</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.awayRow}>
+        {away.map((e) => (
+          <TouchableOpacity
+            key={e.id}
+            onPress={() => router.push(`/employee/${e.id}`)}
+            style={styles.awayItem}
+          >
+            <Avatar gradientId={e.gradientId} name={e.name} size={56} statusRing={e.status === 'hadir' ? undefined : e.status} />
+            <Text style={styles.awayName} numberOfLines={1}>
+              {e.name.split(' ')[0]}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      <View style={styles.legend}>
+        <LegendDot color={colors.red} label="Sakit" />
+        <LegendDot color={colors.blue} label="Cuti" />
+        <LegendDot color={colors.yellowRing} label="Ijin" />
+      </View>
+
+      {/* Ulang tahun terdekat */}
+      <Text style={styles.sectionTitle}>Ulang Tahun Terdekat</Text>
+      <View style={styles.birthGrid}>
+        {birthdays.map((b, i) => (
+          <View
+            key={b.employee.id}
+            style={[styles.birthCard, { backgroundColor: PASTELS[i % PASTELS.length] }]}
+          >
+            <Avatar gradientId={b.employee.gradientId} name={b.employee.name} size={38} />
+            <Text style={styles.birthName} numberOfLines={1}>
+              {b.employee.name.split(' ')[0]}
+            </Text>
+            <Text style={styles.birthDate}>{b.dateLabel}</Text>
+            <View style={styles.agePill}>
+              <Text style={styles.ageText}>{b.turningAge} thn</Text>
+            </View>
+            <Text style={styles.countdown}>
+              {b.daysLeft === 0 ? 'Hari ini! 🎉' : `${b.daysLeft} hari lagi`}
+            </Text>
           </View>
         ))}
       </View>
-      <View style={styles.avatarRow}>
-        {away.map((p) => (
-          <TouchableOpacity
-            key={p.id}
-            onPress={() => openDetail(p.name)}
-            style={styles.avatarItem}
-          >
-            <Avatar name={p.name} size={56} statusBorder={p.kind} />
-            <Text style={styles.avatarLabel} numberOfLines={2}>
-              {p.name.split(' ')[0]}
-            </Text>
-            <Text style={typography.caption}>{p.detail}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
 
-      <Text style={[typography.subtitle, styles.section]}>Ulang Tahun Terdekat</Text>
-      <View style={styles.bdayGrid}>
-        {birthdays.map((b) => (
-          <TouchableOpacity
-            key={b.id}
-            onPress={() => openDetail(b.name)}
-            style={styles.bdayBox}
-          >
-            <Text style={styles.bdayName} numberOfLines={2}>
-              {b.name}
-            </Text>
-            <Text style={typography.caption}>{b.date}</Text>
-            <Text style={typography.caption}>ke-{b.ageTurning}</Text>
-            <Text style={styles.bdayDays}>{b.daysAway} hari lagi</Text>
-          </TouchableOpacity>
-        ))}
+      {/* Direktori */}
+      <Text style={styles.sectionTitle}>Direktori Karyawan</Text>
+      <View style={styles.searchRow}>
+        <Text style={styles.searchIcon}>🔍</Text>
+        <TextInput
+          onChangeText={setQuery}
+          placeholder="Cari nama karyawan…"
+          placeholderTextColor={colors.ink3}
+          style={styles.searchInput}
+          value={query}
+        />
       </View>
-
-      <Text style={[typography.subtitle, styles.section]}>Direktori Karyawan</Text>
-      {DIRECTORY.map((name) => (
+      {directory.map((e) => (
         <TouchableOpacity
-          key={name}
-          onPress={() => openDetail(name)}
-          style={styles.row}
+          key={e.id}
+          onPress={() => router.push(`/employee/${e.id}`)}
+          style={styles.dirRow}
         >
-          <Avatar name={name} size={40} />
-          <Text style={typography.body}>{name}</Text>
+          <Avatar gradientId={e.gradientId} name={e.name} size={46} />
+          <View style={styles.dirText}>
+            <Text style={styles.dirName}>{e.name}</Text>
+            <Text style={styles.dirPos}>{e.position}</Text>
+          </View>
+          <StatusChip label={STATUS_LABEL[e.status]} tone={STATUS_TONE[e.status]} />
         </TouchableOpacity>
       ))}
     </ScreenContainer>
   );
 }
 
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <View style={styles.legendItem}>
+      <View style={[styles.legendDot, { backgroundColor: color }]} />
+      <Text style={styles.legendLabel}>{label}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  avatarItem: { alignItems: 'center', width: 76 },
-  avatarLabel: { fontSize: 12, fontWeight: '600', marginTop: 4, textAlign: 'center' },
-  avatarRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
+  header: {
+    color: colors.ink,
+    fontFamily: fontFamily('800'),
+    fontSize: 19,
     marginTop: spacing.sm,
   },
-  bdayBox: {
-    alignItems: 'center',
-    aspectRatio: 1,
-    backgroundColor: colors.accentSoft,
-    borderRadius: radius.md,
-    flex: 1,
-    justifyContent: 'center',
-    padding: spacing.sm,
-  },
-  bdayDays: { color: colors.primary, fontSize: 11, fontWeight: '700' },
-  bdayGrid: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
-  bdayName: { fontSize: 12, fontWeight: '700', textAlign: 'center' },
-  dot: { borderRadius: 6, height: 12, width: 12 },
-  heading: { marginBottom: spacing.sm },
-  legendItem: { alignItems: 'center', flexDirection: 'row', gap: 4 },
-  legendRow: { flexDirection: 'row', gap: spacing.md, marginVertical: spacing.xs },
-  row: {
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.line,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: spacing.md,
+  sectionTitle: {
+    color: colors.ink,
+    fontFamily: fontFamily('800'),
+    fontSize: 15,
     marginBottom: spacing.sm,
-    padding: spacing.sm,
+    marginTop: spacing.lg,
   },
-  section: { marginTop: spacing.lg },
+  awayRow: { marginHorizontal: -spacing.md, paddingHorizontal: spacing.md },
+  awayItem: { alignItems: 'center', marginRight: 14, width: 64 },
+  awayName: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 11,
+    marginTop: 6,
+  },
+  legend: { flexDirection: 'row', marginTop: spacing.sm },
+  legendItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginRight: spacing.md,
+  },
+  legendDot: { borderRadius: 6, height: 12, width: 12 },
+  legendLabel: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 12,
+    marginLeft: 6,
+  },
+  birthGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  birthCard: {
+    alignItems: 'center',
+    borderRadius: 16,
+    padding: spacing.sm,
+    width: '31%',
+  },
+  birthName: {
+    color: colors.ink,
+    fontFamily: fontFamily('700'),
+    fontSize: 12,
+    marginTop: 6,
+  },
+  birthDate: { color: colors.ink2, fontFamily: fontFamily('500'), fontSize: 11 },
+  agePill: {
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: radius.chip,
+    marginTop: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  ageText: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 11 },
+  countdown: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 10.5,
+    marginTop: 4,
+  },
+  searchRow: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: radius.input,
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+    paddingHorizontal: 12,
+  },
+  searchIcon: { fontSize: 16, marginRight: 8 },
+  searchInput: {
+    color: colors.ink,
+    flex: 1,
+    fontFamily: fontFamily('400'),
+    fontSize: 14,
+    paddingVertical: 12,
+  },
+  dirRow: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
+  dirText: { flex: 1, marginLeft: 12 },
+  dirName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  dirPos: {
+    color: colors.ink2,
+    fontFamily: fontFamily('400'),
+    fontSize: 12,
+    marginTop: 2,
+  },
 });
