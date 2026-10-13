@@ -13,6 +13,8 @@
   --yellow-bg: #fdf6e0;
   --blue: #2563eb;
   --blue-bg: #e9f0fe;
+  --orange: #ea580c;
+  --orange-bg: #fdeee2;
 }
 
 * {
@@ -329,6 +331,11 @@ form .row {
   background: var(--green-bg);
 }
 
+.notice.warning {
+  border-left-color: var(--orange);
+  background: var(--orange-bg);
+}
+
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -386,4 +393,25 @@ form .row {
 .logout-btn:hover {
   border-color: var(--ink);
   color: var(--ink);
+}
+
+/* --- Photo picker karyawan --- */
+.photo-picker {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+}
+.photo-preview {
+  background: var(--paper2);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  height: 96px;
+  object-fit: cover;
+  width: 96px;
+}
+.photo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: 0.25rem;
 }
