@@ -90,7 +90,7 @@ export function TakeoverRow({ request }: { request: LeaveRequest }) {
       <Plate style={styles.rowPlate}>
         <View style={styles.platePad}>
           <View style={styles.row}>
-          <Avatar gradientId={employee.gradientId} name={employee.name} size={46} />
+          <Avatar gradientId={employee.gradientId} name={employee.name} size={46} shape="square" />
           <View style={styles.rowText}>
             <Text style={styles.rowName}>{employee.name}</Text>
             <Text style={styles.rowDesc}>
