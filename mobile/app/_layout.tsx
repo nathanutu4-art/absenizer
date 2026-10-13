@@ -11,8 +11,10 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { RootErrorBoundary } from '../src/components/RootErrorBoundary';
 import { ToastHost } from '../src/components/Toast';
+import { GLASS_BG } from '../src/data/glass-bg';
 import { getThemePalette } from '../src/lib/db';
-import { applyPalette } from '../src/theme';
+import { applyPalette, isGlassMode, setGlassMode } from '../src/theme';
+import { Image, StyleSheet } from 'react-native';
 
 /**
  * Layout akar: memuat Plus Jakarta Sans + palet tema dari Supabase,
@@ -32,7 +34,9 @@ export default function RootLayout() {
 
   // Muat palet tema HR dari company_settings sekali saat aplikasi dibuka;
   // gagal diam-diam dan pakai palet default.
+  // EKSPERIMEN liquid-glass: setGlassMode(true) — set false untuk revert.
   useEffect(() => {
+    setGlassMode(true);
     getThemePalette()
       .then((p) => {
         if (p) applyPalette(p);
@@ -45,8 +49,20 @@ export default function RootLayout() {
 
   return (
     <RootErrorBoundary>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }}>
+      <StatusBar style={isGlassMode() ? 'light' : 'dark'} />
+      {isGlassMode() && (
+        <Image
+          resizeMode="cover"
+          source={{ uri: GLASS_BG }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      >
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
         <Stack.Screen name="(tabs)" />
