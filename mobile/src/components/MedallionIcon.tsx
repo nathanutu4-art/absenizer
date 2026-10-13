@@ -2,13 +2,14 @@ import React from 'react';
 import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { MEDALLION_CREAM, MEDALLION_INK } from '../data/medallions';
 import {
+  MEDALLION_GRAY_INK,
   MEDALLION_GRAY_WADA_APRICOT,
   MEDALLION_GRAY_WADA_INDIGO,
   MEDALLION_GRAY_WADA_OLIVE,
 } from '../data/medallions-gray';
 import { AppIcon } from './AppIcon';
 import type { IconName } from '../data/icons';
-import { colors } from '../theme';
+import { colors, isGlassMode } from '../theme';
 
 export type MedallionVariant =
   | 'ink'
@@ -75,6 +76,26 @@ const GLYPH_COLORS: Record<MedallionVariant, string> = {
  */
 export function MedallionIcon({ glyph, size = 44, variant = 'ink', style }: Props) {
   const glyphSize = Math.round(size * 0.38);
+  // Mode liquid-glass: ring putih + glyph putih (eksperimen, mudah di-revert).
+  if (isGlassMode()) {
+    const base =
+      variant === 'ink'
+        ? MEDALLION_GRAY_INK
+        : variant === 'cream'
+          ? MEDALLION_GRAY_WADA_INDIGO
+          : GRAY_RINGS[variant];
+    return (
+      <View style={[{ height: size, width: size }, style]}>
+        <Image
+          source={{ uri: base }}
+          style={[StyleSheet.absoluteFill, { tintColor: 'rgba(255,255,255,0.9)' }]}
+        />
+        <View style={styles.center}>
+          <AppIcon color="#ffffff" name={glyph} size={glyphSize} />
+        </View>
+      </View>
+    );
+  }
   const ring =
     variant === 'ink' || variant === 'cream' ? (
       <Image source={{ uri: FIXED_RINGS[variant] }} style={StyleSheet.absoluteFill} />
