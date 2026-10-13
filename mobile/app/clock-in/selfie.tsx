@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   Switch,
@@ -8,24 +8,54 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { StampChip } from '../../src/components/StampChip';
+import { setSelfiePhoto } from '../../src/lib/selfiePhoto';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
 /**
- * Ambil Selfie — layar gelap simulasi kamera (tanpa modul kamera native).
- * Panduan oval putus-putus + braket sudut + tombol shutter medali.
+ * Ambil Selfie — pratinjau kamera depan asli (expo-camera).
+ * Tombol shutter mengambil foto sungguhan lalu lanjut ke tantangan kedip.
+ * Toggle "Wajah tidak cocok" mensimulasikan hasil verifikasi (CompreFace
+ * self-hosted belum disambungkan) — hasil tetap diterima dengan penanda.
  */
 export default function SelfieScreen() {
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
   const [simFace, setSimFace] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  function handleShutter() {
+  useEffect(() => {
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
+    }
+  }, [permission, requestPermission]);
+
+  async function handleShutter() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (cameraRef.current && permission?.granted) {
+        const photo = await cameraRef.current.takePictureAsync({
+          quality: 0.7,
+          shutterSound: false,
+        });
+        if (photo?.uri) setSelfiePhoto(photo.uri);
+      }
+    } catch {
+      // Gagal ambil foto — lanjutkan alur demo.
+    } finally {
+      setBusy(false);
+    }
     router.push({
       pathname: '/clock-in/liveness',
       params: simFace ? { simFace: '1' } : {},
     });
   }
+
+  const camReady = permission?.granted === true;
 
   return (
     <View style={styles.root}>
@@ -41,8 +71,28 @@ export default function SelfieScreen() {
           <View style={styles.headerSpacer} />
         </View>
 
-        {/* Viewfinder simulasi */}
+        {/* Viewfinder kamera asli */}
         <View style={styles.viewfinder}>
+          {camReady ? (
+            <CameraView
+              facing="front"
+              ref={cameraRef}
+              style={StyleSheet.absoluteFill}
+            />
+          ) : (
+            <View style={[StyleSheet.absoluteFill, styles.noCam]}>
+              <Text style={styles.noCamText}>
+                {permission && !permission.canAskAgain
+                  ? 'Izin kamera ditolak.\nAktifkan di Pengaturan HP.'
+                  : 'Meminta izin kamera…'}
+              </Text>
+              {permission && !permission.granted && permission.canAskAgain && (
+                <TouchableOpacity onPress={() => requestPermission()}>
+                  <Text style={styles.noCamRetry}>Minta Izin Lagi</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
           <StampChip
             backgroundColor="rgba(0,0,0,0.55)"
             color="#ffffff"
@@ -51,13 +101,13 @@ export default function SelfieScreen() {
             Kamera Depan
           </StampChip>
           {/* panduan oval wajah */}
-          <View style={styles.oval} />
+          <View style={styles.oval} pointerEvents="none" />
           {/* braket sudut */}
-          <View style={[styles.corner, styles.tl]} />
-          <View style={[styles.corner, styles.tr]} />
-          <View style={[styles.corner, styles.bl]} />
-          <View style={[styles.corner, styles.br]} />
-          <Text style={styles.hint}>
+          <View style={[styles.corner, styles.tl]} pointerEvents="none" />
+          <View style={[styles.corner, styles.tr]} pointerEvents="none" />
+          <View style={[styles.corner, styles.bl]} pointerEvents="none" />
+          <View style={[styles.corner, styles.br]} pointerEvents="none" />
+          <Text style={styles.hint} pointerEvents="none">
             Posisikan wajah di dalam oval
           </Text>
         </View>
@@ -128,6 +178,24 @@ const styles = StyleSheet.create({
     left: 14,
     position: 'absolute',
     top: 14,
+  },
+  noCam: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  noCamText: {
+    color: '#ffffff',
+    fontFamily: fontFamily('600'),
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  noCamRetry: {
+    color: colors.wadaApricot,
+    fontFamily: fontFamily('700'),
+    fontSize: 14,
+    marginTop: spacing.sm,
+    textDecorationLine: 'underline',
   },
   oval: {
     borderColor: 'rgba(255,255,255,0.75)',
