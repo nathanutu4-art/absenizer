@@ -9,6 +9,7 @@ import {
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import { RootErrorBoundary } from '../src/components/RootErrorBoundary';
 import { ToastHost } from '../src/components/Toast';
 
 /**
@@ -28,7 +29,7 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <>
+    <RootErrorBoundary>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
@@ -43,6 +44,6 @@ export default function RootLayout() {
         <Stack.Screen name="employee/[id]" />
       </Stack>
       <ToastHost />
-    </>
+    </RootErrorBoundary>
   );
 }
