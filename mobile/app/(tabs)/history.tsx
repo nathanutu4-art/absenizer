@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StampChip } from '../../src/components/StampChip';
-import { HISTORY_ROWS, HISTORY_SUMMARY, type HistoryRow } from '../../src/data/demo';
+import { HISTORY_ROWS, type HistoryRow } from '../../src/data/demo';
+import { getMyAttendance } from '../../src/lib/db';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_TONE: Record<HistoryRow['status'], 'green' | 'yellow' | 'blue' | 'red'> = {
@@ -30,8 +31,48 @@ const STAMP_COLORS = {
   orange: { color: colors.orange, bg: colors.orangeBg },
 } as const;
 
-/** Riwayat — ringkasan bulanan + baris kronologis. */
+/** Riwayat — ringkasan + baris kronologis milik pengguna yang login. */
 export default function HistoryScreen() {
+  // Data real dari Supabase bila tersedia; tampilkan demo saat memuat/kosong.
+  const [rows, setRows] = useState<HistoryRow[]>(HISTORY_ROWS);
+  useEffect(() => {
+    let alive = true;
+    getMyAttendance().then((list) => {
+      if (alive && list.length > 0) setRows(list);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const summary = useMemo(() => {
+    const counts: Record<HistoryRow['status'], number> = {
+      Hadir: 0,
+      Terlambat: 0,
+      Cuti: 0,
+      Sakit: 0,
+      Ijin: 0,
+    };
+    for (const r of rows) counts[r.status] += 1;
+    return [
+      { label: 'Hadir', value: counts.Hadir, tone: 'green' },
+      { label: 'Terlambat', value: counts.Terlambat, tone: 'yellow' },
+      { label: 'Cuti', value: counts.Cuti, tone: 'blue' },
+      { label: 'Sakit', value: counts.Sakit, tone: 'red' },
+      { label: 'Ijin', value: counts.Ijin, tone: 'yellow' },
+    ];
+  }, [rows]);
+
+  const monthLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta',
+        month: 'long',
+        year: 'numeric',
+      }).format(new Date()),
+    [],
+  );
+
   return (
     <ScreenContainer>
       {/* Tajuk arsip */}
@@ -39,10 +80,10 @@ export default function HistoryScreen() {
         <MedallionIcon glyph="clock" size={58} variant="wadaIndigo" />
         <View style={styles.headerText}>
           <Text style={styles.header}>Riwayat</Text>
-          <Text style={styles.month}>Oktober 2026</Text>
+          <Text style={styles.month}>{monthLabel}</Text>
         </View>
         <StampChip color={colors.ink} backgroundColor={colors.paper2}>
-          {`${HISTORY_ROWS.length} hari`}
+          {`${rows.length} hari`}
         </StampChip>
       </View>
       <View style={styles.doubleRule}>
@@ -52,7 +93,7 @@ export default function HistoryScreen() {
 
       {/* Strip ringkasan */}
       <View style={styles.summary}>
-        {HISTORY_SUMMARY.map((s) => (
+        {summary.map((s) => (
           <Plate key={s.label} style={styles.cell}>
             <View style={styles.cellInner}>
               <Text style={styles.cellValue}>{s.value}</Text>
@@ -70,7 +111,7 @@ export default function HistoryScreen() {
 
       {/* Baris riwayat */}
       <View style={styles.list}>
-        {HISTORY_ROWS.map((row) => {
+        {rows.map((row) => {
           const stamp = STAMP_COLORS[STATUS_TONE[row.status]];
           return (
             <Plate key={row.id} style={styles.itemWrap}>
