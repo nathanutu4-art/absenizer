@@ -10,6 +10,7 @@
  * dan dikembalikan sebagai fallback, bukan dilempar ke UI.
  */
 import type { AvatarGradientId } from '../components/Avatar';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import {
   EMPLOYEES,
   GEOFENCE_M,
@@ -289,10 +290,11 @@ function addDays(iso: string, n: number): string {
 // ---------------------------------------------------------------------------
 
 export interface AttendanceInput {
-  simFace?: boolean;
   isFar?: boolean;
   distanceM?: number | null;
   coords: { latitude: number; longitude: number; accuracy: number | null } | null;
+  /** Path storage foto selfie (bucket "selfies"); null bila tak ada/gagal. */
+  selfieUrl?: string | null;
 }
 
 /**
@@ -308,7 +310,6 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
 
     const now = new Date();
     const date = jakartaToday();
-    const score = input.simFace ? 0.4 : 0.96;
 
     const { data, error } = await supabase
       .from('attendance')
@@ -320,8 +321,7 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
           clock_in_lat: input.coords?.latitude ?? null,
           clock_in_lng: input.coords?.longitude ?? null,
           clock_in_accuracy: input.coords?.accuracy ?? null,
-          clock_in_face_score: score,
-          clock_in_face_match: score >= 0.6,
+          clock_in_selfie_url: input.selfieUrl ?? null,
           sync_status: 'synced',
           device_time: now.toISOString(),
           synced_at: now.toISOString(),
@@ -348,14 +348,6 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
         related_score: input.distanceM ?? null,
       });
     }
-    if (input.simFace) {
-      flags.push({
-        attendance_id: attendanceId,
-        flag_type: 'wajah_tidak_cocok',
-        reason: 'Skor verifikasi wajah di bawah ambang batas',
-        related_score: score,
-      });
-    }
     if (flags.length > 0) {
       const { error: flagError } = await supabase
         .from('attendance_flags')
@@ -365,6 +357,41 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
     return true;
   } catch {
     return false;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Upload selfie ke Storage
+// ---------------------------------------------------------------------------
+
+/**
+ * Resize foto selfie (maks lebar 800px, JPEG 0.7) lalu upload ke bucket
+ * "selfies" di path `<employeeId>/<YYYY-MM-DD>_<kind>.jpg`.
+ * Mengembalikan storage path bila sukses, null bila gagal (bucket belum
+ * ada, jaringan, dsb.) — tidak pernah melempar error.
+ */
+export async function uploadSelfie(
+  localUri: string,
+  employeeId: string,
+  kind: 'in' | 'out',
+): Promise<string | null> {
+  if (!isSupabaseConfigured() || !localUri || !employeeId) return null;
+  try {
+    const resized = await manipulateAsync(
+      localUri,
+      [{ resize: { width: 800 } }],
+      { compress: 0.7, format: SaveFormat.JPEG },
+    );
+    const res = await fetch(resized.uri);
+    const blob = await res.blob();
+    const path = `${employeeId}/${jakartaToday()}_${kind}.jpg`;
+    const { error } = await supabase.storage
+      .from('selfies')
+      .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+    if (error) return null;
+    return path;
+  } catch {
+    return null;
   }
 }
 
