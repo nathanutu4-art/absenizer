@@ -8,12 +8,14 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppIcon } from '../../src/components/AppIcon';
-import { colors, fontFamily, spacing } from '../../src/theme';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { Plate } from '../../src/components/Plate';
+import { StampChip } from '../../src/components/StampChip';
+import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
 /**
  * Ambil Selfie — layar gelap simulasi kamera (tanpa modul kamera native).
- * Panduan oval putus-putus + braket sudut + tombol shutter.
+ * Panduan oval putus-putus + braket sudut + tombol shutter medali.
  */
 export default function SelfieScreen() {
   const [simFace, setSimFace] = useState(false);
@@ -29,18 +31,25 @@ export default function SelfieScreen() {
     <View style={styles.root}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <AppIcon color="#fff" name="chevron_left" size={22} />
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={() => router.back()}
+          >
+            <MedallionIcon glyph="chevron_left" size={36} variant="cream" />
           </TouchableOpacity>
           <Text style={styles.title}>Ambil Selfie</Text>
-          <View style={styles.backBtn} />
+          <View style={styles.headerSpacer} />
         </View>
 
         {/* Viewfinder simulasi */}
         <View style={styles.viewfinder}>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>KAMERA DEPAN</Text>
-          </View>
+          <StampChip
+            backgroundColor="rgba(0,0,0,0.55)"
+            color="#ffffff"
+            style={styles.tag}
+          >
+            Kamera Depan
+          </StampChip>
           {/* panduan oval wajah */}
           <View style={styles.oval} />
           {/* braket sudut */}
@@ -54,28 +63,32 @@ export default function SelfieScreen() {
         </View>
 
         {/* Simulasi */}
-        <View style={styles.simBox}>
-          <View style={styles.simRow}>
-            <Text style={styles.simLabel}>Simulasi: Wajah tidak cocok</Text>
-            <Switch
-              onValueChange={setSimFace}
-              trackColor={{ false: '#3a4657', true: colors.orange }}
-              value={simFace}
-            />
+        <Plate
+          shadowColor="rgba(255,255,255,0.16)"
+          style={styles.simPlate}
+        >
+          <View style={styles.simInner}>
+            <View style={styles.simRow}>
+              <Text style={styles.simLabel}>Simulasi: Wajah tidak cocok</Text>
+              <Switch
+                onValueChange={setSimFace}
+                trackColor={{ false: '#3a4657', true: colors.orange }}
+                value={simFace}
+              />
+            </View>
+            <Text style={styles.simHint}>
+              Untuk demo — hasil tetap diterima dengan penanda.
+            </Text>
           </View>
-          <Text style={styles.simHint}>
-            Untuk demo — hasil tetap diterima dengan penanda.
-          </Text>
-        </View>
+        </Plate>
 
         {/* Shutter */}
         <View style={styles.shutterRow}>
           <TouchableOpacity
             accessibilityRole="button"
             onPress={handleShutter}
-            style={styles.shutterOuter}
           >
-            <View style={styles.shutterInner} />
+            <MedallionIcon glyph="check" size={72} variant="cream" />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -84,7 +97,7 @@ export default function SelfieScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: '#101018', flex: 1 },
+  root: { backgroundColor: colors.darkBg, flex: 1 },
   safe: { flex: 1 },
   header: {
     alignItems: 'center',
@@ -93,20 +106,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  backBtn: {
-    alignItems: 'center',
-    backgroundColor: '#1c2436',
-    borderRadius: 12,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
+  headerSpacer: { height: 36, width: 36 },
+  title: {
+    color: '#ffffff',
+    fontFamily: serifFamily('800'),
+    fontSize: 18,
   },
-  backText: { color: '#fff', fontSize: 24, fontWeight: '700', marginTop: -3 },
-  title: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 17 },
   viewfinder: {
     alignItems: 'center',
-    backgroundColor: '#1a2233',
-    borderRadius: 26,
+    backgroundColor: colors.darkSurface,
+    borderColor: colors.etch,
+    borderRadius: radius.card,
+    borderWidth: 1.5,
     height: 400,
     justifyContent: 'center',
     marginHorizontal: spacing.lg,
@@ -114,19 +125,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   tag: {
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    borderRadius: 8,
     left: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
     position: 'absolute',
     top: 14,
-  },
-  tagText: {
-    color: '#fff',
-    fontFamily: fontFamily('700'),
-    fontSize: 11,
-    letterSpacing: 1,
   },
   oval: {
     borderColor: 'rgba(255,255,255,0.75)',
@@ -153,11 +154,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     position: 'absolute',
   },
-  simBox: {
-    backgroundColor: '#1c2436',
-    borderRadius: 15,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
+  simPlate: { marginHorizontal: spacing.lg, marginTop: spacing.md },
+  simInner: {
+    backgroundColor: colors.darkSurface,
+    borderRadius: radius.card,
     padding: spacing.md,
   },
   simRow: {
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  simLabel: { color: '#fff', fontFamily: fontFamily('600'), fontSize: 13 },
+  simLabel: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
   simHint: {
     color: 'rgba(255,255,255,0.55)',
     fontFamily: fontFamily('400'),
@@ -173,19 +173,4 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   shutterRow: { alignItems: 'center', marginTop: spacing.lg },
-  shutterOuter: {
-    alignItems: 'center',
-    borderColor: '#fff',
-    borderRadius: 37,
-    borderWidth: 4,
-    height: 74,
-    justifyContent: 'center',
-    width: 74,
-  },
-  shutterInner: {
-    backgroundColor: '#fff',
-    borderRadius: 27,
-    height: 54,
-    width: 54,
-  },
 });
