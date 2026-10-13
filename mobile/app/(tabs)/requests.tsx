@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Avatar } from '../../src/components/Avatar';
-import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
@@ -31,10 +31,10 @@ import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 type Segment = 'baru' | 'kuota' | 'riwayat';
 
-const TYPE_CARD: Record<RequestType, { bg: string; fg: string; icon: IconName }> = {
-  cuti: { bg: colors.blueBg, fg: colors.blue, icon: 'umbrella' },
-  ijin: { bg: colors.yellowBg, fg: colors.yellowText, icon: 'clipboard' },
-  sakit: { bg: colors.redBg, fg: colors.red, icon: 'thermometer' },
+const TYPE_CARD: Record<RequestType, { bg: string; fg: string; icon: IconName; variant: MedallionVariant }> = {
+  cuti: { bg: colors.blueBg, fg: colors.blue, icon: 'umbrella', variant: 'wadaApricot' },
+  ijin: { bg: colors.yellowBg, fg: colors.yellowText, icon: 'clipboard', variant: 'wadaOlive' },
+  sakit: { bg: colors.redBg, fg: colors.red, icon: 'thermometer', variant: 'wadaIndigo' },
 };
 
 const REQ_STATUS_CHIP: Record<RequestStatus, { color: string; backgroundColor: string }> = {
@@ -154,7 +154,7 @@ function NewRequestForm() {
                 style={styles.typePlate}
               >
                 <View style={styles.typeInner}>
-                  <MedallionIcon glyph={c.icon} size={48} />
+                  <MedallionIcon glyph={c.icon} size={48} variant={c.variant} />
                   <Text style={[styles.typeLabel, { color: active ? c.fg : colors.ink }]}>
                     {TYPE_LABEL[t]}
                   </Text>
@@ -293,7 +293,7 @@ function QuotaTab() {
           <Plate key={q.type} style={styles.quotaPlate}>
             <View style={styles.platePad}>
               <View style={styles.quotaTop}>
-              <MedallionIcon glyph={c.icon} size={52} />
+              <MedallionIcon glyph={c.icon} size={52} variant={c.variant} />
               <View style={styles.quotaText}>
                 <Text style={styles.quotaTitle}>{TYPE_LABEL[q.type]}</Text>
                 <Text style={styles.quotaSub}>{q.usedLabel}</Text>
