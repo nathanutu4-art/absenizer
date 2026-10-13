@@ -6,6 +6,7 @@ import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StampChip } from '../../src/components/StampChip';
 import { HISTORY_ROWS, type HistoryRow } from '../../src/data/demo';
 import { getMyAttendance } from '../../src/lib/db';
+import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_TONE: Record<HistoryRow['status'], 'green' | 'yellow' | 'blue' | 'red'> = {
@@ -33,13 +34,27 @@ const STAMP_COLORS = {
 
 /** Riwayat — ringkasan + baris kronologis milik pengguna yang login. */
 export default function HistoryScreen() {
-  // Data real dari Supabase bila tersedia; tampilkan demo saat memuat/kosong.
-  const [rows, setRows] = useState<HistoryRow[]>(HISTORY_ROWS);
+  // Sesi real: data asli dari Supabase (kosong bila tak ada) — tanpa
+  // fallback demo. Sesi demo: tampilkan baris demo.
+  const [rows, setRows] = useState<HistoryRow[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     let alive = true;
-    getMyAttendance().then((list) => {
-      if (alive && list.length > 0) setRows(list);
-    });
+    (async () => {
+      const session = await getSession();
+      if (session?.demo !== false) {
+        if (alive) {
+          setRows(HISTORY_ROWS);
+          setLoading(false);
+        }
+        return;
+      }
+      const list = await getMyAttendance();
+      if (alive) {
+        setRows(list);
+        setLoading(false);
+      }
+    })();
     return () => {
       alive = false;
     };
@@ -111,7 +126,12 @@ export default function HistoryScreen() {
 
       {/* Baris riwayat */}
       <View style={styles.list}>
-        {rows.map((row) => {
+        {loading ? (
+          <Text style={styles.emptyText}>Memuat riwayat…</Text>
+        ) : rows.length === 0 ? (
+          <Text style={styles.emptyText}>Belum ada riwayat kehadiran.</Text>
+        ) : (
+          rows.map((row) => {
           const stamp = STAMP_COLORS[STATUS_TONE[row.status]];
           return (
             <Plate key={row.id} style={styles.itemWrap}>
@@ -148,7 +168,8 @@ export default function HistoryScreen() {
               </View>
             </Plate>
           );
-        })}
+          })
+        )}
       </View>
     </ScreenContainer>
   );
@@ -205,6 +226,13 @@ const styles = StyleSheet.create({
   },
   cellBar: { borderRadius: 2, height: 3, marginTop: 8, width: 26 },
   list: { marginTop: spacing.md },
+  emptyText: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 13.5,
+    paddingVertical: spacing.lg,
+    textAlign: 'center',
+  },
   itemWrap: { marginBottom: spacing.sm },
   item: {
     alignItems: 'center',
