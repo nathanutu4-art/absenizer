@@ -296,9 +296,11 @@ export default function HomeScreen() {
                 resizeMode="contain"
                 style={styles.sunburst}
               />
-              <MedallionIcon glyph="clock" size={112} variant="ink" />
-              <Text style={styles.clockLabel}>{clockLabel}</Text>
-              <Text style={styles.clockTime}>{wib} WIB</Text>
+              <MedallionIcon glyph="clock" size={112} variant="ink" style={styles.clockMedal} />
+              <View style={styles.clockTextWrap}>
+                <Text style={styles.clockLabel}>{clockLabel}</Text>
+                <Text style={styles.clockTime}>{wib} WIB</Text>
+              </View>
             </TouchableOpacity>
           </View>
           <Text style={styles.clockHint}>
@@ -546,6 +548,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: (CLOCK_DIAMETER - 200) / 2,
     width: 200,
+  },
+  clockMedal: {
+    left: (CLOCK_DIAMETER - 112) / 2,
+    position: 'absolute',
+    top: (CLOCK_DIAMETER - 112) / 2,
+  },
+  clockTextWrap: {
+    alignItems: 'center',
+    bottom: 24,
+    left: 0,
+    position: 'absolute',
+    right: 0,
   },
   clockLabel: {
     color: colors.ink,
