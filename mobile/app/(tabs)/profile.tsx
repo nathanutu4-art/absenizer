@@ -1,15 +1,18 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
 import { GradientView } from '../../src/components/GradientView';
-import { ThemedButton } from '../../src/components/ThemedButton';
+import { Plate } from '../../src/components/Plate';
+import { PlateButton } from '../../src/components/PlateButton';
+import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import { getEmployee, getPicOf } from '../../src/data/demo';
+import { HATCH_TILE } from '../../src/data/medallions';
 import { clearSession, getActiveRole, type DemoRole } from '../../src/lib/session';
-import { colors, fontFamily, radius, spacing } from '../../src/theme';
+import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const ROLE_EMPLOYEE: Record<DemoRole, string> = {
   karyawan: 'nadia',
@@ -46,6 +49,11 @@ export default function ProfileScreen() {
     <View style={styles.root}>
       <ScrollView>
         <GradientView kind="hero" style={styles.hero}>
+          <Image
+            source={{ uri: HATCH_TILE }}
+            resizeMode="repeat"
+            style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
+          />
           <SafeAreaView edges={['top']}>
             <Text style={styles.headerTitle}>Profil</Text>
             <View style={styles.profileRow}>
@@ -54,61 +62,74 @@ export default function ProfileScreen() {
                 <Text style={styles.name}>{me.name}</Text>
                 <Text style={styles.position}>{me.position}</Text>
                 <Text style={styles.empNo}>{me.employeeNo}</Text>
+                <StampChip
+                  color="#ffffff"
+                  backgroundColor="rgba(255,255,255,0.14)"
+                  style={styles.statusChip}
+                >
+                  AKTIF • WFO
+                </StampChip>
               </View>
             </View>
           </SafeAreaView>
         </GradientView>
 
         <View style={styles.body}>
-          <View style={styles.kvCard}>
-            {kv.map(([label, value], i) => (
-              <View key={label}>
-                <View style={styles.kvRow}>
-                  <Text style={styles.kvLabel}>{label}</Text>
-                  <Text style={styles.kvValue}>{value}</Text>
-                </View>
-                {i < kv.length - 1 ? <View style={styles.kvDivider} /> : null}
+          {kv.map(([label, value]) => (
+            <Plate key={label} style={styles.kvWrap}>
+              <View style={styles.kvRow}>
+                <Text style={styles.kvLabel}>{label}</Text>
+                <Text style={styles.kvValue}>{value}</Text>
               </View>
-            ))}
-          </View>
+            </Plate>
+          ))}
 
-          <View style={styles.picCard}>
-            <Text style={styles.cardTitle}>PIC Saya</Text>
-            <View style={styles.picRow}>
-              <Avatar gradientId={pic.gradientId} name={pic.name} size={46} />
-              <View style={styles.picText}>
-                <Text style={styles.picName}>{pic.name}</Text>
-                <Text style={styles.picPos}>{pic.position}</Text>
+          <Plate style={styles.picWrap}>
+            <View style={styles.picInner}>
+              <View style={styles.sectionHead}>
+                <Text style={styles.cardTitle}>PIC Saya</Text>
+                <View style={styles.ruleThick} />
+                <View style={styles.ruleThin} />
+              </View>
+              <View style={styles.picRow}>
+                <Avatar gradientId={pic.gradientId} name={pic.name} size={46} />
+                <View style={styles.picText}>
+                  <Text style={styles.picName}>{pic.name}</Text>
+                  <Text style={styles.picPos}>{pic.position}</Text>
+                </View>
+              </View>
+              <View style={styles.picActions}>
+                <PlateButton
+                  onPress={() => showToast(`Menghubungi ${pic.name}…`)}
+                  variant="paper"
+                  style={styles.picBtn}
+                >
+                  <View style={styles.picBtnLabel}>
+                    <AppIcon color={colors.etch} name="phone" size={16} />
+                    <Text style={styles.picBtnText}>Hubungi PIC</Text>
+                  </View>
+                </PlateButton>
+                <PlateButton
+                  onPress={() => showToast(`Pesan untuk ${pic.name} disiapkan.`)}
+                  variant="paper"
+                  style={styles.picBtn}
+                >
+                  <View style={styles.picBtnLabel}>
+                    <AppIcon color={colors.etch} name="message_circle" size={16} />
+                    <Text style={styles.picBtnText}>Kirim Pesan</Text>
+                  </View>
+                </PlateButton>
               </View>
             </View>
-            <View style={styles.picActions}>
-              <TouchableOpacity
-                onPress={() => showToast(`Menghubungi ${pic.name}…`)}
-                style={styles.picBtn}
-              >
-                <View style={styles.picBtnLabel}>
-                  <AppIcon color={colors.indigo} name="phone" size={16} />
-                  <Text style={styles.picBtnText}>Hubungi PIC</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => showToast(`Pesan untuk ${pic.name} disiapkan.`)}
-                style={styles.picBtn}
-              >
-                <View style={styles.picBtnLabel}>
-                  <AppIcon color={colors.indigo} name="message_circle" size={16} />
-                  <Text style={styles.picBtnText}>Kirim Pesan</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
+          </Plate>
 
-          <ThemedButton
+          <PlateButton
             onPress={handleLogout}
+            variant="danger"
             style={styles.logout}
-            title="Keluar dari Akun"
-            variant="dangerOutline"
-          />
+          >
+            Keluar dari Akun
+          </PlateButton>
         </View>
       </ScrollView>
     </View>
@@ -124,8 +145,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#fff',
-    fontFamily: fontFamily('800'),
-    fontSize: 19,
+    fontFamily: serifFamily('800'),
+    fontSize: 20,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
@@ -136,7 +157,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
   },
   profileText: { flex: 1, marginLeft: spacing.md },
-  name: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 20 },
+  name: { color: '#fff', fontFamily: serifFamily('800'), fontSize: 22 },
   position: {
     color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('500'),
@@ -149,13 +170,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  statusChip: { marginTop: 10 },
   body: { padding: spacing.lg },
-  kvCard: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: spacing.lg,
-  },
-  kvRow: { paddingVertical: 9 },
+  kvWrap: { marginBottom: spacing.sm },
+  kvRow: { paddingHorizontal: spacing.md, paddingVertical: 10 },
   kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12 },
   kvValue: {
     color: colors.ink,
@@ -163,19 +181,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 3,
   },
-  kvDivider: { backgroundColor: colors.line, height: 1 },
-  picCard: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    marginTop: spacing.md,
-    padding: spacing.lg,
-  },
+  picWrap: { marginTop: spacing.sm },
+  picInner: { padding: spacing.lg },
+  sectionHead: { marginBottom: spacing.sm },
   cardTitle: {
     color: colors.ink,
-    fontFamily: fontFamily('800'),
+    fontFamily: serifFamily('800'),
     fontSize: 15,
-    marginBottom: spacing.sm,
+    marginBottom: 6,
   },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
   picRow: { alignItems: 'center', flexDirection: 'row' },
   picText: { flex: 1, marginLeft: 12 },
   picName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
@@ -186,17 +202,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   picActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
-  picBtn: {
-    alignItems: 'center',
-    backgroundColor: colors.blueBg,
-    borderRadius: radius.button,
-    flex: 1,
-    paddingVertical: 12,
+  picBtn: { flex: 1 },
+  picBtnText: {
+    color: colors.etch,
+    fontFamily: fontFamily('700'),
+    fontSize: 12,
+    marginLeft: 6,
   },
-  picBtnText: { color: colors.indigo, fontFamily: fontFamily('700'), fontSize: 13, marginLeft: 6 },
   picBtnLabel: { alignItems: 'center', flexDirection: 'row', justifyContent: 'center' },
-  logout: {
-    borderColor: '#f3c2c2',
-    marginTop: spacing.lg,
-  },
+  logout: { marginTop: spacing.lg },
 });
