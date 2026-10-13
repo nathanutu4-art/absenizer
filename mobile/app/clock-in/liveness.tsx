@@ -9,8 +9,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppIcon } from '../../src/components/AppIcon';
-import { colors, fontFamily, spacing } from '../../src/theme';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { PlateButton } from '../../src/components/PlateButton';
+import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 /**
  * Tantangan Kedip — layar gelap, ring progres + ilustrasi wajah berkedip.
@@ -75,11 +76,14 @@ export default function LivenessScreen() {
     <View style={styles.root}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <AppIcon color="#fff" name="chevron_left" size={22} />
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={() => router.back()}
+          >
+            <MedallionIcon glyph="chevron_left" size={36} variant="cream" />
           </TouchableOpacity>
           <Text style={styles.title}>Tantangan Kedip</Text>
-          <View style={styles.backBtn} />
+          <View style={styles.headerSpacer} />
         </View>
 
         {/* Langkah 2 dari 3 */}
@@ -108,16 +112,13 @@ export default function LivenessScreen() {
         </Text>
 
         <View style={styles.ctaWrap}>
-          <TouchableOpacity
-            accessibilityRole="button"
+          <PlateButton
             disabled={busy}
             onPress={handleDone}
-            style={[styles.cta, busy && styles.ctaBusy]}
+            variant="primary"
           >
-            <Text style={styles.ctaText}>
-              {busy ? 'Memverifikasi…' : 'Saya Sudah Berkedip'}
-            </Text>
-          </TouchableOpacity>
+            {busy ? 'Memverifikasi…' : 'Saya Sudah Berkedip'}
+          </PlateButton>
         </View>
       </SafeAreaView>
     </View>
@@ -127,7 +128,7 @@ export default function LivenessScreen() {
 const RING = 228;
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: '#101018', flex: 1 },
+  root: { backgroundColor: colors.darkBg, flex: 1 },
   safe: { flex: 1 },
   header: {
     alignItems: 'center',
@@ -136,16 +137,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  backBtn: {
-    alignItems: 'center',
-    backgroundColor: '#1c2436',
-    borderRadius: 12,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
+  headerSpacer: { height: 36, width: 36 },
+  title: {
+    color: '#ffffff',
+    fontFamily: serifFamily('800'),
+    fontSize: 18,
   },
-  backText: { color: '#fff', fontSize: 24, fontWeight: '700', marginTop: -3 },
-  title: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 17 },
   dots: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -189,7 +186,7 @@ const styles = StyleSheet.create({
   },
   face: {
     alignItems: 'center',
-    backgroundColor: '#ffd9b3',
+    backgroundColor: colors.paper2,
     borderRadius: 106,
     flexDirection: 'row',
     height: 212,
@@ -197,14 +194,14 @@ const styles = StyleSheet.create({
     width: 212,
   },
   eye: {
-    backgroundColor: '#223140',
+    backgroundColor: colors.etch,
     borderRadius: 11,
     height: 22,
     marginHorizontal: 22,
     width: 22,
   },
   smile: {
-    borderBottomColor: '#223140',
+    borderBottomColor: colors.etch,
     borderBottomWidth: 6,
     borderLeftColor: 'transparent',
     borderRadius: 40,
@@ -216,8 +213,8 @@ const styles = StyleSheet.create({
     width: 80,
   },
   headline: {
-    color: '#fff',
-    fontFamily: fontFamily('800'),
+    color: '#ffffff',
+    fontFamily: serifFamily('800'),
     fontSize: 22,
     marginTop: spacing.xl,
     textAlign: 'center',
@@ -231,13 +228,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   ctaWrap: { marginTop: spacing.xl, paddingHorizontal: spacing.lg },
-  cta: {
-    alignItems: 'center',
-    backgroundColor: colors.indigo,
-    borderRadius: 14,
-    minHeight: 54,
-    justifyContent: 'center',
-  },
-  ctaBusy: { opacity: 0.6 },
-  ctaText: { color: '#fff', fontFamily: fontFamily('700'), fontSize: 16 },
 });
