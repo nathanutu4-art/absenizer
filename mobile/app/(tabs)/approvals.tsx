@@ -50,7 +50,7 @@ export default function ApprovalsScreen() {
       <Plate style={styles.infoPlate}>
         <View style={styles.platePad}>
           <View style={styles.infoRow}>
-            <MedallionIcon glyph="info" size={40} />
+            <MedallionIcon glyph="info" size={40} variant="wadaApricot" />
             <Text style={[styles.infoText, styles.infoBody]}>
               Tinjau pengajuan dari anggota tim Anda. Penolakan wajib disertai
               catatan.
