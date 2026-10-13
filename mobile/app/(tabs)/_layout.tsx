@@ -18,7 +18,7 @@ import { colors, fontFamily } from '../../src/theme';
 function tabIcon(name: IconName) {
   return ({ focused }: { focused: boolean }) =>
     focused ? (
-      <MedallionIcon glyph={name} size={40} variant="ink" />
+      <MedallionIcon glyph={name} size={40} variant="wadaApricot" />
     ) : (
       <AppIcon color={colors.ink3} name={name} size={24} />
     );
