@@ -1,5 +1,5 @@
 /**
- * Dataset demo AbsensiKu — mengikuti fixture high-fidelity prototype.
+ * Dataset demo Absenizer — mengikuti fixture high-fidelity prototype.
  * Nanti digantikan data Supabase; konstanta perusahaan/kantor/geofence/kuota
  * mengikuti spek desain.
  */
