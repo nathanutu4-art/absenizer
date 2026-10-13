@@ -7,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { colors, fontFamily, radius } from '../theme';
+import { GLASS_RADIUS, colors, fontFamily, isGlassMode, radius } from '../theme';
 
 interface Props {
   children: React.ReactNode;
@@ -23,9 +23,46 @@ interface Props {
  * border tinta 1.5px, bayangan keras 4px.
  */
 export function PlateButton({ children, onPress, variant = 'primary', style, disabled }: Props) {
+  const glass = isGlassMode();
   const bg =
-    variant === 'primary' ? colors.indigoDark : variant === 'danger' ? colors.reject : colors.surface;
-  const fg = variant === 'paper' ? colors.etch : '#ffffff';
+    glass && variant === 'primary'
+      ? 'rgba(255,255,255,0.22)'
+      : variant === 'primary'
+        ? colors.indigoDark
+        : variant === 'danger'
+          ? colors.reject
+          : colors.surface;
+  const fg = variant === 'paper' && !glass ? colors.etch : '#ffffff';
+  const label =
+    typeof children === 'string' ? (
+      <Text style={[styles.text, { color: fg }]}>{children}</Text>
+    ) : (
+      children
+    );
+  // Mode liquid-glass: tombol kaca tanpa bayangan keras.
+  if (glass) {
+    return (
+      <TouchableOpacity
+        accessibilityRole="button"
+        activeOpacity={0.85}
+        disabled={disabled}
+        onPress={onPress}
+        style={[
+          styles.button,
+          {
+            backgroundColor: bg,
+            borderColor: 'rgba(255,255,255,0.35)',
+            borderRadius: GLASS_RADIUS,
+            borderWidth: 1,
+            opacity: disabled ? 0.6 : 1,
+          },
+          style,
+        ]}
+      >
+        {label}
+      </TouchableOpacity>
+    );
+  }
   return (
     <View style={[styles.wrap, style]}>
       <View style={[styles.shadow, { backgroundColor: colors.etchDeep }]} />
