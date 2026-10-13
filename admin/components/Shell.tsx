@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import Sidebar from "@/components/Sidebar";
+import Topbar from "@/components/Topbar";
 
 type State = "checking" | "ok" | "denied";
 
@@ -90,7 +91,10 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="layout">
       <Sidebar />
-      <main className="main">{children}</main>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+        <Topbar />
+        <main className="main">{children}</main>
+      </div>
     </div>
   );
 }
