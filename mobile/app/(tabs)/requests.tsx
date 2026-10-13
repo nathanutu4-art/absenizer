@@ -25,10 +25,12 @@ import {
   getEmployee,
   type Employee,
   type LeaveRequest,
+  type Quota,
   type RequestStatus,
   type RequestType,
 } from '../../src/data/demo';
-import { getEmployees, getMyEmployeeId, getMyLeaveRequests, submitLeaveRequest } from '../../src/lib/db';
+import { getCompanySettings, getEmployees, getMyEmployeeId, getMyLeaveBalance, getMyLeaveRequests, submitLeaveRequest } from '../../src/lib/db';
+import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 type Segment = 'baru' | 'kuota' | 'riwayat';
@@ -343,9 +345,58 @@ function HatchBar({ progress, color }: { progress: number; color: string }) {
 
 /** --- Segmen: Sisa Kuota --- */
 function QuotaTab() {
+  // Sesi demo: QUOTAS demo. Sesi real: saldo dari database (leave_balances),
+  // fallback ke default dari company_settings bila baris belum ada.
+  const [quotas, setQuotas] = useState<Quota[]>(QUOTAS);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const s = await getSession();
+        if (s?.demo !== false) return;
+        const [balance, settings] = await Promise.all([
+          getMyLeaveBalance(),
+          getCompanySettings(),
+        ]);
+        if (!alive) return;
+        const cutiQuota = balance?.cutiQuota ?? settings.cutiQuotaDefault;
+        const cutiUsed = balance?.cutiUsed ?? 0;
+        const ijinQuota = balance?.ijinQuota ?? settings.ijinQuotaDefault;
+        const ijinUsed = balance?.ijinUsed ?? 0;
+        const fmt = (n: number) =>
+          Number.isInteger(n) ? String(n) : n.toLocaleString('id-ID');
+        setQuotas([
+          {
+            type: 'cuti',
+            used: cutiUsed,
+            total: cutiQuota,
+            usedLabel: `Terpakai ${fmt(cutiUsed)} dari ${fmt(cutiQuota)} hari`,
+          },
+          {
+            type: 'ijin',
+            used: ijinUsed,
+            total: ijinQuota,
+            usedLabel: `Terpakai ${fmt(ijinUsed)} dari ${fmt(ijinQuota)}`,
+          },
+          {
+            type: 'sakit',
+            used: 0,
+            total: null,
+            usedLabel: 'Tanpa batas • wajib surat dokter',
+          },
+        ]);
+      } catch {
+        // Tetap tampilkan angka demo bila gagal — jangan kosong.
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   return (
     <View>
-      {QUOTAS.map((q) => {
+      {quotas.map((q) => {
         const c = TYPE_CARD[q.type];
         const progress = q.total !== null ? q.used / q.total : 0.25;
         return (
