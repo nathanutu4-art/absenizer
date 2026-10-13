@@ -20,7 +20,7 @@ interface Props {
 }
 
 /**
- * Tombol standar AbsensiKu.
+ * Tombol standar Absenizer.
  * - primary: gradasi 135deg #2f7ed0 -> #0057ba, radius 14.
  * - clockOut: gradasi #f59e0b -> #d97706.
  * - outline: garis indigo; danger: merah solid; ghost: teks indigo.
