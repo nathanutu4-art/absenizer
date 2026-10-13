@@ -107,12 +107,74 @@ export function applyPalette(p: ThemePalette): void {
   colors.wadaOlive = HEX_RE.test(p.olive) ? p.olive : DEFAULT_PALETTE.olive;
 }
 
-/** Warna status pengajuan: Sakit = merah, Cuti = biru, Ijin = kuning. */
+// ---------------------------------------------------------------------------
+// Mode liquid-glass eksperimental (runtime flag — mudah di-revert)
+// ---------------------------------------------------------------------------
+
+let glassMode = false;
+let glassSnapshot: Record<string, string> | null = null;
+
+export function isGlassMode(): boolean {
+  return glassMode;
+}
+
+/** Radius kartu kaca. */
+export const GLASS_RADIUS = 18;
+
+/** Override warna saat glass mode aktif (wada* trio tidak disentuh). */
+const GLASS_OVERRIDES: Record<string, string> = {
+  bg: 'transparent',
+  surface: 'rgba(255,255,255,0.10)',
+  plate: 'rgba(255,255,255,0.08)',
+  ink: '#ffffff',
+  ink2: 'rgba(255,255,255,0.78)',
+  ink3: 'rgba(255,255,255,0.55)',
+  etch: 'rgba(255,255,255,0.4)',
+  etchDeep: 'rgba(255,255,255,0.25)',
+  line: 'rgba(255,255,255,0.16)',
+  paper2: 'rgba(255,255,255,0.06)',
+  greenBg: 'rgba(62,207,111,0.18)',
+  redBg: 'rgba(242,109,109,0.18)',
+  blueBg: 'rgba(74,144,217,0.20)',
+  yellowBg: 'rgba(245,166,35,0.18)',
+  orangeBg: 'rgba(234,88,12,0.20)',
+};
+
+/**
+ * Nyalakan/matikan liquid-glass. Saat ON, nilai colors saat ini di-snapshot
+ * lalu dioverride; saat OFF, snapshot dikembalikan. Idempoten, tidak pernah
+ * melempar error.
+ */
+export function setGlassMode(on: boolean): void {
+  if (on === glassMode) return;
+  if (on) {
+    glassSnapshot = {};
+    for (const k of Object.keys(GLASS_OVERRIDES)) {
+      glassSnapshot[k] = (colors as Record<string, string>)[k] ?? '';
+    }
+    Object.assign(colors, GLASS_OVERRIDES);
+  } else if (glassSnapshot) {
+    Object.assign(colors, glassSnapshot);
+    glassSnapshot = null;
+  }
+  glassMode = on;
+}
+
+/**
+ * Warna status pengajuan: Sakit = merah, Cuti = biru, Ijin = kuning.
+ * Getter agar mengikuti perubahan colors saat runtime (palet/glass mode).
+ */
 export const leaveStatusColors = {
-  sakit: { fg: colors.red, bg: colors.redBg },
-  cuti: { fg: colors.blue, bg: colors.blueBg },
-  ijin: { fg: colors.yellowText, bg: colors.yellowBg },
-} as const;
+  get sakit() {
+    return { fg: colors.red, bg: colors.redBg };
+  },
+  get cuti() {
+    return { fg: colors.blue, bg: colors.blueBg };
+  },
+  get ijin() {
+    return { fg: colors.yellowText, bg: colors.yellowBg };
+  },
+};
 
 export type LeaveKind = keyof typeof leaveStatusColors;
 
