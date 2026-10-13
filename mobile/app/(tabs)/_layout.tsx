@@ -1,30 +1,34 @@
 import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import type { ColorValue } from 'react-native';
 import { AppIcon } from '../../src/components/AppIcon';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
 import type { IconName } from '../../src/data/icons';
 import { PIC_REQUESTS } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
 import { colors, fontFamily } from '../../src/theme';
 
 /**
- * Tab bar berbasis peran (mengikuti high-fidelity prototype):
+ * Tab bar berbasis peran (mengikuti high-fidelity prototype), reskin
+ * gaya ukiran: latar kertas, garis atas tinta 3px, ikon medali untuk tab
+ * aktif, ikon tinta untuk tab nonaktif.
  * - Karyawan: Beranda, Riwayat, Tim, Pengajuan, Profil
  * - PIC: Beranda, Persetujuan (badge = jumlah menunggu), Tim, Profil
  * - HR: Beranda, Ambil Alih (badge = jumlah eskalasi), Tim, Profil
  */
 function tabIcon(name: IconName) {
-  return ({ color }: { color: ColorValue }) => (
-    <AppIcon
-      color={typeof color === 'string' ? color : colors.indigo}
-      name={name}
-      size={25}
-    />
-  );
+  return ({ focused }: { focused: boolean }) =>
+    focused ? (
+      <MedallionIcon glyph={name} size={40} variant="ink" />
+    ) : (
+      <AppIcon color={colors.ink3} name={name} size={24} />
+    );
 }
 
 const badgeStyle = {
   backgroundColor: colors.red,
+  borderColor: colors.ink,
+  borderRadius: 2,
+  borderWidth: 1.5,
   color: '#fff',
   fontFamily: fontFamily('700'),
   fontSize: 9,
@@ -48,14 +52,20 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.indigo,
+        tabBarActiveTintColor: colors.ink,
         tabBarInactiveTintColor: colors.ink3,
-        tabBarLabelStyle: { fontFamily: fontFamily('600'), fontSize: 10.5 },
+        tabBarLabelStyle: {
+          fontFamily: fontFamily('600'),
+          fontSize: 9.5,
+          letterSpacing: 1,
+          textTransform: 'uppercase',
+        },
         tabBarStyle: {
-          borderTopColor: colors.line,
-          borderTopWidth: 1,
-          height: 64,
-          paddingBottom: 8,
+          backgroundColor: colors.bg,
+          borderTopColor: colors.ink,
+          borderTopWidth: 3,
+          height: 74,
+          paddingBottom: 10,
           paddingTop: 6,
         },
       }}
