@@ -136,7 +136,7 @@ export default function LoginScreen() {
         <SafeAreaView edges={['top']} style={styles.safe}>
           <View style={styles.heroBody}>
             <MedallionIcon glyph="shield" size={60} variant="wadaIndigo" />
-            <Text style={styles.title}>Selamat Datang di AbsensiKu</Text>
+            <Text style={styles.title}>Selamat Datang di Absenizer</Text>
             <Text style={styles.subtitle}>
               Masuk dengan email perusahaan Anda.
             </Text>
