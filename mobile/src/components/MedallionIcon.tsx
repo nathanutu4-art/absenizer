@@ -1,12 +1,11 @@
 import React from 'react';
 import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { MEDALLION_CREAM, MEDALLION_INK } from '../data/medallions';
 import {
-  MEDALLION_CREAM,
-  MEDALLION_INK,
-  MEDALLION_WADA_APRICOT,
-  MEDALLION_WADA_INDIGO,
-  MEDALLION_WADA_OLIVE,
-} from '../data/medallions';
+  MEDALLION_GRAY_WADA_APRICOT,
+  MEDALLION_GRAY_WADA_INDIGO,
+  MEDALLION_GRAY_WADA_OLIVE,
+} from '../data/medallions-gray';
 import { AppIcon } from './AppIcon';
 import type { IconName } from '../data/icons';
 import { colors } from '../theme';
@@ -25,19 +24,39 @@ interface Props {
   size?: number;
   /**
    * Varian warna: 'ink'/'cream' (monokrom ukiran),
-   * 'wadaIndigo'/'wadaApricot'/'wadaOlive' (Sanzo Wada No. 211).
+   * 'wadaIndigo'/'wadaApricot'/'wadaOlive' (palet tema dinamis,
+   * dapat diganti HR dari panel admin).
    */
   variant?: MedallionVariant;
   style?: StyleProp<ViewStyle>;
 }
 
-const RINGS: Record<MedallionVariant, string> = {
+/** Ring tetap untuk varian monokrom. */
+const FIXED_RINGS: Record<'ink' | 'cream', string> = {
   ink: MEDALLION_INK,
   cream: MEDALLION_CREAM,
-  wadaIndigo: MEDALLION_WADA_INDIGO,
-  wadaApricot: MEDALLION_WADA_APRICOT,
-  wadaOlive: MEDALLION_WADA_OLIVE,
 };
+
+/** Ring dasar grayscale untuk varian palet dinamis (di-tint saat render). */
+const GRAY_RINGS: Record<'wadaIndigo' | 'wadaApricot' | 'wadaOlive', string> = {
+  wadaIndigo: MEDALLION_GRAY_WADA_INDIGO,
+  wadaApricot: MEDALLION_GRAY_WADA_APRICOT,
+  wadaOlive: MEDALLION_GRAY_WADA_OLIVE,
+};
+
+/** Warna tint dinamis — dibaca saat render agar mengikuti applyPalette(). */
+function ringTint(variant: MedallionVariant): string | undefined {
+  switch (variant) {
+    case 'wadaIndigo':
+      return colors.wadaIndigo;
+    case 'wadaApricot':
+      return colors.wadaApricot;
+    case 'wadaOlive':
+      return colors.wadaOlive;
+    default:
+      return undefined;
+  }
+}
 
 /** Warna glyph yang kontras di atas tiap varian ring. */
 const GLYPH_COLORS: Record<MedallionVariant, string> = {
@@ -50,14 +69,24 @@ const GLYPH_COLORS: Record<MedallionVariant, string> = {
 
 /**
  * Ikon medali ukiran: cincin ganda berarsir + glyph di tengah,
- * mengikuti hi-fi gaya engraving. Varian warna mengikuti
- * Sanzo Wada Dictionary of Color Combinations No. 211.
+ * mengikuti hi-fi gaya engraving. Varian wada mengikuti palet tema
+ * dinamis (default Sanzo Wada No. 211; HR dapat mengganti dari panel
+ * admin — dimuat saat aplikasi dibuka).
  */
 export function MedallionIcon({ glyph, size = 44, variant = 'ink', style }: Props) {
   const glyphSize = Math.round(size * 0.38);
+  const ring =
+    variant === 'ink' || variant === 'cream' ? (
+      <Image source={{ uri: FIXED_RINGS[variant] }} style={StyleSheet.absoluteFill} />
+    ) : (
+      <Image
+        source={{ uri: GRAY_RINGS[variant] }}
+        style={[StyleSheet.absoluteFill, { tintColor: ringTint(variant) }]}
+      />
+    );
   return (
     <View style={[{ height: size, width: size }, style]}>
-      <Image source={{ uri: RINGS[variant] }} style={StyleSheet.absoluteFill} />
+      {ring}
       <View style={styles.center}>
         <AppIcon color={GLYPH_COLORS[variant]} name={glyph} size={glyphSize} />
       </View>
