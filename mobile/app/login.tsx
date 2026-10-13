@@ -38,8 +38,8 @@ const ROLE_OPTIONS: { value: DemoRole; label: string }[] = [
  * atas plat kertas. Logika auth & mode demo tidak berubah.
  */
 export default function LoginScreen() {
-  const [email, setEmail] = useState('nadia.prameswari@perusahaan.co.id');
-  const [password, setPassword] = useState('demo1234');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
   const [role, setRole] = useState<DemoRole>('karyawan');
   const [loading, setLoading] = useState(false);
