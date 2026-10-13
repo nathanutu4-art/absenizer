@@ -2,6 +2,7 @@ import React from 'react';
 import {
   ImageBackground,
   StyleSheet,
+  View,
   type ImageSourcePropType,
   type ImageStyle,
   type StyleProp,
@@ -9,6 +10,7 @@ import {
 } from 'react-native';
 
 import { GRADIENT_IMAGES } from '../data/gradientImages';
+import { isGlassMode } from '../theme';
 
 const GRADIENTS = {
   primary: { uri: GRADIENT_IMAGES.grad_primary },
@@ -28,8 +30,12 @@ interface Props {
 /**
  * Gradasi tanpa dependensi native: PNG kecil di-stretch sebagai latar.
  * Dipakai untuk tombol primer, hero, dan tombol clock-out sesuai spek desain.
+ * Mode liquid-glass: View transparan (latar global dari gambar background).
  */
 export function GradientView({ kind, children, style, imageStyle }: Props) {
+  if (isGlassMode()) {
+    return <View style={style}>{children}</View>;
+  }
   const source: ImageSourcePropType = GRADIENTS[kind];
   return (
     <ImageBackground
