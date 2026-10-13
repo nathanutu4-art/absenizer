@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -14,6 +14,7 @@ import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StampChip } from '../../src/components/StampChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
+import { getEmployees } from '../../src/lib/db';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_LABEL: Record<Employee['status'], string> = {
@@ -78,9 +79,20 @@ function awayRingColor(status: Employee['status']): string {
 /** Info Karyawan — tidak masuk, ulang tahun terdekat, direktori. */
 export default function TeamScreen() {
   const [query, setQuery] = useState('');
+  // Direktori dimuat dari Supabase bila tersedia; tampilkan demo saat memuat.
+  const [directorySrc, setDirectorySrc] = useState<Employee[]>(EMPLOYEES);
+  useEffect(() => {
+    let alive = true;
+    getEmployees().then((list) => {
+      if (alive) setDirectorySrc(list);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
   const birthdays = useMemo(upcomingBirthdays, []);
   const away = EMPLOYEES.filter((e) => e.status !== 'hadir');
-  const directory = EMPLOYEES.filter((e) =>
+  const directory = directorySrc.filter((e) =>
     e.name.toLowerCase().includes(query.toLowerCase()),
   );
 
