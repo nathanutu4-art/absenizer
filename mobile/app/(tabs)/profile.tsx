@@ -9,12 +9,12 @@ import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
 import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
-import { getEmployee, getPicOf } from '../../src/data/demo';
+import { getEmployee, getPicOf, type Employee } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
 import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
 import { DUMMY_AVATAR } from '../../src/data/dummy-avatar';
 import { clearSession, getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { getMyEmployee, isSupabaseConfigured } from '../../src/lib/db';
+import { getEmployees, getMyEmployee, isSupabaseConfigured } from '../../src/lib/db';
 import { supabase } from '../../src/lib/supabase';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -24,10 +24,30 @@ const ROLE_EMPLOYEE: Record<DemoRole, string> = {
   hr: 'sari',
 };
 
+/** Baris kosong (tanda strip) bila data user login tak ditemukan. */
+const EMPTY_EMPLOYEE: Employee = {
+  id: '',
+  gradientId: '01',
+  name: '—',
+  employeeNo: '—',
+  position: '—',
+  birthDate: '—',
+  birthISO: '',
+  email: '—',
+  phone: '—',
+  joinDate: '—',
+  tenure: '—',
+  status: 'hadir',
+  role: 'karyawan',
+};
+
 /** Profil — data diri + kartu PIC + ganti kata sandi + keluar. */
 export default function ProfileScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
-  const [isDemo, setIsDemo] = useState(true);
+  const [isDemo, setIsDemo] = useState<boolean | null>(null);
+  const [meDb, setMeDb] = useState<Employee | null>(null);
+  const [meLoaded, setMeLoaded] = useState(false);
+  const [picDb, setPicDb] = useState<Employee | null>(null);
   const [mePhoto, setMePhoto] = useState<string | null>(null);
   const [newPass, setNewPass] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
@@ -35,19 +55,37 @@ export default function ProfileScreen() {
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
-    getActiveRole().then(setRole);
-    getSession().then((s) => setIsDemo(s?.demo !== false));
     let alive = true;
-    getMyEmployee().then((me) => {
-      if (alive && me?.photoUrl) setMePhoto(me.photoUrl);
-    });
+    (async () => {
+      const s = await getSession();
+      const demo = s?.demo !== false;
+      if (!alive) return;
+      setIsDemo(demo);
+      setRole(await getActiveRole());
+      if (!demo) {
+        const me = await getMyEmployee();
+        if (!alive) return;
+        setMeDb(me);
+        setMeLoaded(true);
+        if (me?.photoUrl) setMePhoto(me.photoUrl);
+        if (me?.picId) {
+          const list = await getEmployees();
+          if (!alive) return;
+          setPicDb(list.find((e) => e.id === me.picId) ?? null);
+        }
+      }
+    })();
     return () => {
       alive = false;
     };
   }, []);
 
-  const me = getEmployee(ROLE_EMPLOYEE[role]);
-  const pic = getPicOf(me);
+  // Sesi demo: data demo. Sesi real: seluruhnya dari user yang login
+  // (strip bila tak ditemukan) — tak pernah data demo.
+  const demoMe = getEmployee(ROLE_EMPLOYEE[role]);
+  const me: Employee = isDemo ? demoMe : (meDb ?? EMPTY_EMPLOYEE);
+  const pic: Employee | null = isDemo ? getPicOf(demoMe) : picDb;
+  const loading = isDemo === null || (!isDemo && !meLoaded);
   const avatarUri = isDemo
     ? AVATAR_PLACEHOLDER
     : mePhoto && /^https?:\/\//i.test(mePhoto)
@@ -130,15 +168,20 @@ export default function ProfileScreen() {
         </GradientView>
 
         <View style={styles.body}>
-          {kv.map(([label, value]) => (
-            <Plate key={label} style={styles.kvWrap}>
-              <View style={styles.kvRow}>
-                <Text style={styles.kvLabel}>{label}</Text>
-                <Text style={styles.kvValue}>{value}</Text>
-              </View>
-            </Plate>
-          ))}
+          {loading ? (
+            <Text style={styles.loadingText}>Memuat profil…</Text>
+          ) : (
+            kv.map(([label, value]) => (
+              <Plate key={label} style={styles.kvWrap}>
+                <View style={styles.kvRow}>
+                  <Text style={styles.kvLabel}>{label}</Text>
+                  <Text style={styles.kvValue}>{value}</Text>
+                </View>
+              </Plate>
+            ))
+          )}
 
+          {pic ? (
           <Plate style={styles.picWrap}>
             <View style={styles.picInner}>
               <View style={styles.sectionHead}>
@@ -177,6 +220,7 @@ export default function ProfileScreen() {
               </View>
             </View>
           </Plate>
+          ) : null}
 
           <Plate style={styles.picWrap}>
             <View style={styles.picInner}>
@@ -299,6 +343,13 @@ const styles = StyleSheet.create({
   statusChip: { marginTop: 10 },
   body: { padding: spacing.lg },
   kvWrap: { marginBottom: spacing.sm },
+  loadingText: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 14,
+    marginVertical: spacing.md,
+    textAlign: 'center',
+  },
   kvRow: { paddingHorizontal: spacing.md, paddingVertical: 10 },
   kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12 },
   kvValue: {
