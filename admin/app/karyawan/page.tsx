@@ -31,10 +31,11 @@ export default async function KaryawanPage() {
       </div>
 
       <div className="notice">
-        <strong>Catatan akun login:</strong> akun login (email + kata sandi)
-        dibuat terpisah di dashboard Supabase → <em>Authentication → Users</em>.
-        Setelah itu, isi kolom <em>user_id</em> karyawan via SQL agar akun
-        terhubung ke profil ini.
+        <strong>Akun login otomatis:</strong> setiap karyawan baru langsung
+        dibuatkan akun login dengan kata sandi default{" "}
+        <strong>secret123</strong> — minta karyawan menggantinya di halaman
+        Profil aplikasi. Setelah menambah karyawan, Anda akan keluar dan perlu
+        login kembali sebagai HR.
       </div>
 
       {error && (
