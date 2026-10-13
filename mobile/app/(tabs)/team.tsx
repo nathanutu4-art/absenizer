@@ -9,11 +9,12 @@ import {
   View,
 } from 'react-native';
 import { Avatar } from '../../src/components/Avatar';
-import { AppIcon } from '../../src/components/AppIcon';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
-import { StatusChip } from '../../src/components/StatusChip';
+import { StampChip } from '../../src/components/StampChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
-import { colors, fontFamily, radius, spacing } from '../../src/theme';
+import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_LABEL: Record<Employee['status'], string> = {
   hadir: 'Hadir',
@@ -29,7 +30,12 @@ const STATUS_TONE = {
   ijin: 'yellow',
 } as const;
 
-const PASTELS = ['#e9f0fe', '#fdf6e0', '#e8f7ee', '#fdeee2', '#fdeeee', '#eef2ff'];
+const STAMP_COLORS = {
+  green: { color: colors.green, bg: colors.greenBg },
+  yellow: { color: colors.yellowText, bg: colors.yellowBg },
+  blue: { color: colors.blue, bg: colors.blueBg },
+  red: { color: colors.red, bg: colors.redBg },
+} as const;
 
 interface Birthday {
   employee: Employee;
@@ -61,6 +67,14 @@ function upcomingBirthdays(): Birthday[] {
   return list.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 6);
 }
 
+function awayRingColor(status: Employee['status']): string {
+  return status === 'sakit'
+    ? colors.red
+    : status === 'cuti'
+      ? colors.blue
+      : colors.yellowRing;
+}
+
 /** Info Karyawan — tidak masuk, ulang tahun terdekat, direktori. */
 export default function TeamScreen() {
   const [query, setQuery] = useState('');
@@ -73,9 +87,13 @@ export default function TeamScreen() {
   return (
     <ScreenContainer>
       <Text style={styles.header}>Info Karyawan</Text>
+      <View style={styles.doubleRule}>
+        <View style={styles.ruleThick} />
+        <View style={styles.ruleThin} />
+      </View>
 
       {/* Sedang tidak masuk */}
-      <Text style={styles.sectionTitle}>Sedang Tidak Masuk</Text>
+      <SectionTitle label="Sedang Tidak Masuk" />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.awayRow}>
         {away.map((e) => (
           <TouchableOpacity
@@ -83,7 +101,11 @@ export default function TeamScreen() {
             onPress={() => router.push(`/employee/${e.id}`)}
             style={styles.awayItem}
           >
-            <Avatar gradientId={e.gradientId} name={e.name} size={56} statusRing={e.status === 'hadir' ? undefined : e.status} />
+            <View
+              style={[styles.awayRing, { borderColor: awayRingColor(e.status) }]}
+            >
+              <MedallionIcon glyph="user" size={48} />
+            </View>
             <Text style={styles.awayName} numberOfLines={1}>
               {e.name.split(' ')[0]}
             </Text>
@@ -97,32 +119,31 @@ export default function TeamScreen() {
       </View>
 
       {/* Ulang tahun terdekat */}
-      <Text style={styles.sectionTitle}>Ulang Tahun Terdekat</Text>
+      <SectionTitle label="Ulang Tahun Terdekat" />
       <View style={styles.birthGrid}>
-        {birthdays.map((b, i) => (
-          <View
-            key={b.employee.id}
-            style={[styles.birthCard, { backgroundColor: PASTELS[i % PASTELS.length] }]}
-          >
-            <Avatar gradientId={b.employee.gradientId} name={b.employee.name} size={38} />
-            <Text style={styles.birthName} numberOfLines={1}>
-              {b.employee.name.split(' ')[0]}
-            </Text>
-            <Text style={styles.birthDate}>{b.dateLabel}</Text>
-            <View style={styles.agePill}>
-              <Text style={styles.ageText}>{b.turningAge} thn</Text>
+        {birthdays.map((b) => (
+          <Plate key={b.employee.id} style={styles.birthCard}>
+            <View style={styles.birthInner}>
+              <Avatar gradientId={b.employee.gradientId} name={b.employee.name} size={38} />
+              <Text style={styles.birthName} numberOfLines={1}>
+                {b.employee.name.split(' ')[0]}
+              </Text>
+              <Text style={styles.birthDate}>{b.dateLabel}</Text>
+              <View style={styles.agePill}>
+                <Text style={styles.ageText}>{b.turningAge} thn</Text>
+              </View>
+              <Text style={styles.countdown}>
+                {b.daysLeft === 0 ? 'Hari ini!' : `${b.daysLeft} hari lagi`}
+              </Text>
             </View>
-            <Text style={styles.countdown}>
-              {b.daysLeft === 0 ? 'Hari ini!' : `${b.daysLeft} hari lagi`}
-            </Text>
-          </View>
+          </Plate>
         ))}
       </View>
 
       {/* Direktori */}
-      <Text style={styles.sectionTitle}>Direktori Karyawan</Text>
+      <SectionTitle label="Direktori Karyawan" />
       <View style={styles.searchRow}>
-        <AppIcon color={colors.ink3} name="search" size={18} style={styles.searchIconImg} />
+        <MedallionIcon glyph="search" size={32} style={styles.searchMedal} />
         <TextInput
           onChangeText={setQuery}
           placeholder="Cari nama karyawan…"
@@ -131,21 +152,37 @@ export default function TeamScreen() {
           value={query}
         />
       </View>
-      {directory.map((e) => (
-        <TouchableOpacity
-          key={e.id}
-          onPress={() => router.push(`/employee/${e.id}`)}
-          style={styles.dirRow}
-        >
-          <Avatar gradientId={e.gradientId} name={e.name} size={46} />
-          <View style={styles.dirText}>
-            <Text style={styles.dirName}>{e.name}</Text>
-            <Text style={styles.dirPos}>{e.position}</Text>
-          </View>
-          <StatusChip label={STATUS_LABEL[e.status]} tone={STATUS_TONE[e.status]} />
-        </TouchableOpacity>
-      ))}
+      {directory.map((e) => {
+        const stamp = STAMP_COLORS[STATUS_TONE[e.status]];
+        return (
+          <Plate key={e.id} style={styles.dirWrap}>
+            <TouchableOpacity
+              onPress={() => router.push(`/employee/${e.id}`)}
+              style={styles.dirRow}
+            >
+              <Avatar gradientId={e.gradientId} name={e.name} size={46} />
+              <View style={styles.dirText}>
+                <Text style={styles.dirName}>{e.name}</Text>
+                <Text style={styles.dirPos}>{e.position}</Text>
+              </View>
+              <StampChip color={stamp.color} backgroundColor={stamp.bg}>
+                {STATUS_LABEL[e.status]}
+              </StampChip>
+            </TouchableOpacity>
+          </Plate>
+        );
+      })}
     </ScreenContainer>
+  );
+}
+
+function SectionTitle({ label }: { label: string }) {
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={styles.sectionTitle}>{label}</Text>
+      <View style={styles.ruleThick} />
+      <View style={styles.ruleThin} />
+    </View>
   );
 }
 
@@ -161,19 +198,27 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 const styles = StyleSheet.create({
   header: {
     color: colors.ink,
-    fontFamily: fontFamily('800'),
-    fontSize: 19,
+    fontFamily: serifFamily('800'),
+    fontSize: 22,
     marginTop: spacing.sm,
   },
+  doubleRule: { marginTop: spacing.sm },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  sectionHead: { marginBottom: spacing.sm, marginTop: spacing.lg },
   sectionTitle: {
     color: colors.ink,
-    fontFamily: fontFamily('800'),
+    fontFamily: serifFamily('800'),
     fontSize: 15,
-    marginBottom: spacing.sm,
-    marginTop: spacing.lg,
+    marginBottom: 6,
   },
   awayRow: { marginHorizontal: -spacing.md, paddingHorizontal: spacing.md },
-  awayItem: { alignItems: 'center', marginRight: 14, width: 64 },
+  awayItem: { alignItems: 'center', marginRight: 14, width: 72 },
+  awayRing: {
+    borderRadius: 34,
+    borderWidth: 3,
+    padding: 3,
+  },
   awayName: {
     color: colors.ink2,
     fontFamily: fontFamily('500'),
@@ -186,7 +231,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginRight: spacing.md,
   },
-  legendDot: { borderRadius: 6, height: 12, width: 12 },
+  legendDot: {
+    borderColor: colors.etch,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    height: 12,
+    width: 12,
+  },
   legendLabel: {
     color: colors.ink2,
     fontFamily: fontFamily('500'),
@@ -198,12 +249,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  birthCard: {
-    alignItems: 'center',
-    borderRadius: 16,
-    padding: spacing.sm,
-    width: '31%',
-  },
+  birthCard: { width: '31%' },
+  birthInner: { alignItems: 'center', padding: spacing.sm },
   birthName: {
     color: colors.ink,
     fontFamily: fontFamily('700'),
@@ -212,8 +259,10 @@ const styles = StyleSheet.create({
   },
   birthDate: { color: colors.ink2, fontFamily: fontFamily('500'), fontSize: 11 },
   agePill: {
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    borderRadius: radius.chip,
+    backgroundColor: colors.paper2,
+    borderColor: colors.etch,
+    borderRadius: 2,
+    borderWidth: 1.5,
     marginTop: 6,
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -227,26 +276,27 @@ const styles = StyleSheet.create({
   },
   searchRow: {
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: radius.input,
+    backgroundColor: colors.plate,
+    borderColor: colors.etch,
+    borderRadius: 3,
+    borderWidth: 1.5,
     flexDirection: 'row',
     marginBottom: spacing.sm,
     paddingHorizontal: 12,
+    paddingVertical: 6,
   },
-  searchIconImg: { marginRight: 8 },
+  searchMedal: { marginRight: 8 },
   searchInput: {
     color: colors.ink,
     flex: 1,
     fontFamily: fontFamily('400'),
     fontSize: 14,
-    paddingVertical: 12,
+    paddingVertical: 8,
   },
+  dirWrap: { marginBottom: spacing.sm },
   dirRow: {
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
     flexDirection: 'row',
-    marginBottom: spacing.sm,
     padding: spacing.md,
   },
   dirText: { flex: 1, marginLeft: 12 },
