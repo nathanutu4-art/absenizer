@@ -127,7 +127,7 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
         <Plate style={styles.card}>
           <View style={styles.platePadLg}>
             <View style={styles.cardTop}>
-            <Avatar gradientId={employee.gradientId} name={employee.name} size={52} />
+            <Avatar gradientId={employee.gradientId} name={employee.name} size={52} shape="square" />
             <View style={styles.cardText}>
               <Text style={styles.cardName}>{employee.name}</Text>
               <Text style={styles.cardDesc}>
