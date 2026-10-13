@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { colors, plateShadow, radius } from '../theme';
+import { GLASS_RADIUS, colors, isGlassMode, plateShadow, radius } from '../theme';
 
 interface Props {
   children: React.ReactNode;
@@ -14,8 +14,27 @@ interface Props {
 /**
  * Kartu plat cetak gaya ukiran: border tinta 1.5px, radius 4px,
  * bayangan keras offset tanpa blur.
+ * Mode liquid-glass: kartu kaca tanpa bayangan (border terang, radius 18).
  */
 export function Plate({ children, style, shadowColor, shadowOffset = plateShadow }: Props) {
+  if (isGlassMode()) {
+    // Dibaca saat render agar mengikuti setGlassMode().
+    return (
+      <View
+        style={[
+          {
+            backgroundColor: colors.surface,
+            borderColor: 'rgba(255,255,255,0.28)',
+            borderRadius: GLASS_RADIUS,
+            borderWidth: 1,
+          },
+          style,
+        ]}
+      >
+        {children}
+      </View>
+    );
+  }
   return (
     <View style={[styles.wrap, style]}>
       <View
