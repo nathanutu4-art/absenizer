@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from '../../src/components/AppIcon';
 import { StatusChip } from '../../src/components/StatusChip';
 import { ThemedButton } from '../../src/components/ThemedButton';
 import { getEmployee } from '../../src/data/demo';
@@ -51,7 +52,7 @@ export default function SuccessScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.checkWrap}>
           <View style={styles.checkCircle}>
-            <Text style={styles.checkGlyph}>✓</Text>
+            <AppIcon color="#fff" name="check" size={48} />
           </View>
         </View>
         <Text style={styles.title}>Clock In Berhasil</Text>
