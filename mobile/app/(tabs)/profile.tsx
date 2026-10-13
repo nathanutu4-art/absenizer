@@ -98,7 +98,7 @@ export default function ProfileScreen() {
                 <View style={styles.ruleThin} />
               </View>
               <View style={styles.picRow}>
-                <Avatar gradientId={pic.gradientId} name={pic.name} size={46} />
+                <Avatar gradientId={pic.gradientId} name={pic.name} size={46} shape="square" />
                 <View style={styles.picText}>
                   <Text style={styles.picName}>{pic.name}</Text>
                   <Text style={styles.picPos}>{pic.position}</Text>
