@@ -123,6 +123,7 @@ interface DbEmployeeRow {
   phone: string | null;
   join_date: string;
   pic_id: string | null;
+  photo_url: string | null;
   is_hr: boolean;
   is_active: boolean;
 }
@@ -182,6 +183,7 @@ function mapDbEmployee(row: DbEmployeeRow): Employee {
     status: 'hadir' as AttendanceStatus,
     role: row.is_hr ? 'hr' : 'karyawan',
     picId: row.pic_id ?? undefined,
+    photoUrl: row.photo_url ?? undefined,
   };
 }
 
@@ -192,7 +194,7 @@ export async function getEmployees(): Promise<Employee[]> {
     const { data, error } = await supabase
       .from('employees')
       .select(
-        'id, employee_no, full_name, position, birth_date, email, phone, join_date, pic_id, is_hr, is_active',
+        'id, employee_no, full_name, position, birth_date, email, phone, join_date, pic_id, photo_url, is_hr, is_active',
       )
       .eq('is_active', true)
       .order('full_name');
@@ -229,6 +231,25 @@ export async function getMyEmployeeId(): Promise<string | null> {
       if (id) return id;
     }
     return null;
+  } catch {
+    return null;
+  }
+}
+
+/** Employee lengkap milik sesi aktif; null di mode demo / tak ditemukan. */
+export async function getMyEmployee(): Promise<Employee | null> {
+  const empId = await getMyEmployeeId();
+  if (!empId) return null;
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .select(
+        'id, employee_no, full_name, position, birth_date, email, phone, join_date, pic_id, photo_url, is_hr, is_active',
+      )
+      .eq('id', empId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return mapDbEmployee(data as DbEmployeeRow);
   } catch {
     return null;
   }
