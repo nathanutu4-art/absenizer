@@ -343,3 +343,47 @@ form .row {
   font-size: 0.82rem;
   word-break: break-all;
 }
+
+/* --- Login --- */
+.login-wrap {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 2rem 1rem;
+}
+.login-card {
+  max-width: 380px;
+  width: 100%;
+}
+.login-card .hint {
+  color: var(--ink2);
+  font-size: 0.82rem;
+  margin-top: 1rem;
+}
+
+/* --- Tombol keluar di sidebar --- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+.sidebar nav {
+  flex: 1;
+}
+.logout-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink2);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  text-align: left;
+  width: 100%;
+}
+.logout-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
