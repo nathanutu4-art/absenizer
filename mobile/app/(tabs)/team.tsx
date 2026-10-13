@@ -14,6 +14,7 @@ import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StampChip } from '../../src/components/StampChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
+import { DUMMY_AVATAR } from '../../src/data/dummy-avatar';
 import { getAwayEmployees, getEmployees, type AwayEmployee } from '../../src/lib/db';
 import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
@@ -89,6 +90,11 @@ function awayRingColor(status: Employee['status']): string {
       : colors.yellowRing;
 }
 
+/** Foto karyawan untuk sesi real: URL absolut bila ada, dummy JPG bila tidak. */
+function photoFor(e: Employee): string {
+  return e.photoUrl && /^https?:\/\//i.test(e.photoUrl) ? e.photoUrl : DUMMY_AVATAR;
+}
+
 /** Info Karyawan — tidak masuk, ulang tahun terdekat, direktori. */
 export default function TeamScreen() {
   const [query, setQuery] = useState('');
@@ -122,7 +128,7 @@ export default function TeamScreen() {
       alive = false;
     };
   }, []);
-  const awayItems: { id: string; name: string; status: Employee['status'] }[] =
+  const awayItems: { id: string; name: string; status: Employee['status']; photoUri?: string }[] =
     isDemo === null
       ? []
       : isDemo && awayDb === null
@@ -131,11 +137,15 @@ export default function TeamScreen() {
             name: e.name,
             status: e.status,
           }))
-        : (awayDb ?? []).map((a) => ({
-            id: a.employeeId,
-            name: a.name,
-            status: a.type,
-          }));
+        : (awayDb ?? []).map((a) => {
+            const emp = directorySrc.find((e) => e.id === a.employeeId);
+            return {
+              id: a.employeeId,
+              name: a.name,
+              status: a.type,
+              photoUri: emp ? photoFor(emp) : DUMMY_AVATAR,
+            };
+          });
   const directory = directorySrc.filter((e) =>
     e.name.toLowerCase().includes(query.toLowerCase()),
   );
@@ -162,7 +172,11 @@ export default function TeamScreen() {
                 <View
                   style={[styles.awayRing, { borderColor: awayRingColor(e.status) }]}
                 >
-                  <MedallionIcon glyph="user" size={48} />
+                  {e.photoUri ? (
+                    <Avatar name={e.name} photoUri={e.photoUri} size={48} />
+                  ) : (
+                    <MedallionIcon glyph="user" size={48} />
+                  )}
                 </View>
                 <Text style={styles.awayName} numberOfLines={1}>
                   {e.name.split(' ')[0]}
@@ -184,7 +198,12 @@ export default function TeamScreen() {
         {birthdays.map((b) => (
           <Plate key={b.employee.id} style={styles.birthCard}>
             <View style={styles.birthInner}>
-              <Avatar gradientId={b.employee.gradientId} name={b.employee.name} size={38} />
+              <Avatar
+                gradientId={b.employee.gradientId}
+                name={b.employee.name}
+                photoUri={isDemo ? undefined : photoFor(b.employee)}
+                size={38}
+              />
               <Text style={styles.birthName} numberOfLines={1}>
                 {b.employee.name.split(' ')[0]}
               </Text>
@@ -224,7 +243,13 @@ export default function TeamScreen() {
               onPress={() => router.push(`/employee/${e.id}`)}
               style={styles.dirRow}
             >
-              <Avatar gradientId={e.gradientId} name={e.name} size={46} shape="square" />
+              <Avatar
+                gradientId={e.gradientId}
+                name={e.name}
+                photoUri={isDemo ? undefined : photoFor(e)}
+                shape="square"
+                size={46}
+              />
               <View style={styles.dirText}>
                 <Text style={styles.dirName}>{e.name}</Text>
                 <Text style={styles.dirPos}>{e.position}</Text>
