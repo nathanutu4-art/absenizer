@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
 import { colors, fontFamily } from '../theme';
 
 import { GRADIENT_IMAGES } from '../data/gradientImages';
@@ -38,6 +38,11 @@ interface Props {
   statusRing?: 'sakit' | 'cuti' | 'ijin';
   /** 'circle' (default) atau 'square' ala bingkai foto. */
   shape?: 'circle' | 'square';
+  /**
+   * URI foto profil (http(s) atau data-URI). Bila diisi, foto ditampilkan
+   * (persegi mengikuti aturan avatar); bila tidak, gradasi/inisial.
+   */
+  photoUri?: string | null;
 }
 
 const RING_COLORS = {
@@ -53,8 +58,8 @@ function initials(name: string): string {
   return (first + last).toUpperCase();
 }
 
-/** Avatar: lingkaran inisial di atas gradasi, atau bingkai foto persegi. */
-export function Avatar({ name, size = 48, gradientId, statusRing, shape = 'circle' }: Props) {
+/** Avatar: foto profil bila ada, atau lingkaran inisial di atas gradasi, atau bingkai foto persegi. */
+export function Avatar({ name, size = 48, gradientId, statusRing, shape = 'circle', photoUri }: Props) {
   const radius = shape === 'circle' ? size / 2 : 0;
   const boxStyle = {
     width: size,
@@ -65,7 +70,13 @@ export function Avatar({ name, size = 48, gradientId, statusRing, shape = 'circl
     <Text style={[styles.text, { fontSize: size * 0.36 }]}>{initials(name)}</Text>
   );
 
-  const body = gradientId ? (
+  const body = photoUri ? (
+    <Image
+      resizeMode="cover"
+      source={{ uri: photoUri }}
+      style={[styles.box, boxStyle]}
+    />
+  ) : gradientId ? (
     <ImageBackground
       imageStyle={{ borderRadius: radius }}
       resizeMode="stretch"
