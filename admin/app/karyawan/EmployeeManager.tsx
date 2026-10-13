@@ -103,9 +103,43 @@ export default function EmployeeManager({ employees }: Props) {
         if (error) throw error;
         setMessage({ kind: "ok", text: "Data karyawan diperbarui." });
       } else {
-        const { error } = await sb.from("employees").insert(payload);
-        if (error) throw error;
-        setMessage({ kind: "ok", text: "Karyawan baru ditambahkan." });
+        // 1) Buat baris karyawan dulu.
+        const { data: inserted, error: insErr } = await sb
+          .from("employees")
+          .insert(payload)
+          .select("id")
+          .single();
+        if (insErr) throw insErr;
+
+        // 2) Buatkan akun login dengan kata sandi default "secret123".
+        //    signUp mengalihkan sesi ke user baru, jadi setelah ini admin
+        //    keluar dan perlu login kembali.
+        try {
+          const { data: authData, error: authErr } = await sb.auth.signUp({
+            email: payload.email,
+            password: "secret123",
+            options: { data: { full_name: payload.full_name } },
+          });
+          if (authErr) throw authErr;
+          const newUserId = authData.user?.id;
+          if (newUserId) {
+            const { error: linkErr } = await sb
+              .from("employees")
+              .update({ user_id: newUserId })
+              .eq("id", inserted.id);
+            if (linkErr) throw linkErr;
+          }
+        } catch (authE) {
+          // Rollback: hapus baris karyawan bila akun gagal dibuat.
+          await sb.from("employees").delete().eq("id", inserted.id);
+          throw authE;
+        }
+
+        await sb.auth.signOut();
+        // Sesi kini milik user baru, jadi kembali ke halaman login.
+        // Akun yang dibuat: email di atas dengan kata sandi "secret123".
+        router.replace("/login");
+        return;
       }
       setShowForm(false);
       router.refresh();
