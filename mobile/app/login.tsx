@@ -115,7 +115,7 @@ export default function LoginScreen() {
         />
         <SafeAreaView edges={['top']} style={styles.safe}>
           <View style={styles.heroBody}>
-            <MedallionIcon glyph="shield" size={60} variant="cream" />
+            <MedallionIcon glyph="shield" size={60} variant="wadaIndigo" />
             <Text style={styles.title}>Selamat Datang di AbsensiKu</Text>
             <Text style={styles.subtitle}>
               Masuk dengan email perusahaan Anda.
@@ -146,7 +146,7 @@ export default function LoginScreen() {
             <View style={styles.formInner}>
               <Text style={styles.label}>Email perusahaan</Text>
               <View style={styles.inputRow}>
-                <MedallionIcon glyph="mail" size={32} style={styles.inputIcon} />
+                <MedallionIcon glyph="mail" size={32} style={styles.inputIcon} variant="wadaIndigo" />
                 <TextInput
                   autoCapitalize="none"
                   keyboardType="email-address"
@@ -160,7 +160,7 @@ export default function LoginScreen() {
 
               <Text style={styles.label}>Kata sandi</Text>
               <View style={styles.inputRow}>
-                <MedallionIcon glyph="lock" size={32} style={styles.inputIcon} />
+                <MedallionIcon glyph="lock" size={32} style={styles.inputIcon} variant="wadaIndigo" />
                 <TextInput
                   onChangeText={setPassword}
                   placeholder="••••••••"
