@@ -1,5 +1,5 @@
 /**
- * Lapisan data ganda (dual-mode) AbsensiKu.
+ * Lapisan data ganda (dual-mode) Absenizer.
  *
  * - Bila Supabase terkonfigurasi (env terisi & bukan placeholder) DAN data
  *   tersedia, baca/tulis lewat Supabase.
