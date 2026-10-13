@@ -357,7 +357,7 @@ export function RequestRow({ request }: { request: LeaveRequest }) {
     <Plate style={styles.reqPlate}>
       <View style={styles.platePad}>
         <View style={styles.reqInner}>
-          <Avatar gradientId={employee.gradientId} name={employee.name} size={44} />
+          <Avatar gradientId={employee.gradientId} name={employee.name} size={44} shape="square" />
           <View style={styles.reqText}>
             <Text style={styles.reqTitle}>
               {TYPE_LABEL[request.type]} • {request.dateRange}
