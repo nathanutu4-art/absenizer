@@ -17,6 +17,7 @@ import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import type { IconName } from '../../src/data/icons';
 import { HATCH_TILE, SUNBURST_INK } from '../../src/data/medallions';
+import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
 import {
   GEOFENCE_M,
   LATE_TOLERANCE_MIN,
@@ -184,7 +185,12 @@ export default function HomeScreen() {
           <SafeAreaView edges={['top']}>
             <View style={styles.heroTop}>
               <View style={styles.greetingRow}>
-                <MedallionIcon glyph="user" size={52} variant="cream" />
+                <View style={styles.avatarFrame}>
+                  <Image
+                    source={{ uri: AVATAR_PLACEHOLDER }}
+                    style={styles.avatarImage}
+                  />
+                </View>
                 <View style={styles.greetingText}>
                   <Text style={styles.greetingSmall}>
                     Selamat datang, {ROLE_LABEL[role]}
@@ -407,7 +413,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xl + spacing.md,
+  },
+  /** Bingkai foto profil persegi ala bingkai gambar. */
+  avatarFrame: {
+    backgroundColor: colors.paper2,
+    borderColor: colors.etch,
+    borderWidth: 2,
+    padding: 3,
+  },
+  avatarImage: {
+    borderColor: colors.etch,
+    borderWidth: 1,
+    height: 56,
+    width: 56,
   },
   greetingRow: { alignItems: 'center', flexDirection: 'row', flex: 1 },
   greetingText: { marginLeft: 12, flex: 1 },
