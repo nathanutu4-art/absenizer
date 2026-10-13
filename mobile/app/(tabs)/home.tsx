@@ -29,6 +29,7 @@ import {
   getEmployee,
 } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
+import { getEmployees, getMyEmployeeId } from '../../src/lib/db';
 import { recordClockOut, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -97,9 +98,26 @@ export default function HomeScreen() {
   const clock = useClockState();
   const wib = useWibClock();
   const pulse = useRef(new Animated.Value(0)).current;
+  // Nama pengguna yang login (dari DB bila tersedia).
+  const [meName, setMeName] = useState<string | null>(null);
 
   useEffect(() => {
     getActiveRole().then(setRole);
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const empId = await getMyEmployeeId();
+      if (!empId) return;
+      const list = await getEmployees();
+      if (!alive) return;
+      const found = list.find((e) => e.id === empId);
+      if (found) setMeName(found.name);
+    })();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -195,7 +213,7 @@ export default function HomeScreen() {
                   <Text style={styles.greetingSmall}>
                     Selamat datang, {ROLE_LABEL[role]}
                   </Text>
-                  <Text style={styles.greetingName}>{me.name}</Text>
+                  <Text style={styles.greetingName}>{meName ?? me.name}</Text>
                   <Text style={styles.dateLine}>{todayLine()}</Text>
                 </View>
               </View>
