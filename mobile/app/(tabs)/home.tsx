@@ -11,12 +11,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GradientView } from '../../src/components/GradientView';
-import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import type { IconName } from '../../src/data/icons';
-import { HATCH_TILE, SUNBURST_INK } from '../../src/data/medallions';
+import { HATCH_TILE, SUNBURST_APRICOT } from '../../src/data/medallions';
 import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
 import {
   GEOFENCE_M,
@@ -152,24 +152,24 @@ export default function HomeScreen() {
   const statusChip =
     clock.phase === 'in' ? 'Belum Clock In' : clock.phase === 'out' ? 'Sudah Clock In' : 'Selesai';
 
-  const shortcuts: { label: string; icon: IconName; route: string }[] =
+  const shortcuts: { label: string; icon: IconName; route: string; variant: MedallionVariant }[] =
     role === 'karyawan'
       ? [
-          { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests' },
-          { label: 'Tim', icon: 'users', route: '/(tabs)/team' },
-          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history' },
-          { label: 'Profil', icon: 'user', route: '/(tabs)/profile' },
+          { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests', variant: 'wadaApricot' },
+          { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaOlive' },
+          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history', variant: 'wadaIndigo' },
+          { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
         ]
       : role === 'pic'
         ? [
-            { label: 'Persetujuan', icon: 'check_circle', route: '/(tabs)/approvals' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team' },
-            { label: 'Profil', icon: 'user', route: '/(tabs)/profile' },
+            { label: 'Persetujuan', icon: 'check_circle', route: '/(tabs)/approvals', variant: 'wadaApricot' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaOlive' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
           ]
         : [
-            { label: 'Ambil Alih', icon: 'repeat', route: '/(tabs)/takeover' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team' },
-            { label: 'Profil', icon: 'user', route: '/(tabs)/profile' },
+            { label: 'Ambil Alih', icon: 'repeat', route: '/(tabs)/takeover', variant: 'wadaOlive' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaOlive' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
           ];
 
   return (
@@ -262,7 +262,7 @@ export default function HomeScreen() {
               ]}
             >
               <Image
-                source={{ uri: SUNBURST_INK }}
+                source={{ uri: SUNBURST_APRICOT }}
                 resizeMode="contain"
                 style={styles.sunburst}
               />
@@ -310,7 +310,7 @@ export default function HomeScreen() {
             >
               <Plate style={styles.shortcutPlate}>
                 <View style={styles.shortcutInner}>
-                  <MedallionIcon glyph={s.icon} size={44} variant="ink" />
+                  <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
                   <Text style={styles.shortcutLabel}>{s.label}</Text>
                 </View>
               </Plate>
