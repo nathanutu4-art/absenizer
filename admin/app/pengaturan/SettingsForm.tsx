@@ -31,9 +31,15 @@ export default function SettingsForm({ initial }: Props) {
   const [tolerance, setTolerance] = useState(
     initial ? String(initial.late_tolerance_min) : "15"
   );
+  const [cutiQuota, setCutiQuota] = useState(
+    initial?.cuti_quota_default != null ? String(initial.cuti_quota_default) : "12"
+  );
+  const [ijinQuota, setIjinQuota] = useState(
+    initial?.ijin_quota_default != null ? String(initial.ijin_quota_default) : "12"
+  );
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{
-    kind: "ok" | "error";
+    kind: "ok" | "error" | "warning";
     text: string;
   } | null>(null);
 
@@ -61,6 +67,10 @@ export default function SettingsForm({ initial }: Props) {
       is_active: true,
       updated_at: new Date().toISOString(),
     };
+    const quotaPayload = {
+      cuti_quota_default: Number(cutiQuota),
+      ijin_quota_default: Number(ijinQuota),
+    };
 
     if (
       !payload.office_name ||
@@ -74,18 +84,56 @@ export default function SettingsForm({ initial }: Props) {
       setSaving(false);
       return;
     }
+    if (
+      !Number.isInteger(quotaPayload.cuti_quota_default) ||
+      quotaPayload.cuti_quota_default < 0 ||
+      !Number.isInteger(quotaPayload.ijin_quota_default) ||
+      quotaPayload.ijin_quota_default < 0
+    ) {
+      setMessage({
+        kind: "error",
+        text: "Kuota cuti/ijin harus bilangan bulat ≥ 0.",
+      });
+      setSaving(false);
+      return;
+    }
 
-    try {
+    /** true bila error menandakan kolom kuota belum ada (migrasi belum jalan). */
+    function isMissingQuotaColumn(err: unknown): boolean {
+      const msg = err instanceof Error ? err.message : String(err);
+      return (
+        msg.includes("42703") ||
+        msg.includes("cuti_quota_default") ||
+        msg.includes("ijin_quota_default")
+      );
+    }
+
+    async function saveRow(row: Record<string, unknown>) {
       const sb = getSupabase();
       if (initial) {
         const { error } = await sb
           .from("company_settings")
-          .update(payload)
+          .update(row)
           .eq("id", initial.id);
         if (error) throw error;
       } else {
-        const { error } = await sb.from("company_settings").insert(payload);
+        const { error } = await sb.from("company_settings").insert(row);
         if (error) throw error;
+      }
+    }
+
+    try {
+      try {
+        await saveRow({ ...payload, ...quotaPayload });
+      } catch (quotaErr) {
+        if (!isMissingQuotaColumn(quotaErr)) throw quotaErr;
+        // Kolom kuota belum ada — simpan sisanya, beri petunjuk migrasi.
+        await saveRow(payload);
+        setMessage({
+          kind: "warning",
+          text: "Pengaturan tersimpan, tetapi kuota cuti/ijin tidak tersimpan: jalankan supabase/migration-quota-defaults.sql di SQL Editor Supabase, lalu simpan lagi.",
+        });
+        return;
       }
       setMessage({ kind: "ok", text: "Pengaturan berhasil disimpan." });
     } catch (err) {
@@ -210,8 +258,48 @@ export default function SettingsForm({ initial }: Props) {
         </div>
       </div>
 
+      <div className="card">
+        <h2>Kuota Cuti & Ijin</h2>
+        <div className="row">
+          <div className="field">
+            <label htmlFor="cuti_quota">Kuota cuti default (hari/tahun)</label>
+            <input
+              id="cuti_quota"
+              type="number"
+              min={0}
+              step={1}
+              value={cutiQuota}
+              onChange={(e) => setCutiQuota(e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="ijin_quota">Kuota ijin default (kali/tahun)</label>
+            <input
+              id="ijin_quota"
+              type="number"
+              min={0}
+              step={1}
+              value={ijinQuota}
+              onChange={(e) => setIjinQuota(e.target.value)}
+            />
+          </div>
+        </div>
+        <p className="hint">
+          Dipakai sebagai kuota awal karyawan baru di aplikasi. Sakit tidak
+          mengurangi kuota.
+        </p>
+      </div>
+
       {message && (
-        <div className={`notice ${message.kind === "ok" ? "ok" : "error"}`}>
+        <div
+          className={`notice ${
+            message.kind === "ok"
+              ? "ok"
+              : message.kind === "warning"
+                ? "warning"
+                : "error"
+          }`}
+        >
           {message.text}
         </div>
       )}
