@@ -11,6 +11,7 @@ import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import { getEmployee, getPicOf } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
+import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
 import { clearSession, getActiveRole, type DemoRole } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -57,7 +58,12 @@ export default function ProfileScreen() {
           <SafeAreaView edges={['top']}>
             <Text style={styles.headerTitle}>Profil</Text>
             <View style={styles.profileRow}>
-              <Avatar gradientId={me.gradientId} name={me.name} size={76} />
+              <View style={styles.avatarFrame}>
+                <Image
+                  source={{ uri: AVATAR_PLACEHOLDER }}
+                  style={styles.avatarImage}
+                />
+              </View>
               <View style={styles.profileText}>
                 <Text style={styles.name}>{me.name}</Text>
                 <Text style={styles.position}>{me.position}</Text>
@@ -147,8 +153,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: serifFamily('800'),
     fontSize: 20,
+    paddingBottom: spacing.sm,
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    paddingTop: spacing.xl + spacing.md,
+  },
+  /** Bingkai foto profil persegi ala bingkai gambar (sama seperti dashboard). */
+  avatarFrame: {
+    backgroundColor: colors.paper2,
+    borderColor: colors.etch,
+    borderWidth: 2,
+    padding: 3,
+  },
+  avatarImage: {
+    borderColor: colors.etch,
+    borderWidth: 1,
+    height: 68,
+    width: 68,
   },
   profileRow: {
     alignItems: 'center',
