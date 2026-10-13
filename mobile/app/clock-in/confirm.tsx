@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from '../../src/components/AppIcon';
 import { StatusChip } from '../../src/components/StatusChip';
 import { ThemedButton } from '../../src/components/ThemedButton';
 import {
@@ -57,7 +58,7 @@ export default function ConfirmScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>‹</Text>
+            <AppIcon color={colors.ink} name="chevron_left" size={22} />
           </TouchableOpacity>
           <Text style={styles.title}>Konfirmasi GPS</Text>
           <View style={styles.backBtn} />
@@ -69,14 +70,15 @@ export default function ConfirmScreen() {
           <View style={styles.geofence} />
           {/* pin kantor */}
           <View style={styles.officePin}>
-            <Text style={styles.pinGlyph}>🏢</Text>
+            <AppIcon color={colors.indigo} name="building" size={24} />
           </View>
           {/* pin pengguna */}
           <View style={[styles.userPin, simFar && styles.userPinFar]}>
             <View style={styles.userDot} />
           </View>
           <View style={styles.gpsChip}>
-            <Text style={styles.gpsChipText}>📡 GPS Akurat • ± 8 m</Text>
+            <AppIcon color={colors.indigo} name="navigation" size={14} style={styles.gpsChipIcon} />
+            <Text style={styles.gpsChipText}>GPS Akurat • ± 8 m</Text>
           </View>
         </View>
 
@@ -102,7 +104,7 @@ export default function ConfirmScreen() {
 
         {/* Kartu kantor */}
         <View style={styles.officeCard}>
-          <Text style={styles.officeGlyph}>📍</Text>
+          <AppIcon color={colors.indigo} name="map_pin" size={28} style={styles.officeGlyphIcon} />
           <View style={styles.officeText}>
             <Text style={styles.officeName}>{OFFICE_NAME}</Text>
             <Text style={styles.officeAddress}>{OFFICE_ADDRESS}</Text>
@@ -209,13 +211,16 @@ const styles = StyleSheet.create({
     width: 24,
   },
   gpsChip: {
+    alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.95)',
     borderRadius: radius.chip,
     bottom: 14,
+    flexDirection: 'row',
     paddingHorizontal: 14,
     paddingVertical: 8,
     position: 'absolute',
   },
+  gpsChipIcon: { marginRight: 6 },
   gpsChipText: {
     color: colors.ink,
     fontFamily: fontFamily('700'),
@@ -250,7 +255,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     padding: spacing.md,
   },
-  officeGlyph: { fontSize: 28, marginRight: 12 },
+  officeGlyphIcon: { marginRight: 12 },
   officeText: { flex: 1 },
   officeName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
   officeAddress: {
