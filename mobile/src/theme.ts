@@ -53,6 +53,14 @@ export const colors = {
   approve: '#14532d',
   reject: '#7f1d1d',
 
+  // --- Sanzo Wada Dictionary of Color Combinations No. 211 ---
+  /** Deep Indigo */
+  wadaIndigo: '#051230',
+  /** Apricot Orange */
+  wadaApricot: '#f68c50',
+  /** Olive Yellow */
+  wadaOlive: '#a6a159',
+
   // --- Gradasi clock-out ---
   clockOutFrom: '#f59e0b',
   clockOutTo: '#d97706',
