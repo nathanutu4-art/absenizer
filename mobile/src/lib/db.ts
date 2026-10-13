@@ -410,12 +410,12 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
 // ---------------------------------------------------------------------------
 
 /**
- * Resize foto selfie (maks lebar 800px, JPEG 0.7) lalu upload ke bucket
- * "selfies" di path `<employeeId>/<YYYY-MM-DD>_<kind>.jpg`.
+ * Upload foto selfie ke bucket "selfies" di path
+ * `<employeeId>/<YYYY-MM-DD>_<kind>.jpg`.
+ * (Resize dinonaktifkan sementara — expo-image-manipulator dicurigai
+ * menyebabkan crash; foto diupload apa adanya dari kamera quality 0.7.)
  * Mengembalikan storage path bila sukses, null bila gagal (bucket belum
  * ada, jaringan, dsb.) — tidak pernah melempar error.
- * expo-image-manipulator dimuat malas agar modul native tak tersentuh
- * saat aplikasi dibuka (hanya dipakai di alur clock-in).
  */
 export async function uploadSelfie(
   localUri: string,
@@ -424,13 +424,7 @@ export async function uploadSelfie(
 ): Promise<string | null> {
   if (!isSupabaseConfigured() || !localUri || !employeeId) return null;
   try {
-    const { manipulateAsync, SaveFormat } = await import('expo-image-manipulator');
-    const resized = await manipulateAsync(
-      localUri,
-      [{ resize: { width: 800 } }],
-      { compress: 0.7, format: SaveFormat.JPEG },
-    );
-    const res = await fetch(resized.uri);
+    const res = await fetch(localUri);
     const blob = await res.blob();
     const path = `${employeeId}/${jakartaToday()}_${kind}.jpg`;
     const { error } = await supabase.storage
