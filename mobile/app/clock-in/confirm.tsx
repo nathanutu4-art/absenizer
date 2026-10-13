@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Switch,
@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Location from 'expo-location';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
@@ -15,21 +16,77 @@ import { StampChip } from '../../src/components/StampChip';
 import {
   GEOFENCE_M,
   OFFICE_ADDRESS,
+  OFFICE_COORD,
   OFFICE_NAME,
 } from '../../src/data/demo';
 import { recordClockIn } from '../../src/lib/clockState';
+import { distanceMeters, isInsideGeofence } from '../../src/lib/geo';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
+/** Format jarak: "850 m" atau "1,4 km". */
+function formatDistance(meters: number): string {
+  if (meters >= 1000) {
+    return `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
+  }
+  return `${Math.round(meters)} m`;
+}
+
 /**
- * Konfirmasi GPS — peta simulasi (styled view): pin kantor + pin pengguna +
- * lingkaran geofence putus-putus. Di luar area TETAP DITERIMA + penanda oranye.
+ * Konfirmasi GPS — lokasi asli perangkat (expo-location) dihitung terhadap
+ * titik kantor. Peta tetap ilustrasi gaya ukiran. Toggle "di luar area"
+ * memaksa skenario demo. Di luar area TETAP DITERIMA + penanda oranye.
  */
 export default function ConfirmScreen() {
   const { simFace } = useLocalSearchParams<{ simFace?: string }>();
   const [simFar, setSimFar] = useState(false);
+  const [coords, setCoords] =
+    useState<Pick<Location.LocationObjectCoords, 'latitude' | 'longitude' | 'accuracy'> | null>(null);
+  const [locDenied, setLocDenied] = useState(false);
 
-  const distanceLabel = simFar ? '1,4 km' : '120 m';
-  const areaLabel = simFar ? 'Di Luar Area' : 'Di Dalam Area';
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (!alive) return;
+      if (status !== 'granted') {
+        setLocDenied(true);
+        return;
+      }
+      try {
+        const pos = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        if (alive) {
+          setCoords({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+          });
+        }
+      } catch {
+        if (alive) setLocDenied(true);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const realDist = coords ? distanceMeters(coords, OFFICE_COORD) : null;
+  const realInside = coords ? isInsideGeofence(coords, OFFICE_COORD, GEOFENCE_M) : null;
+  // Toggle simulasi menimpa hasil GPS asli (untuk demo).
+  const isFar = simFar || (realInside === false);
+  const distanceLabel = simFar
+    ? '1,4 km'
+    : realDist == null
+      ? '…'
+      : formatDistance(realDist);
+  const areaLabel = isFar ? 'Di Luar Area' : 'Di Dalam Area';
+  const gpsLabel = locDenied
+    ? 'GPS ditolak — pakai simulasi'
+    : coords
+      ? `GPS ±${Math.round(coords.accuracy ?? 0)} m`
+      : 'Mencari GPS…';
 
   function handleConfirm() {
     const now = new Intl.DateTimeFormat('id-ID', {
@@ -41,7 +98,7 @@ export default function ConfirmScreen() {
       .replace(':', '.');
     const flags: string[] = [];
     if (simFace) flags.push('Wajah Tidak Cocok');
-    if (simFar) flags.push('Di Luar Area');
+    if (isFar) flags.push('Di Luar Area');
     recordClockIn(now, flags);
     router.push({
       pathname: '/clock-in/success',
@@ -49,7 +106,7 @@ export default function ConfirmScreen() {
         time: now,
         distance: distanceLabel,
         ...(simFace ? { simFace: '1' } : {}),
-        ...(simFar ? { simFar: '1' } : {}),
+        ...(isFar ? { simFar: '1' } : {}),
       },
     });
   }
@@ -78,12 +135,12 @@ export default function ConfirmScreen() {
               <MedallionIcon glyph="building" size={46} variant="wadaIndigo" />
             </View>
             {/* pin pengguna */}
-            <View style={[styles.userPin, simFar && styles.userPinFar]}>
+            <View style={[styles.userPin, isFar && styles.userPinFar]}>
               <View style={styles.userDot} />
             </View>
             <View style={styles.gpsChipWrap}>
               <StampChip color={colors.green} backgroundColor={colors.greenBg}>
-                GPS Akurat ±8 m
+                {gpsLabel}
               </StampChip>
             </View>
           </View>
@@ -102,7 +159,7 @@ export default function ConfirmScreen() {
               <Text
                 style={[
                   styles.statValue,
-                  simFar ? { color: colors.orange } : { color: colors.green },
+                  isFar ? { color: colors.orange } : { color: colors.green },
                 ]}
               >
                 {areaLabel}
@@ -122,6 +179,11 @@ export default function ConfirmScreen() {
               <Text style={styles.officeMeta}>
                 Geofence {GEOFENCE_M.toLocaleString('id-ID')} m
               </Text>
+              {coords && (
+                <Text style={styles.officeMeta}>
+                  {coords.latitude.toFixed(4)}, {coords.longitude.toFixed(4)}
+                </Text>
+              )}
             </View>
           </View>
         </Plate>
