@@ -46,6 +46,8 @@ export interface Employee {
   role: DemoRole;
   /** Id PIC dari DB (opsional). */
   picId?: string;
+  /** URL foto profil dari DB (opsional). */
+  photoUrl?: string;
 }
 
 export const EMPLOYEES: Employee[] = [
