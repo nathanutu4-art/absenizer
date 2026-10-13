@@ -105,7 +105,7 @@ export default function ProfileScreen() {
                   style={styles.picBtn}
                 >
                   <View style={styles.picBtnLabel}>
-                    <AppIcon color={colors.etch} name="phone" size={16} />
+                    <AppIcon color={colors.wadaIndigo} name="phone" size={16} />
                     <Text style={styles.picBtnText}>Hubungi PIC</Text>
                   </View>
                 </PlateButton>
@@ -115,7 +115,7 @@ export default function ProfileScreen() {
                   style={styles.picBtn}
                 >
                   <View style={styles.picBtnLabel}>
-                    <AppIcon color={colors.etch} name="message_circle" size={16} />
+                    <AppIcon color={colors.wadaIndigo} name="message_circle" size={16} />
                     <Text style={styles.picBtnText}>Kirim Pesan</Text>
                   </View>
                 </PlateButton>
