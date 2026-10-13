@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
@@ -12,7 +12,9 @@ import { showToast } from '../../src/components/Toast';
 import { getEmployee, getPicOf } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
 import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
-import { clearSession, getActiveRole, type DemoRole } from '../../src/lib/session';
+import { clearSession, getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
+import { isSupabaseConfigured } from '../../src/lib/db';
+import { supabase } from '../../src/lib/supabase';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const ROLE_EMPLOYEE: Record<DemoRole, string> = {
@@ -21,12 +23,18 @@ const ROLE_EMPLOYEE: Record<DemoRole, string> = {
   hr: 'sari',
 };
 
-/** Profil — data diri + kartu PIC + keluar. */
+/** Profil — data diri + kartu PIC + ganti kata sandi + keluar. */
 export default function ProfileScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
+  const [isDemo, setIsDemo] = useState(true);
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [pwBusy, setPwBusy] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   useEffect(() => {
     getActiveRole().then(setRole);
+    getSession().then((s) => setIsDemo(s?.demo !== false));
   }, []);
 
   const me = getEmployee(ROLE_EMPLOYEE[role]);
@@ -44,6 +52,33 @@ export default function ProfileScreen() {
   async function handleLogout() {
     await clearSession();
     router.replace('/login');
+  }
+
+  async function handleChangePassword() {
+    setPwMsg(null);
+    if (newPass.length < 6) {
+      setPwMsg({ ok: false, text: 'Kata sandi minimal 6 karakter.' });
+      return;
+    }
+    if (newPass !== confirmPass) {
+      setPwMsg({ ok: false, text: 'Konfirmasi kata sandi tidak sama.' });
+      return;
+    }
+    setPwBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPass });
+      if (error) throw error;
+      setNewPass('');
+      setConfirmPass('');
+      setPwMsg({ ok: true, text: 'Kata sandi berhasil diubah.' });
+    } catch (e) {
+      setPwMsg({
+        ok: false,
+        text: e instanceof Error ? e.message : 'Gagal mengubah kata sandi.',
+      });
+    } finally {
+      setPwBusy(false);
+    }
   }
 
   return (
@@ -129,6 +164,63 @@ export default function ProfileScreen() {
             </View>
           </Plate>
 
+          <Plate style={styles.picWrap}>
+            <View style={styles.picInner}>
+              <View style={styles.sectionHead}>
+                <Text style={styles.cardTitle}>Ganti Kata Sandi</Text>
+                <View style={styles.ruleThick} />
+                <View style={styles.ruleThin} />
+              </View>
+              {isDemo || !isSupabaseConfigured() ? (
+                <Text style={styles.pwNote}>
+                  Mode demo — kata sandi hanya dapat diubah pada akun asli.
+                </Text>
+              ) : (
+                <View>
+                  <TextInput
+                    onChangeText={(t) => {
+                      setNewPass(t);
+                      setPwMsg(null);
+                    }}
+                    placeholder="Kata sandi baru (min. 6 karakter)"
+                    placeholderTextColor={colors.ink3}
+                    secureTextEntry
+                    style={styles.pwInput}
+                    value={newPass}
+                  />
+                  <TextInput
+                    onChangeText={(t) => {
+                      setConfirmPass(t);
+                      setPwMsg(null);
+                    }}
+                    placeholder="Ulangi kata sandi baru"
+                    placeholderTextColor={colors.ink3}
+                    secureTextEntry
+                    style={styles.pwInput}
+                    value={confirmPass}
+                  />
+                  {pwMsg && (
+                    <Text
+                      style={[
+                        styles.pwMsg,
+                        { color: pwMsg.ok ? colors.green : colors.red },
+                      ]}
+                    >
+                      {pwMsg.text}
+                    </Text>
+                  )}
+                  <PlateButton
+                    onPress={handleChangePassword}
+                    variant="primary"
+                    style={styles.pwBtn}
+                  >
+                    {pwBusy ? 'Menyimpan…' : 'Simpan Kata Sandi'}
+                  </PlateButton>
+                </View>
+              )}
+            </View>
+          </Plate>
+
           <PlateButton
             onPress={handleLogout}
             variant="danger"
@@ -202,6 +294,29 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   picWrap: { marginTop: spacing.sm },
+  pwInput: {
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    fontFamily: fontFamily('500'),
+    fontSize: 14,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  pwMsg: {
+    fontFamily: fontFamily('600'),
+    fontSize: 13,
+    marginTop: spacing.sm,
+  },
+  pwBtn: { marginTop: spacing.md },
+  pwNote: {
+    color: colors.ink2,
+    fontFamily: fontFamily('500'),
+    fontSize: 13,
+    marginTop: spacing.xs,
+  },
   picInner: { padding: spacing.lg },
   sectionHead: { marginBottom: spacing.sm },
   cardTitle: {
