@@ -31,6 +31,9 @@ export interface CompanySettings {
   late_tolerance_min: number;
   is_active: boolean;
   updated_at: string;
+  /** Kolom dari migration-quota-defaults.sql; null bila migrasi belum jalan. */
+  cuti_quota_default: number | null;
+  ijin_quota_default: number | null;
 }
 
 export type LeaveType = "cuti" | "ijin" | "sakit";
