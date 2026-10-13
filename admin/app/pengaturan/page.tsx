@@ -30,7 +30,7 @@ export default async function PengaturanPage() {
     <>
       <div className="page-head">
         <h1>Pengaturan Perusahaan</h1>
-        <p>Satu baris pengaturan aktif: titik kantor, geofence, dan jam kerja.</p>
+        <p>Satu baris pengaturan aktif: titik kantor, geofence, jam kerja, dan kuota cuti/ijin.</p>
       </div>
 
       {error && (
