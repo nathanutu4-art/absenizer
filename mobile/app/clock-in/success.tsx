@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Plate } from '../../src/components/Plate';
@@ -8,6 +8,7 @@ import { PlateButton } from '../../src/components/PlateButton';
 import { StampChip } from '../../src/components/StampChip';
 import { getEmployee } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
+import { getSelfiePhoto } from '../../src/lib/selfiePhoto';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const ROLE_EMPLOYEE: Record<DemoRole, string> = {
@@ -27,9 +28,11 @@ export default function SuccessScreen() {
     simFar?: string;
   }>();
   const [name, setName] = useState('—');
+  const [photo, setPhoto] = useState<string | null>(null);
 
   useEffect(() => {
     getActiveRole().then((role) => setName(getEmployee(ROLE_EMPLOYEE[role]).name));
+    setPhoto(getSelfiePhoto());
   }, []);
 
   const flags: string[] = [];
@@ -60,6 +63,11 @@ export default function SuccessScreen() {
           </View>
         </View>
         <Text style={styles.title}>Clock In Berhasil</Text>
+        {photo && (
+          <View style={styles.photoWrap}>
+            <Image source={{ uri: photo }} style={styles.photo} />
+          </View>
+        )}
         <Text style={styles.timestamp}>
           {time ?? '--.--'} WIB • {todayLong()}
         </Text>
@@ -168,6 +176,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 6,
     textAlign: 'center',
+  },
+  photoWrap: {
+    alignItems: 'center',
+    marginTop: spacing.md,
+  },
+  photo: {
+    borderColor: colors.etch,
+    borderWidth: 2,
+    height: 120,
+    width: 120,
   },
   flagRow: {
     flexDirection: 'row',
