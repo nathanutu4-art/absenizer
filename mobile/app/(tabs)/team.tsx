@@ -15,6 +15,7 @@ import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StampChip } from '../../src/components/StampChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
 import { getAwayEmployees, getEmployees, type AwayEmployee } from '../../src/lib/db';
+import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_LABEL: Record<Employee['status'], string> = {
@@ -105,10 +106,15 @@ export default function TeamScreen() {
   const birthdays = useMemo(() => birthdaysThisMonth(directorySrc), [directorySrc]);
 
   // "Sedang Tidak Masuk" dari data real (pengajuan disetujui yang mencakup
-  // hari ini). null = DB tak terjangkau → pakai demo; [] = sembunyikan seksi.
+  // hari ini). Sesi demo: pakai demo bila DB tak terjangkau. Sesi real:
+  // tampilkan hanya bila daftar tak kosong — tak pernah data demo.
+  const [isDemo, setIsDemo] = useState<boolean | null>(null);
   const [awayDb, setAwayDb] = useState<AwayEmployee[] | null>(null);
   useEffect(() => {
     let alive = true;
+    getSession().then((s) => {
+      if (alive) setIsDemo(s?.demo !== false);
+    });
     getAwayEmployees().then((list) => {
       if (alive) setAwayDb(list);
     });
@@ -117,13 +123,19 @@ export default function TeamScreen() {
     };
   }, []);
   const awayItems: { id: string; name: string; status: Employee['status'] }[] =
-    awayDb === null
-      ? EMPLOYEES.filter((e) => e.status !== 'hadir').map((e) => ({
-          id: e.id,
-          name: e.name,
-          status: e.status,
-        }))
-      : awayDb.map((a) => ({ id: a.employeeId, name: a.name, status: a.type }));
+    isDemo === null
+      ? []
+      : isDemo && awayDb === null
+        ? EMPLOYEES.filter((e) => e.status !== 'hadir').map((e) => ({
+            id: e.id,
+            name: e.name,
+            status: e.status,
+          }))
+        : (awayDb ?? []).map((a) => ({
+            id: a.employeeId,
+            name: a.name,
+            status: a.type,
+          }));
   const directory = directorySrc.filter((e) =>
     e.name.toLowerCase().includes(query.toLowerCase()),
   );
