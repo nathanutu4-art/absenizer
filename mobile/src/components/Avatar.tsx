@@ -33,9 +33,11 @@ interface Props {
   gradientId?: AvatarGradientId;
   /**
    * Warna ring status (halaman Tim): merah = sakit, biru = cuti,
-   * kuning = ijin. Tanpa ring bila tidak diisi.
+   * kuning = ijin. Tanpa ring bila tidak diisi. Hanya untuk lingkaran.
    */
   statusRing?: 'sakit' | 'cuti' | 'ijin';
+  /** 'circle' (default) atau 'square' ala bingkai foto. */
+  shape?: 'circle' | 'square';
 }
 
 const RING_COLORS = {
@@ -51,31 +53,42 @@ function initials(name: string): string {
   return (first + last).toUpperCase();
 }
 
-/** Avatar lingkaran: inisial di atas gradasi dua-stop + opsional ring status. */
-export function Avatar({ name, size = 48, gradientId, statusRing }: Props) {
-  const circleStyle = {
+/** Avatar: lingkaran inisial di atas gradasi, atau bingkai foto persegi. */
+export function Avatar({ name, size = 48, gradientId, statusRing, shape = 'circle' }: Props) {
+  const radius = shape === 'circle' ? size / 2 : 0;
+  const boxStyle = {
     width: size,
     height: size,
-    borderRadius: size / 2,
+    borderRadius: radius,
   };
   const content = (
     <Text style={[styles.text, { fontSize: size * 0.36 }]}>{initials(name)}</Text>
   );
 
-  const circle = gradientId ? (
+  const body = gradientId ? (
     <ImageBackground
-      imageStyle={{ borderRadius: size / 2 }}
+      imageStyle={{ borderRadius: radius }}
       resizeMode="stretch"
       source={AVATAR_GRADIENTS[gradientId]}
-      style={[styles.circle, circleStyle]}
+      style={[styles.box, boxStyle]}
     >
       {content}
     </ImageBackground>
   ) : (
-    <View style={[styles.circle, circleStyle, styles.fallback]}>{content}</View>
+    <View style={[styles.box, boxStyle, styles.fallback]}>{content}</View>
   );
 
-  if (!statusRing) return circle;
+  if (shape === 'square') {
+    return (
+      <View style={styles.frame}>
+        <View style={[styles.frameInner, { width: size, height: size }]}>
+          {body}
+        </View>
+      </View>
+    );
+  }
+
+  if (!statusRing) return body;
 
   return (
     <View
@@ -86,15 +99,27 @@ export function Avatar({ name, size = 48, gradientId, statusRing }: Props) {
         padding: 2,
       }}
     >
-      {circle}
+      {body}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  circle: {
+  box: {
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  /** Bingkai foto persegi ganda, seperti bingkai gambar. */
+  frame: {
+    backgroundColor: colors.paper2,
+    borderColor: colors.etch,
+    borderWidth: 2,
+    padding: 3,
+  },
+  frameInner: {
+    borderColor: colors.etch,
+    borderWidth: 1,
     overflow: 'hidden',
   },
   fallback: { backgroundColor: colors.blueBg },
