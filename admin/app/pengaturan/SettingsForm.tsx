@@ -37,6 +37,23 @@ export default function SettingsForm({ initial }: Props) {
   const [ijinQuota, setIjinQuota] = useState(
     initial?.ijin_quota_default != null ? String(initial.ijin_quota_default) : "12"
   );
+  const DEFAULT_PALETTE = {
+    name: "Wada No. 211 — Indigo",
+    indigo: "#051230",
+    apricot: "#f68c50",
+    olive: "#a6a159",
+  };
+  const PALETTES = [
+    DEFAULT_PALETTE,
+    { name: "Wada No. 144 — Signal", indigo: "#111314", apricot: "#f37420", olive: "#b73f74" },
+    { name: "Terracotta", indigo: "#3d1d0e", apricot: "#c96f4a", olive: "#d9a441" },
+    { name: "Hutan", indigo: "#12261c", apricot: "#6a9f7b", olive: "#c9a227" },
+    { name: "Samudra", indigo: "#0b2545", apricot: "#2ca6a4", olive: "#e9c46a" },
+    { name: "Anggrek", indigo: "#2d1b2e", apricot: "#9b5de5", olive: "#e0a458" },
+  ];
+  const [palette, setPalette] = useState(
+    initial?.theme_palette ?? DEFAULT_PALETTE
+  );
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{
     kind: "ok" | "error" | "warning";
@@ -71,6 +88,7 @@ export default function SettingsForm({ initial }: Props) {
       cuti_quota_default: Number(cutiQuota),
       ijin_quota_default: Number(ijinQuota),
     };
+    const palettePayload = { theme_palette: palette };
 
     if (
       !payload.office_name ||
@@ -108,6 +126,12 @@ export default function SettingsForm({ initial }: Props) {
       );
     }
 
+    /** true bila error menandakan kolom theme_palette belum ada. */
+    function isMissingPaletteColumn(err: unknown): boolean {
+      const msg = err instanceof Error ? err.message : String(err);
+      return msg.includes("42703") || msg.includes("theme_palette");
+    }
+
     async function saveRow(row: Record<string, unknown>) {
       const sb = getSupabase();
       if (initial) {
@@ -124,14 +148,24 @@ export default function SettingsForm({ initial }: Props) {
 
     try {
       try {
-        await saveRow({ ...payload, ...quotaPayload });
+        await saveRow({ ...payload, ...quotaPayload, ...palettePayload });
       } catch (quotaErr) {
-        if (!isMissingQuotaColumn(quotaErr)) throw quotaErr;
-        // Kolom kuota belum ada — simpan sisanya, beri petunjuk migrasi.
-        await saveRow(payload);
+        if (!isMissingQuotaColumn(quotaErr) && !isMissingPaletteColumn(quotaErr))
+          throw quotaErr;
+        // Kolom kuota/palet belum ada — simpan sisanya, beri petunjuk migrasi.
+        const missing: string[] = [];
+        if (isMissingQuotaColumn(quotaErr))
+          missing.push("supabase/migration-quota-defaults.sql");
+        if (isMissingPaletteColumn(quotaErr))
+          missing.push("supabase/migration-theme-palette.sql");
+        try {
+          await saveRow(payload);
+        } catch {
+          /* abaikan */
+        }
         setMessage({
           kind: "warning",
-          text: "Pengaturan tersimpan, tetapi kuota cuti/ijin tidak tersimpan: jalankan supabase/migration-quota-defaults.sql di SQL Editor Supabase, lalu simpan lagi.",
+          text: `Pengaturan tersimpan, tetapi sebagian tidak tersimpan: jalankan ${missing.join(" dan ")} di SQL Editor Supabase, lalu simpan lagi.`,
         });
         return;
       }
@@ -288,6 +322,138 @@ export default function SettingsForm({ initial }: Props) {
           Dipakai sebagai kuota awal karyawan baru di aplikasi. Sakit tidak
           mengurangi kuota.
         </p>
+      </div>
+
+      <div className="card">
+        <h2>Palet Warna Aplikasi</h2>
+        <p className="hint">
+          Trio warna Sanzo Wada untuk aplikasi mobile: primer (header & hero),
+          aksen (tombol & tab aktif), sekunder. Berlaku setelah aplikasi dibuka
+          ulang.
+        </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+            gap: 10,
+            marginTop: 10,
+          }}
+        >
+          {PALETTES.map((p) => {
+            const active =
+              palette.indigo.toLowerCase() === p.indigo.toLowerCase() &&
+              palette.apricot.toLowerCase() === p.apricot.toLowerCase() &&
+              palette.olive.toLowerCase() === p.olive.toLowerCase();
+            return (
+              <button
+                key={p.name}
+                type="button"
+                onClick={() => setPalette({ ...p })}
+                style={{
+                  border: active ? "2px solid #1c2733" : "1px solid #c9bfa3",
+                  borderRadius: 6,
+                  padding: 10,
+                  background: "#fffdf4",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                  {[p.indigo, p.apricot, p.olive].map((c) => (
+                    <span
+                      key={c}
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 4,
+                        background: c,
+                        border: "1px solid #1c2733",
+                        display: "inline-block",
+                      }}
+                    />
+                  ))}
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 600 }}>{p.name}</div>
+                {active && (
+                  <div style={{ fontSize: 12, color: "#16a34a" }}>
+                    ✓ Terpilih
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <div className="row" style={{ marginTop: 12 }}>
+          <div className="field">
+            <label htmlFor="pal_indigo">Primer (header)</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                id="pal_indigo"
+                type="color"
+                value={palette.indigo}
+                onChange={(e) =>
+                  setPalette({ ...palette, name: "Kustom", indigo: e.target.value })
+                }
+                style={{ width: 44, height: 34, padding: 2 }}
+              />
+              <input
+                type="text"
+                value={palette.indigo}
+                onChange={(e) =>
+                  setPalette({ ...palette, name: "Kustom", indigo: e.target.value })
+                }
+                placeholder="#051230"
+                style={{ width: 90 }}
+              />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="pal_apricot">Aksen (tombol)</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                id="pal_apricot"
+                type="color"
+                value={palette.apricot}
+                onChange={(e) =>
+                  setPalette({ ...palette, name: "Kustom", apricot: e.target.value })
+                }
+                style={{ width: 44, height: 34, padding: 2 }}
+              />
+              <input
+                type="text"
+                value={palette.apricot}
+                onChange={(e) =>
+                  setPalette({ ...palette, name: "Kustom", apricot: e.target.value })
+                }
+                placeholder="#f68c50"
+                style={{ width: 90 }}
+              />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="pal_olive">Sekunder</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                id="pal_olive"
+                type="color"
+                value={palette.olive}
+                onChange={(e) =>
+                  setPalette({ ...palette, name: "Kustom", olive: e.target.value })
+                }
+                style={{ width: 44, height: 34, padding: 2 }}
+              />
+              <input
+                type="text"
+                value={palette.olive}
+                onChange={(e) =>
+                  setPalette({ ...palette, name: "Kustom", olive: e.target.value })
+                }
+                placeholder="#a6a159"
+                style={{ width: 90 }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {message && (
