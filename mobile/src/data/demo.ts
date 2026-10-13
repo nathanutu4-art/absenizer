@@ -18,6 +18,11 @@ export const WORK_START = '08.00';
 export const WORK_END = '17.00';
 export const LATE_TOLERANCE_MIN = 15;
 export const GEOFENCE_M = 1000;
+/**
+ * Titik kantor untuk validasi geofence (bisa diubah HR).
+ * Default: pusat Kota Kendari (perkiraan).
+ */
+export const OFFICE_COORD = { latitude: -3.9984, longitude: 122.5187 };
 
 // ---------------------------------------------------------------------------
 // Karyawan
