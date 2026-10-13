@@ -8,6 +8,7 @@ import { PlateButton } from '../../src/components/PlateButton';
 import { StampChip } from '../../src/components/StampChip';
 import { getEmployee } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
+import { getMyEmployee } from '../../src/lib/db';
 import { getSelfiePhoto } from '../../src/lib/selfiePhoto';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -30,7 +31,16 @@ export default function SuccessScreen() {
   const [photo, setPhoto] = useState<string | null>(null);
 
   useEffect(() => {
-    getActiveRole().then((role) => setName(getEmployee(ROLE_EMPLOYEE[role]).name));
+    (async () => {
+      // Nama pengguna yang login (data real); fallback ke demo bila sesi demo.
+      const me = await getMyEmployee();
+      if (me) {
+        setName(me.name);
+      } else {
+        const role = await getActiveRole();
+        setName(getEmployee(ROLE_EMPLOYEE[role]).name);
+      }
+    })();
     setPhoto(getSelfiePhoto());
   }, []);
 
