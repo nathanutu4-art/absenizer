@@ -105,7 +105,7 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
           <Plate style={styles.auditPlate}>
             <View style={styles.platePad}>
               <View style={styles.auditRow}>
-              <MedallionIcon glyph="shield" size={48} />
+              <MedallionIcon glyph="shield" size={48} variant="wadaIndigo" />
                 <View style={styles.auditText}>
                   <StampChip color={colors.orange} backgroundColor={colors.orangeBg}>
                     Audit
@@ -170,7 +170,7 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
                 onPress={() => showToast('Membuka lampiran…')}
                 style={styles.attachBox}
               >
-                <MedallionIcon glyph="file_text" size={40} />
+                <MedallionIcon glyph="file_text" size={40} variant="wadaIndigo" />
                 <Text style={styles.attachName}>{request.attachment}</Text>
               </TouchableOpacity>
             </View>
