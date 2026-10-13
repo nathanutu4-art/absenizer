@@ -4,11 +4,13 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GradientView } from '../src/components/GradientView';
 import { ILLUSTRATION_OPENING } from '../src/data/illustrations-opening';
-import { colors, fontFamily, radius, spacing } from '../src/theme';
+import { LOGO_MARK } from '../src/data/logo-mark';
+import { fontFamily, radius, spacing } from '../src/theme';
 
 /**
- * Opening — hero gradasi biru + ilustrasi pekerja (bentuk sederhana) +
- * bottom sheet putih berisi headline dan CTA "Masuk".
+ * Opening — editorial gelap yang artsy: ilustrasi ukiran vintage
+ * (disamakan dengan gaya logo) di atas bingkai indigo, headline putih,
+ * dan CTA putih. Palet tetap: navy/indigo/putih.
  */
 export default function OpeningScreen() {
   return (
@@ -16,44 +18,44 @@ export default function OpeningScreen() {
       <SafeAreaView style={styles.safe}>
         {/* Brand */}
         <View style={styles.brandRow}>
-          <View style={styles.brandBadge}>
-            <Text style={styles.brandBadgeText}>A</Text>
-          </View>
+          <Image source={{ uri: LOGO_MARK }} style={styles.brandBadge} />
           <Text style={styles.brandText}>AbsensiKu</Text>
         </View>
 
-        {/* Ilustrasi pekerja kantor */}
-        <Image
-          resizeMode="contain"
-          source={{ uri: ILLUSTRATION_OPENING }}
-          style={styles.illustrationImage}
-        />
+        {/* Ilustrasi ukiran */}
+        <View style={styles.artWrap}>
+          <Image
+            resizeMode="cover"
+            source={{ uri: ILLUSTRATION_OPENING }}
+            style={styles.art}
+          />
+        </View>
 
-        {/* Bottom sheet */}
-        <View style={styles.sheet}>
-          <View style={styles.dots}>
-            <View style={[styles.dot, styles.dotActive]} />
-            <View style={styles.dot} />
-            <View style={styles.dot} />
-          </View>
+        {/* Kop editorial */}
+        <View style={styles.copy}>
+          <Text style={styles.kicker}>Absensi Karyawan</Text>
           <Text style={styles.headline}>Absen Mudah dari Mana Saja</Text>
           <Text style={styles.sub}>
             Clock in dengan verifikasi wajah, pantau kehadiran tim, dan ajukan
             cuti — semua dalam satu aplikasi.
           </Text>
+        </View>
+
+        {/* CTA + indikator */}
+        <View style={styles.footer}>
           <TouchableOpacity
             accessibilityRole="button"
             activeOpacity={0.85}
             onPress={() => router.push('/login')}
+            style={styles.cta}
           >
-            <GradientView
-              imageStyle={{ borderRadius: radius.button }}
-              kind="primary"
-              style={styles.cta}
-            >
-              <Text style={styles.ctaText}>Masuk →</Text>
-            </GradientView>
+            <Text style={styles.ctaText}>Masuk →</Text>
           </TouchableOpacity>
+          <View style={styles.dots}>
+            <View style={[styles.dot, styles.dotActive]} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+          </View>
         </View>
       </SafeAreaView>
     </GradientView>
@@ -70,174 +72,73 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   brandBadge: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.22)',
     borderRadius: 12,
     height: 40,
-    justifyContent: 'center',
     width: 40,
   },
-  brandBadgeText: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 20 },
   brandText: {
     color: '#fff',
     fontFamily: fontFamily('800'),
     fontSize: 20,
     marginLeft: 10,
   },
-  illustrationImage: { height: 300, width: '100%' },
-  illustration: { flex: 1, marginHorizontal: spacing.lg },
-  sun: {
-    backgroundColor: 'rgba(255,255,255,0.35)',
-    borderRadius: 30,
-    height: 60,
-    position: 'absolute',
-    right: 24,
-    top: 8,
-    width: 60,
+  artWrap: {
+    borderRadius: 28,
+    marginHorizontal: spacing.lg,
+    marginTop: spacing.lg,
+    overflow: 'hidden',
   },
-  buildingA: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    bottom: 0,
-    height: 150,
-    left: 8,
-    position: 'absolute',
-    width: 74,
-  },
-  buildingB: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    bottom: 0,
-    height: 110,
-    position: 'absolute',
-    right: 8,
-    width: 60,
-  },
-  person: { bottom: 34, left: '38%', position: 'absolute' },
-  head: {
-    backgroundColor: '#ffd9b3',
-    borderRadius: 22,
-    height: 44,
-    width: 44,
-  },
-  body: {
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    height: 74,
-    marginTop: -6,
-    width: 64,
-  },
-  armLeft: {
-    backgroundColor: '#e8eef5',
-    borderRadius: 10,
-    height: 52,
-    left: -14,
-    position: 'absolute',
-    top: 48,
-    transform: [{ rotate: '18deg' }],
-    width: 20,
-  },
-  armRight: {
-    backgroundColor: '#e8eef5',
-    borderRadius: 10,
-    height: 52,
-    position: 'absolute',
-    right: -14,
-    top: 48,
-    transform: [{ rotate: '-18deg' }],
-    width: 20,
-  },
-  desk: {
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    borderRadius: 8,
-    bottom: 22,
-    height: 14,
-    left: '10%',
-    position: 'absolute',
-    width: '80%',
-  },
-  laptopScreen: {
-    backgroundColor: '#223140',
-    borderRadius: 6,
-    bottom: 36,
-    height: 44,
-    left: '22%',
-    position: 'absolute',
-    width: 66,
-  },
-  laptopBase: {
-    backgroundColor: '#5c7287',
-    borderRadius: 4,
-    bottom: 30,
-    height: 8,
-    left: '18%',
-    position: 'absolute',
-    width: 86,
-  },
-  docOne: {
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 6,
-    height: 40,
-    position: 'absolute',
-    right: '30%',
-    top: 60,
-    transform: [{ rotate: '10deg' }],
-    width: 30,
-  },
-  docTwo: {
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 6,
-    height: 34,
-    left: '20%',
-    position: 'absolute',
-    top: 96,
-    transform: [{ rotate: '-12deg' }],
-    width: 26,
-  },
-  sheet: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingBottom: spacing.xl,
+  art: { height: 300, width: '100%' },
+  copy: {
+    marginTop: spacing.lg,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
   },
+  kicker: {
+    color: '#b8b8ff',
+    fontFamily: fontFamily('700'),
+    fontSize: 12,
+    letterSpacing: 3,
+    textTransform: 'uppercase',
+  },
+  headline: {
+    color: '#fff',
+    fontFamily: fontFamily('800'),
+    fontSize: 32,
+    lineHeight: 38,
+    marginTop: 8,
+  },
+  sub: {
+    color: 'rgba(255,255,255,0.72)',
+    fontFamily: fontFamily('400'),
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 10,
+  },
+  footer: {
+    marginTop: 'auto',
+    paddingBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  cta: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: radius.button,
+    justifyContent: 'center',
+    minHeight: 56,
+  },
+  ctaText: { color: '#0057ba', fontFamily: fontFamily('700'), fontSize: 16 },
   dots: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: spacing.md,
+    marginTop: spacing.md,
   },
   dot: {
-    backgroundColor: colors.line,
+    backgroundColor: 'rgba(255,255,255,0.28)',
     borderRadius: 4,
     height: 8,
     marginHorizontal: 4,
     width: 8,
   },
-  dotActive: { backgroundColor: colors.indigo, width: 24 },
-  headline: {
-    color: colors.ink,
-    fontFamily: fontFamily('800'),
-    fontSize: 25,
-    textAlign: 'center',
-  },
-  sub: {
-    color: colors.ink2,
-    fontFamily: fontFamily('400'),
-    fontSize: 14,
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  cta: {
-    alignItems: 'center',
-    borderRadius: radius.button,
-    justifyContent: 'center',
-    marginTop: spacing.lg,
-    minHeight: 54,
-  },
-  ctaText: { color: '#fff', fontFamily: fontFamily('700'), fontSize: 16 },
+  dotActive: { backgroundColor: '#fff', width: 24 },
 });
