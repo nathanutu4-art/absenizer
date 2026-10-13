@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Avatar } from '../../src/components/Avatar';
+import { AppIcon } from '../../src/components/AppIcon';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StatusChip } from '../../src/components/StatusChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
@@ -112,7 +113,7 @@ export default function TeamScreen() {
               <Text style={styles.ageText}>{b.turningAge} thn</Text>
             </View>
             <Text style={styles.countdown}>
-              {b.daysLeft === 0 ? 'Hari ini! 🎉' : `${b.daysLeft} hari lagi`}
+              {b.daysLeft === 0 ? 'Hari ini!' : `${b.daysLeft} hari lagi`}
             </Text>
           </View>
         ))}
@@ -121,7 +122,7 @@ export default function TeamScreen() {
       {/* Direktori */}
       <Text style={styles.sectionTitle}>Direktori Karyawan</Text>
       <View style={styles.searchRow}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <AppIcon color={colors.ink3} name="search" size={18} style={styles.searchIconImg} />
         <TextInput
           onChangeText={setQuery}
           placeholder="Cari nama karyawan…"
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     paddingHorizontal: 12,
   },
-  searchIcon: { fontSize: 16, marginRight: 8 },
+  searchIconImg: { marginRight: 8 },
   searchInput: {
     color: colors.ink,
     flex: 1,
