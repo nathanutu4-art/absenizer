@@ -13,18 +13,28 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../src/components/AppIcon';
 import { GradientView } from '../src/components/GradientView';
-import { SegmentedControl } from '../src/components/SegmentedControl';
-import { ThemedButton } from '../src/components/ThemedButton';
+import { MedallionIcon } from '../src/components/MedallionIcon';
+import { Plate } from '../src/components/Plate';
+import { PlateButton } from '../src/components/PlateButton';
+import { StampChip } from '../src/components/StampChip';
 import { APP_VERSION, COMPANY_NAME } from '../src/data/demo';
 import { ILLUSTRATION_LOGIN } from '../src/data/illustrations-login';
+import { HATCH_TILE } from '../src/data/medallions';
 import { supabase } from '../src/lib/supabase';
 import { SESSION_KEY, type DemoRole } from '../src/lib/session';
 import { showToast } from '../src/components/Toast';
-import { colors, fontFamily, radius, spacing } from '../src/theme';
+import { colors, fontFamily, serifFamily, spacing } from '../src/theme';
+
+const ROLE_OPTIONS: { value: DemoRole; label: string }[] = [
+  { value: 'karyawan', label: 'Karyawan' },
+  { value: 'pic', label: 'PIC' },
+  { value: 'hr', label: 'HR' },
+];
 
 /**
  * Login — BR-31: email perusahaan + kata sandi. Akun dibuatkan Admin HR.
- * Hero gradasi + ilustrasi meja kantor (bentuk sederhana).
+ * Hero ukiran + ilustrasi meja kantor berbingkai ganda, formulir di
+ * atas plat kertas. Logika auth & mode demo tidak berubah.
  */
 export default function LoginScreen() {
   const [email, setEmail] = useState('nadia.prameswari@perusahaan.co.id');
@@ -95,203 +105,184 @@ export default function LoginScreen() {
   }
 
   return (
-    <GradientView kind="hero" style={styles.root}>
-      <SafeAreaView style={styles.safe}>
+    <View style={styles.root}>
+      {/* Hero ukiran */}
+      <GradientView kind="hero" style={styles.hero}>
+        <Image
+          resizeMode="repeat"
+          source={{ uri: HATCH_TILE }}
+          style={[StyleSheet.absoluteFill, styles.hatch]}
+        />
+        <SafeAreaView edges={['top']} style={styles.safe}>
+          <View style={styles.heroBody}>
+            <MedallionIcon glyph="shield" size={60} variant="cream" />
+            <Text style={styles.title}>Selamat Datang di AbsensiKu</Text>
+            <Text style={styles.subtitle}>
+              Masuk dengan email perusahaan Anda.
+            </Text>
+            <Plate style={styles.frame}>
+              <View style={styles.frameInner}>
+                <Image
+                  resizeMode="cover"
+                  source={{ uri: ILLUSTRATION_LOGIN }}
+                  style={styles.art}
+                />
+              </View>
+            </Plate>
+          </View>
+        </SafeAreaView>
+      </GradientView>
+
+      {/* Formulir di atas kertas */}
+      <View style={styles.sheet}>
+        <View style={styles.ruleThick} />
+        <View style={styles.ruleThin} />
         <ScrollView
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
+          style={styles.scrollView}
         >
-          {/* Ilustrasi meja kantor */}
-          <Image
-            resizeMode="contain"
-            source={{ uri: ILLUSTRATION_LOGIN }}
-            style={styles.illustrationImage}
-          />
+          <Plate style={styles.form}>
+            <View style={styles.formInner}>
+              <Text style={styles.label}>Email perusahaan</Text>
+              <View style={styles.inputRow}>
+                <MedallionIcon glyph="mail" size={32} style={styles.inputIcon} />
+                <TextInput
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  onChangeText={setEmail}
+                  placeholder="nama@perusahaan.co.id"
+                  placeholderTextColor={colors.ink3}
+                  style={styles.input}
+                  value={email}
+                />
+              </View>
 
-          <Text style={styles.title}>Selamat Datang di AbsensiKu</Text>
-          <Text style={styles.subtitle}>
-            Masuk dengan email perusahaan Anda.
-          </Text>
+              <Text style={styles.label}>Kata sandi</Text>
+              <View style={styles.inputRow}>
+                <MedallionIcon glyph="lock" size={32} style={styles.inputIcon} />
+                <TextInput
+                  onChangeText={setPassword}
+                  placeholder="••••••••"
+                  placeholderTextColor={colors.ink3}
+                  secureTextEntry
+                  style={styles.input}
+                  value={password}
+                />
+              </View>
 
-          <View style={styles.card}>
-            <Text style={styles.label}>Email perusahaan</Text>
-            <View style={styles.inputRow}>
-              <AppIcon color={colors.ink3} name="mail" size={18} style={styles.inputIcon} />
-              <TextInput
-                autoCapitalize="none"
-                keyboardType="email-address"
-                onChangeText={setEmail}
-                placeholder="nama@perusahaan.co.id"
-                placeholderTextColor={colors.ink3}
-                style={styles.input}
-                value={email}
-              />
-            </View>
+              <View style={styles.rowBetween}>
+                <TouchableOpacity
+                  onPress={() => setRemember(!remember)}
+                  style={styles.rememberRow}
+                >
+                  <View style={[styles.checkbox, remember && styles.checkboxOn]}>
+                    {remember ? <AppIcon color="#fff" name="check" size={13} /> : null}
+                  </View>
+                  <Text style={styles.rememberText}>Ingat saya</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => showToast('Hubungi Admin HR untuk reset kata sandi.')}>
+                  <Text style={styles.forgot}>Lupa kata sandi?</Text>
+                </TouchableOpacity>
+              </View>
 
-            <Text style={styles.label}>Kata sandi</Text>
-            <View style={styles.inputRow}>
-              <AppIcon color={colors.ink3} name="lock" size={18} style={styles.inputIcon} />
-              <TextInput
-                onChangeText={setPassword}
-                placeholder="••••••••"
-                placeholderTextColor={colors.ink3}
-                secureTextEntry
-                style={styles.input}
-                value={password}
-              />
-            </View>
+              <Text style={styles.label}>Masuk sebagai</Text>
+              <View style={styles.roleRow}>
+                {ROLE_OPTIONS.map((opt) => {
+                  const active = role === opt.value;
+                  return (
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      activeOpacity={0.85}
+                      key={opt.value}
+                      onPress={() => setRole(opt.value)}
+                      style={styles.roleChip}
+                    >
+                      <StampChip
+                        backgroundColor={active ? colors.ink : 'transparent'}
+                        color={active ? colors.surface : colors.ink2}
+                      >
+                        {opt.label}
+                      </StampChip>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
 
-            <View style={styles.rowBetween}>
-              <TouchableOpacity
-                onPress={() => setRemember(!remember)}
-                style={styles.rememberRow}
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+
+              <PlateButton
+                disabled={loading}
+                onPress={handleLogin}
+                style={styles.loginBtn}
+                variant="primary"
               >
-                <View style={[styles.checkbox, remember && styles.checkboxOn]}>
-                  {remember ? <AppIcon color="#fff" name="check" size={13} /> : null}
-                </View>
-                <Text style={styles.rememberText}>Ingat saya</Text>
+                {loading ? 'Memuat…' : 'Masuk'}
+              </PlateButton>
+              <TouchableOpacity
+                disabled={loading}
+                onPress={handleDemoLogin}
+                style={styles.demoLinkWrap}
+              >
+                <Text style={styles.demoLink}>
+                  {loading ? 'Memuat…' : 'Masuk sebagai Demo'}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => showToast('Hubungi Admin HR untuk reset kata sandi.')}>
-                <Text style={styles.forgot}>Lupa kata sandi?</Text>
-              </TouchableOpacity>
+              <Text style={styles.hint}>
+                Belum punya akun? Hubungi Admin HR — akun dibuatkan oleh HR.
+              </Text>
             </View>
-
-            <Text style={styles.label}>Masuk sebagai</Text>
-            <SegmentedControl<DemoRole>
-              onChange={setRole}
-              options={[
-                { value: 'karyawan', label: 'Karyawan' },
-                { value: 'pic', label: 'PIC' },
-                { value: 'hr', label: 'HR' },
-              ]}
-              value={role}
-            />
-
-            {error ? <Text style={styles.error}>{error}</Text> : null}
-
-            <ThemedButton
-              loading={loading}
-              onPress={handleLogin}
-              style={styles.loginBtn}
-              title="Masuk"
-            />
-            <ThemedButton
-              loading={loading}
-              onPress={handleDemoLogin}
-              style={styles.demoBtn}
-              title="Masuk sebagai Demo"
-              variant="outline"
-            />
-            <Text style={styles.hint}>
-              Belum punya akun? Hubungi Admin HR — akun dibuatkan oleh HR.
-            </Text>
-          </View>
+          </Plate>
 
           <Text style={styles.footer}>
             {COMPANY_NAME} • Versi {APP_VERSION}
           </Text>
         </ScrollView>
-      </SafeAreaView>
-    </GradientView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safe: { flex: 1 },
-  scroll: { padding: spacing.lg },
-  illustration: { height: 130, marginBottom: spacing.sm },
-  window: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderRadius: 12,
-    height: 90,
-    left: 10,
-    position: 'absolute',
-    top: 0,
-    width: 110,
+  root: { backgroundColor: colors.indigoDark, flex: 1 },
+  hero: { flexShrink: 0 },
+  hatch: { opacity: 0.07 },
+  safe: { flexShrink: 0 },
+  heroBody: {
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
   },
-  deskTop: {
-    backgroundColor: 'rgba(255,255,255,0.85)',
-    borderRadius: 8,
-    bottom: 18,
-    height: 12,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-  },
-  monitor: {
-    backgroundColor: '#223140',
-    borderRadius: 8,
-    bottom: 30,
-    height: 56,
-    left: '30%',
-    position: 'absolute',
-    width: 84,
-  },
-  monitorStand: {
-    backgroundColor: '#5c7287',
-    bottom: 22,
-    height: 10,
-    left: '42%',
-    position: 'absolute',
-    width: 12,
-  },
-  keyboard: {
-    backgroundColor: 'rgba(255,255,255,0.7)',
-    borderRadius: 5,
-    bottom: 32,
-    height: 10,
-    left: '8%',
-    position: 'absolute',
-    width: 70,
-  },
-  mug: {
-    backgroundColor: '#f59e0b',
-    borderRadius: 8,
-    bottom: 32,
-    height: 26,
-    position: 'absolute',
-    right: '22%',
-    width: 22,
-  },
-  plant: {
-    backgroundColor: '#16a34a',
-    borderRadius: 16,
-    bottom: 44,
-    height: 32,
-    position: 'absolute',
-    right: '6%',
-    width: 32,
-  },
-  plantPot: {
-    backgroundColor: '#ea580c',
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    bottom: 30,
-    height: 18,
-    position: 'absolute',
-    right: '8%',
-    width: 28,
-  },
-  illustrationImage: { height: 170, marginBottom: spacing.sm, width: '100%' },
   title: {
-    color: '#fff',
-    fontFamily: fontFamily('800'),
-    fontSize: 27,
-    marginTop: spacing.sm,
+    color: '#ffffff',
+    fontFamily: serifFamily('800'),
+    fontSize: 24,
+    marginTop: spacing.md,
+    textAlign: 'center',
   },
   subtitle: {
     color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('400'),
     fontSize: 14,
     marginTop: 6,
+    textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: radius.card,
-    marginTop: spacing.lg,
-    padding: spacing.lg,
+  frame: { marginTop: spacing.md, width: '100%' },
+  frameInner: { backgroundColor: colors.paper2, padding: 8 },
+  art: {
+    borderColor: colors.ink,
+    borderRadius: 2,
+    borderWidth: 2,
+    height: 150,
+    width: '100%',
   },
+  sheet: { backgroundColor: colors.bg, flex: 1 },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  scrollView: { flex: 1 },
+  scroll: { padding: spacing.lg },
+  form: { width: '100%' },
+  formInner: { padding: spacing.lg },
   label: {
     color: colors.ink,
     fontFamily: fontFamily('700'),
@@ -301,20 +292,20 @@ const styles = StyleSheet.create({
   },
   inputRow: {
     alignItems: 'center',
-    borderColor: colors.line,
-    borderRadius: radius.input,
-    borderWidth: 1,
+    backgroundColor: colors.surface,
+    borderColor: colors.etch,
+    borderRadius: 3,
+    borderWidth: 1.5,
     flexDirection: 'row',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
   },
   inputIcon: { marginRight: 8 },
-  icon: { fontSize: 16, marginRight: 8 },
   input: {
     color: colors.ink,
     flex: 1,
     fontFamily: fontFamily('400'),
     fontSize: 14,
-    paddingVertical: 13,
+    paddingVertical: 12,
   },
   rowBetween: {
     alignItems: 'center',
@@ -325,15 +316,14 @@ const styles = StyleSheet.create({
   rememberRow: { alignItems: 'center', flexDirection: 'row' },
   checkbox: {
     alignItems: 'center',
-    borderColor: colors.line,
-    borderRadius: 6,
+    borderColor: colors.ink,
+    borderRadius: 2,
     borderWidth: 1.5,
     height: 20,
     justifyContent: 'center',
     width: 20,
   },
-  checkboxOn: { backgroundColor: colors.indigo, borderColor: colors.indigo },
-  checkmark: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  checkboxOn: { backgroundColor: colors.ink },
   rememberText: {
     color: colors.ink2,
     fontFamily: fontFamily('500'),
@@ -341,6 +331,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   forgot: { color: colors.indigo, fontFamily: fontFamily('600'), fontSize: 13 },
+  roleRow: { flexDirection: 'row', marginTop: 2 },
+  roleChip: { marginRight: spacing.sm },
   error: {
     color: colors.red,
     fontFamily: fontFamily('500'),
@@ -348,7 +340,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   loginBtn: { marginTop: spacing.lg },
-  demoBtn: { marginTop: spacing.sm },
+  demoLinkWrap: { alignItems: 'center', marginTop: spacing.md },
+  demoLink: {
+    color: colors.indigo,
+    fontFamily: fontFamily('600'),
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
   hint: {
     color: colors.ink3,
     fontFamily: fontFamily('400'),
@@ -357,7 +355,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footer: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink3,
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: spacing.lg,
