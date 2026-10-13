@@ -1,6 +1,6 @@
 /**
  * Penampung sementara URI foto selfie antar layar clock-in.
- * (Demo — nanti digantikan upload ke backend/CompreFace.)
+ * Diunggah (setelah resize) ke Supabase Storage saat konfirmasi.
  */
 let uri: string | null = null;
 
