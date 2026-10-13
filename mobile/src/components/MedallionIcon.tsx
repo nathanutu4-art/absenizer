@@ -43,9 +43,9 @@ const RINGS: Record<MedallionVariant, string> = {
 const GLYPH_COLORS: Record<MedallionVariant, string> = {
   ink: colors.etch,
   cream: colors.surface,
-  wadaIndigo: colors.surface,
+  wadaIndigo: colors.etch,
   wadaApricot: colors.etch,
-  wadaOlive: colors.surface,
+  wadaOlive: colors.etch,
 };
 
 /**
