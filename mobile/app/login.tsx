@@ -171,7 +171,7 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   keyboardType="email-address"
                   onChangeText={setEmail}
-                  placeholder="nama@perusahaan.co.id"
+                  placeholder="username"
                   placeholderTextColor={colors.ink3}
                   style={styles.input}
                   value={email}
