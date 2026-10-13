@@ -12,8 +12,9 @@ import { showToast } from '../../src/components/Toast';
 import { getEmployee, getPicOf } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
 import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
+import { DUMMY_AVATAR } from '../../src/data/dummy-avatar';
 import { clearSession, getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { isSupabaseConfigured } from '../../src/lib/db';
+import { getMyEmployee, isSupabaseConfigured } from '../../src/lib/db';
 import { supabase } from '../../src/lib/supabase';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -27,6 +28,7 @@ const ROLE_EMPLOYEE: Record<DemoRole, string> = {
 export default function ProfileScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
   const [isDemo, setIsDemo] = useState(true);
+  const [mePhoto, setMePhoto] = useState<string | null>(null);
   const [newPass, setNewPass] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [pwBusy, setPwBusy] = useState(false);
@@ -35,10 +37,22 @@ export default function ProfileScreen() {
   useEffect(() => {
     getActiveRole().then(setRole);
     getSession().then((s) => setIsDemo(s?.demo !== false));
+    let alive = true;
+    getMyEmployee().then((me) => {
+      if (alive && me?.photoUrl) setMePhoto(me.photoUrl);
+    });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const me = getEmployee(ROLE_EMPLOYEE[role]);
   const pic = getPicOf(me);
+  const avatarUri = isDemo
+    ? AVATAR_PLACEHOLDER
+    : mePhoto && /^https?:\/\//i.test(mePhoto)
+      ? mePhoto
+      : DUMMY_AVATAR;
 
   const kv: [string, string][] = [
     ['Nomor Karyawan', me.employeeNo],
@@ -95,7 +109,7 @@ export default function ProfileScreen() {
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
                 <Image
-                  source={{ uri: AVATAR_PLACEHOLDER }}
+                  source={{ uri: avatarUri }}
                   style={styles.avatarImage}
                 />
               </View>
