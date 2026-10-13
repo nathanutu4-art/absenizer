@@ -36,7 +36,7 @@ export default function HistoryScreen() {
     <ScreenContainer>
       {/* Tajuk arsip */}
       <View style={styles.headerRow}>
-        <MedallionIcon glyph="clock" size={58} />
+        <MedallionIcon glyph="clock" size={58} variant="wadaIndigo" />
         <View style={styles.headerText}>
           <Text style={styles.header}>Riwayat</Text>
           <Text style={styles.month}>Oktober 2026</Text>
