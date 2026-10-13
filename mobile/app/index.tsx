@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GradientView } from '../src/components/GradientView';
+import { ILLUSTRATION_OPENING } from '../src/data/illustrations-opening';
 import { colors, fontFamily, radius, spacing } from '../src/theme';
 
 /**
@@ -21,26 +22,12 @@ export default function OpeningScreen() {
           <Text style={styles.brandText}>AbsensiKu</Text>
         </View>
 
-        {/* Ilustrasi pekerja kantor — bentuk geometris sederhana */}
-        <View style={styles.illustration}>
-          <View style={styles.sun} />
-          <View style={styles.buildingA} />
-          <View style={styles.buildingB} />
-          {/* pekerja */}
-          <View style={styles.person}>
-            <View style={styles.head} />
-            <View style={styles.body} />
-            <View style={styles.armLeft} />
-            <View style={styles.armRight} />
-          </View>
-          {/* meja + laptop */}
-          <View style={styles.desk} />
-          <View style={styles.laptopScreen} />
-          <View style={styles.laptopBase} />
-          {/* dokumen melayang */}
-          <View style={styles.docOne} />
-          <View style={styles.docTwo} />
-        </View>
+        {/* Ilustrasi pekerja kantor */}
+        <Image
+          resizeMode="contain"
+          source={{ uri: ILLUSTRATION_OPENING }}
+          style={styles.illustrationImage}
+        />
 
         {/* Bottom sheet */}
         <View style={styles.sheet}>
@@ -97,6 +84,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 10,
   },
+  illustrationImage: { height: 300, width: '100%' },
   illustration: { flex: 1, marginHorizontal: spacing.lg },
   sun: {
     backgroundColor: 'rgba(255,255,255,0.35)',
