@@ -31,7 +31,7 @@ export default function RequestActions({
   const [warn, setWarn] = useState<string | null>(null);
 
   if (status !== "menunggu") {
-    return <span style={{ color: "#4d5a68", fontSize: "0.85rem" }}>Selesai</span>;
+    return <span style={{ color: "var(--muted)", fontSize: "0.85rem" }}>Selesai</span>;
   }
 
   /** Jumlah hari kalender dari start s.d. end (inklusif). */
@@ -231,12 +231,12 @@ export default function RequestActions({
         </div>
       )}
       {error && (
-        <div style={{ color: "#dc2626", fontSize: "0.82rem", marginTop: "0.35rem" }}>
+        <div style={{ color: "var(--red-ink)", fontSize: "0.82rem", marginTop: "0.35rem" }}>
           {error}
         </div>
       )}
       {warn && (
-        <div style={{ color: "#b45309", fontSize: "0.82rem", marginTop: "0.35rem" }}>
+        <div style={{ color: "var(--accent-ink)", fontSize: "0.82rem", marginTop: "0.35rem" }}>
           {warn}
         </div>
       )}
