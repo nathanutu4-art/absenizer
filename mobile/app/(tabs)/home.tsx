@@ -18,6 +18,7 @@ import { showToast } from '../../src/components/Toast';
 import type { IconName } from '../../src/data/icons';
 import { HATCH_TILE, SUNBURST_APRICOT } from '../../src/data/medallions';
 import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
+import { DUMMY_AVATAR } from '../../src/data/dummy-avatar';
 import {
   GEOFENCE_M,
   LATE_TOLERANCE_MIN,
@@ -28,8 +29,8 @@ import {
   WORK_START,
   getEmployee,
 } from '../../src/data/demo';
-import { getActiveRole, type DemoRole } from '../../src/lib/session';
-import { getEmployees, getMyEmployeeId } from '../../src/lib/db';
+import { getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
+import { getMyEmployee } from '../../src/lib/db';
 import { recordClockOut, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -98,8 +99,10 @@ export default function HomeScreen() {
   const clock = useClockState();
   const wib = useWibClock();
   const pulse = useRef(new Animated.Value(0)).current;
-  // Nama pengguna yang login (dari DB bila tersedia).
+  // Nama & foto pengguna yang login (dari DB bila tersedia).
   const [meName, setMeName] = useState<string | null>(null);
+  const [mePhoto, setMePhoto] = useState<string | null>(null);
+  const [isDemo, setIsDemo] = useState(true);
 
   useEffect(() => {
     getActiveRole().then(setRole);
@@ -108,17 +111,26 @@ export default function HomeScreen() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const empId = await getMyEmployeeId();
-      if (!empId) return;
-      const list = await getEmployees();
+      const session = await getSession();
       if (!alive) return;
-      const found = list.find((e) => e.id === empId);
-      if (found) setMeName(found.name);
+      setIsDemo(session?.demo !== false);
+      const me = await getMyEmployee();
+      if (!alive) return;
+      if (me) {
+        setMeName(me.name);
+        setMePhoto(me.photoUrl ?? null);
+      }
     })();
     return () => {
       alive = false;
     };
   }, []);
+
+  const avatarUri = isDemo
+    ? AVATAR_PLACEHOLDER
+    : mePhoto && /^https?:\/\//i.test(mePhoto)
+      ? mePhoto
+      : DUMMY_AVATAR;
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -205,7 +217,7 @@ export default function HomeScreen() {
               <View style={styles.greetingRow}>
                 <View style={styles.avatarFrame}>
                   <Image
-                    source={{ uri: AVATAR_PLACEHOLDER }}
+                    source={{ uri: avatarUri }}
                     style={styles.avatarImage}
                   />
                 </View>
