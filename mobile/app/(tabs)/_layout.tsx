@@ -5,7 +5,7 @@ import { MedallionIcon } from '../../src/components/MedallionIcon';
 import type { IconName } from '../../src/data/icons';
 import { PIC_REQUESTS } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
-import { colors, fontFamily } from '../../src/theme';
+import { colors, fontFamily, isGlassMode } from '../../src/theme';
 
 /**
  * Tab bar berbasis peran (mengikuti high-fidelity prototype), reskin
@@ -43,6 +43,9 @@ export default function TabsLayout() {
 
   if (!role) return null;
 
+  // Mode liquid-glass: tab bar kaca gelap (eksperimen, mudah di-revert).
+  const glass = isGlassMode();
+
   const pendingCount = PIC_REQUESTS.filter((r) => r.status === 'menunggu').length;
   const escalatedCount = PIC_REQUESTS.filter(
     (r) => r.status === 'menunggu' && r.escalated,
@@ -52,8 +55,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.ink,
-        tabBarInactiveTintColor: colors.ink3,
+        tabBarActiveTintColor: glass ? '#ffffff' : colors.ink,
+        tabBarInactiveTintColor: glass ? 'rgba(255,255,255,0.55)' : colors.ink3,
         tabBarLabelStyle: {
           fontFamily: fontFamily('600'),
           fontSize: 9.5,
@@ -61,9 +64,9 @@ export default function TabsLayout() {
           textTransform: 'uppercase',
         },
         tabBarStyle: {
-          backgroundColor: colors.bg,
-          borderTopColor: colors.ink,
-          borderTopWidth: 3,
+          backgroundColor: glass ? 'rgba(20,16,40,0.55)' : colors.bg,
+          borderTopColor: glass ? 'rgba(255,255,255,0.15)' : colors.ink,
+          borderTopWidth: glass ? 1 : 3,
           height: 74,
           paddingBottom: 10,
           paddingTop: 6,
