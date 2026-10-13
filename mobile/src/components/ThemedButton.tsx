@@ -7,7 +7,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { colors, fontFamily, radius } from '../theme';
+import { GLASS_RADIUS, colors, fontFamily, isGlassMode, radius } from '../theme';
 import { GradientView } from './GradientView';
 
 interface Props {
@@ -34,18 +34,36 @@ export function ThemedButton({
   style,
 }: Props) {
   const isDisabled = disabled || loading;
+  const glass = isGlassMode();
   const textColor =
-    variant === 'outline' || variant === 'ghost'
-      ? colors.indigo
-      : variant === 'dangerOutline'
-        ? colors.red
-        : '#ffffff';
+    glass && (variant === 'primary' || variant === 'clockOut')
+      ? '#ffffff'
+      : variant === 'outline' || variant === 'ghost'
+        ? colors.indigo
+        : variant === 'dangerOutline'
+          ? colors.red
+          : '#ffffff';
 
   const inner = loading ? (
     <ActivityIndicator color={textColor} />
   ) : (
     <Text style={[styles.text, { color: textColor }]}>{title}</Text>
   );
+
+  // Mode liquid-glass: tombol kaca (GradientView sudah transparan di mode ini).
+  if (glass && (variant === 'primary' || variant === 'clockOut')) {
+    return (
+      <TouchableOpacity
+        accessibilityRole="button"
+        activeOpacity={0.85}
+        disabled={isDisabled}
+        onPress={onPress}
+        style={[styles.base, styles.glassPrimary, isDisabled && styles.disabled, style]}
+      >
+        {inner}
+      </TouchableOpacity>
+    );
+  }
 
   if (variant === 'primary' || variant === 'clockOut') {
     return (
@@ -112,6 +130,12 @@ const styles = StyleSheet.create({
   },
   danger: { backgroundColor: colors.red },
   success: { backgroundColor: colors.green },
+  glassPrimary: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    borderColor: 'rgba(255,255,255,0.35)',
+    borderRadius: GLASS_RADIUS,
+    borderWidth: 1,
+  },
   text: { fontFamily: fontFamily('700'), fontSize: 16 },
   disabled: { opacity: 0.5 },
 });
