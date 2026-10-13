@@ -6,6 +6,7 @@ import { getSupabase } from "@/lib/supabase";
 
 const NAV = [
   { href: "/", label: "Dashboard" },
+  { href: "/absensi", label: "Log Absensi" },
   { href: "/pengaturan", label: "Pengaturan" },
   { href: "/karyawan", label: "Karyawan" },
   { href: "/pengajuan", label: "Pengajuan" },
