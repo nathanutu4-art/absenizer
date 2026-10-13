@@ -20,6 +20,7 @@ import {
   WORK_START,
   type AttendanceStatus,
   type Employee,
+  type HistoryRow,
   type LeaveRequest,
   type RequestStatus,
   type RequestType,
@@ -179,6 +180,7 @@ function mapDbEmployee(row: DbEmployeeRow): Employee {
     // DB tidak menyimpan status harian; default hadir.
     status: 'hadir' as AttendanceStatus,
     role: row.is_hr ? 'hr' : 'karyawan',
+    picId: row.pic_id ?? undefined,
   };
 }
 
@@ -471,8 +473,7 @@ interface DbLeaveRow {
 }
 
 /** Pengajuan milikku; fallback ke MY_REQUESTS demo bila mode demo. */
-export async function getMyLeaveRequests(): Promise<LeaveRequest[]> {
-  const employeeId = await getMyEmployeeId();
+export async function getMyLeaveRequests(): Promise<LeaveRequest[]> {  const employeeId = await getMyEmployeeId();
   if (!employeeId) return MY_REQUESTS;
   try {
     const { data, error } = await supabase
@@ -495,5 +496,140 @@ export async function getMyLeaveRequests(): Promise<LeaveRequest[]> {
     }));
   } catch {
     return [];
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Riwayat kehadiran & ketidakhadiran
+// ---------------------------------------------------------------------------
+
+const HARI_PENDEK = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+
+const FLAG_LABEL: Record<string, string> = {
+  di_luar_area: 'Di Luar Area',
+  wajah_tidak_cocok: 'Wajah Tidak Cocok',
+  fake_gps: 'GPS Palsu',
+  terlambat: 'Terlambat',
+  tidak_lengkap: 'Tidak Lengkap',
+};
+
+/** "2026-10-13T08:02:11Z" -> "08.02" (Asia/Jakarta); null -> "-". */
+function formatJamSingkat(iso: string | null): string {
+  if (!iso) return '-';
+  try {
+    return new Intl.DateTimeFormat('id-ID', {
+      timeZone: 'Asia/Jakarta',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+      .format(new Date(iso))
+      .replace(':', '.');
+  } catch {
+    return '-';
+  }
+}
+
+interface DbAttendanceRow {
+  id: string;
+  date: string; // "YYYY-MM-DD"
+  clock_in_at: string | null;
+  clock_out_at: string | null;
+  is_late: boolean;
+}
+
+/**
+ * Riwayat kehadiran milik pengguna yang login, terbaru dulu.
+ * [] bila mode demo / tanpa employee / DB kosong / galat → pemanggil
+ * memakai fallback demo.
+ */
+export async function getMyAttendance(): Promise<HistoryRow[]> {
+  const employeeId = await getMyEmployeeId();
+  if (!employeeId) return [];
+  try {
+    const { data, error } = await supabase
+      .from('attendance')
+      .select('id, date, clock_in_at, clock_out_at, is_late')
+      .eq('employee_id', employeeId)
+      .order('date', { ascending: false })
+      .limit(30);
+    if (error || !data || data.length === 0) return [];
+
+    const rows = data as DbAttendanceRow[];
+    const { data: flagRows } = await supabase
+      .from('attendance_flags')
+      .select('attendance_id, flag_type')
+      .in(
+        'attendance_id',
+        rows.map((r) => r.id),
+      );
+    const flagsById = new Map<string, string[]>();
+    for (const f of (flagRows ?? []) as {
+      attendance_id: string;
+      flag_type: string;
+    }[]) {
+      const arr = flagsById.get(f.attendance_id) ?? [];
+      arr.push(FLAG_LABEL[f.flag_type] ?? f.flag_type);
+      flagsById.set(f.attendance_id, arr);
+    }
+
+    return rows.map((r) => {
+      const [y = 1970, m = 1, d = 1] = r.date.split('-').map(Number);
+      const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+      return {
+        id: r.id,
+        dateLabel: HARI_PENDEK[dow] ?? '',
+        dayNum: String(d),
+        monthYear: `${SHORT_MONTHS_ID[m - 1]} ${y}`,
+        clockIn: formatJamSingkat(r.clock_in_at),
+        clockOut: formatJamSingkat(r.clock_out_at),
+        status: (r.is_late ? 'Terlambat' : 'Hadir') as HistoryRow['status'],
+        flags: flagsById.get(r.id) ?? [],
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+export interface AwayEmployee {
+  employeeId: string;
+  name: string;
+  type: 'ijin' | 'sakit' | 'cuti';
+}
+
+/**
+ * Karyawan yang sedang tidak masuk hari ini: pengajuan berstatus disetujui
+ * yang rentang tanggalnya mencakup hari ini (Asia/Jakarta).
+ * null bila Supabase tak terkonfigurasi / galat → pemanggil memakai demo.
+ * [] bila DB baik-baik saja tapi tak ada yang tidak masuk → seksi disembunyikan.
+ */
+export async function getAwayEmployees(): Promise<AwayEmployee[] | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const today = jakartaToday();
+    const { data, error } = await supabase
+      .from('leave_requests')
+      .select('employee_id, type, employees(full_name)')
+      .eq('status', 'disetujui')
+      .in('type', ['ijin', 'sakit', 'cuti'])
+      .lte('start_date', today)
+      .gte('end_date', today);
+    if (error) return null;
+    const rows = (data ?? []) as {
+      employee_id: string;
+      type: string;
+      employees: { full_name: string } | { full_name: string }[] | null;
+    }[];
+    return rows.map((r) => {
+      const emp = Array.isArray(r.employees) ? r.employees[0] : r.employees;
+      const t = r.type === 'sakit' || r.type === 'cuti' ? r.type : 'ijin';
+      return {
+        employeeId: r.employee_id,
+        name: emp?.full_name ?? '—',
+        type: t as AwayEmployee['type'],
+      };
+    });
+  } catch {
+    return null;
   }
 }
