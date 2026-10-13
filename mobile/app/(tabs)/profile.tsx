@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
 import { GradientView } from '../../src/components/GradientView';
 import { ThemedButton } from '../../src/components/ThemedButton';
@@ -85,13 +86,19 @@ export default function ProfileScreen() {
                 onPress={() => showToast(`Menghubungi ${pic.name}…`)}
                 style={styles.picBtn}
               >
-                <Text style={styles.picBtnText}>📞 Hubungi PIC</Text>
+                <View style={styles.picBtnLabel}>
+                  <AppIcon color={colors.indigo} name="phone" size={16} />
+                  <Text style={styles.picBtnText}>Hubungi PIC</Text>
+                </View>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => showToast(`Pesan untuk ${pic.name} disiapkan.`)}
                 style={styles.picBtn}
               >
-                <Text style={styles.picBtnText}>💬 Kirim Pesan</Text>
+                <View style={styles.picBtnLabel}>
+                  <AppIcon color={colors.indigo} name="message_circle" size={16} />
+                  <Text style={styles.picBtnText}>Kirim Pesan</Text>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
@@ -186,7 +193,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
   },
-  picBtnText: { color: colors.indigo, fontFamily: fontFamily('700'), fontSize: 13 },
+  picBtnText: { color: colors.indigo, fontFamily: fontFamily('700'), fontSize: 13, marginLeft: 6 },
+  picBtnLabel: { alignItems: 'center', flexDirection: 'row', justifyContent: 'center' },
   logout: {
     borderColor: '#f3c2c2',
     marginTop: spacing.lg,
