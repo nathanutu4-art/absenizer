@@ -68,7 +68,44 @@ export const colors = {
   // --- Layar gelap (kamera / liveness) ---
   darkBg: '#0b1220',
   darkSurface: '#151f31',
-} as const;
+} // (properti string biasa agar palet bisa diganti saat runtime)
+
+export interface ThemePalette {
+  name: string;
+  indigo: string;
+  apricot: string;
+  olive: string;
+}
+
+export const DEFAULT_PALETTE: ThemePalette = {
+  name: 'Wada No. 211 — Indigo',
+  indigo: '#051230',
+  apricot: '#f68c50',
+  olive: '#a6a159',
+};
+
+/** Preset palet untuk panel admin (dibangun dari dictionary Sanzo Wada dkk). */
+export const PALETTES: ThemePalette[] = [
+  { name: 'Wada No. 211 — Indigo', indigo: '#051230', apricot: '#f68c50', olive: '#a6a159' },
+  { name: 'Wada No. 144 — Signal', indigo: '#111314', apricot: '#f37420', olive: '#b73f74' },
+  { name: 'Terracotta', indigo: '#3d1d0e', apricot: '#c96f4a', olive: '#d9a441' },
+  { name: 'Hutan', indigo: '#12261c', apricot: '#6a9f7b', olive: '#c9a227' },
+  { name: 'Samudra', indigo: '#0b2545', apricot: '#2ca6a4', olive: '#e9c46a' },
+  { name: 'Anggrek', indigo: '#2d1b2e', apricot: '#9b5de5', olive: '#e0a458' },
+];
+
+const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+
+/**
+ * Terapkan palet ke colors.wadaIndigo/apricot/olive.
+ * Entri yang bukan hex valid diganti nilai DEFAULT_PALETTE — tidak pernah
+ * melempar error.
+ */
+export function applyPalette(p: ThemePalette): void {
+  colors.wadaIndigo = HEX_RE.test(p.indigo) ? p.indigo : DEFAULT_PALETTE.indigo;
+  colors.wadaApricot = HEX_RE.test(p.apricot) ? p.apricot : DEFAULT_PALETTE.apricot;
+  colors.wadaOlive = HEX_RE.test(p.olive) ? p.olive : DEFAULT_PALETTE.olive;
+}
 
 /** Warna status pengajuan: Sakit = merah, Cuti = biru, Ijin = kuning. */
 export const leaveStatusColors = {
