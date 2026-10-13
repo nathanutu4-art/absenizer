@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Image,
   StyleSheet,
@@ -23,10 +23,12 @@ import {
   STATUS_LABEL,
   TYPE_LABEL,
   getEmployee,
+  type Employee,
   type LeaveRequest,
   type RequestStatus,
   type RequestType,
 } from '../../src/data/demo';
+import { getEmployees, getMyEmployeeId, getMyLeaveRequests, submitLeaveRequest } from '../../src/lib/db';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 type Segment = 'baru' | 'kuota' | 'riwayat';
@@ -57,6 +59,25 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 /** Pengajuan — Buat Baru / Sisa Kuota / Pengajuanku. */
 export default function RequestsScreen() {
   const [segment, setSegment] = useState<Segment>('baru');
+  // Daftar "Pengajuanku": data real bila tersedia, demo saat memuat/kosong.
+  const [requests, setRequests] = useState<LeaveRequest[]>(MY_REQUESTS);
+  const [me, setMe] = useState<Employee | null>(null);
+
+  const reloadRequests = useCallback(() => {
+    getMyLeaveRequests().then((rows) => {
+      if (rows.length > 0) setRequests(rows);
+    });
+  }, []);
+
+  useEffect(() => {
+    reloadRequests();
+    (async () => {
+      const empId = await getMyEmployeeId();
+      if (!empId) return;
+      const list = await getEmployees();
+      setMe(list.find((e) => e.id === empId) ?? null);
+    })();
+  }, [reloadRequests]);
 
   return (
     <ScreenContainer>
@@ -65,9 +86,9 @@ export default function RequestsScreen() {
         <StampTabs onChange={setSegment} value={segment} />
       </View>
 
-      {segment === 'baru' ? <NewRequestForm /> : null}
+      {segment === 'baru' ? <NewRequestForm onSubmitted={reloadRequests} /> : null}
       {segment === 'kuota' ? <QuotaTab /> : null}
-      {segment === 'riwayat' ? <MyRequestsTab /> : null}
+      {segment === 'riwayat' ? <MyRequestsTab requests={requests} employee={me} /> : null}
     </ScreenContainer>
   );
 }
@@ -111,7 +132,21 @@ function StampTabs({
 }
 
 /** --- Segmen: Buat Baru --- */
-function NewRequestForm() {
+const BULAN_PENDEK: Record<string, string> = {
+  Jan: '01', Feb: '02', Mar: '03', Apr: '04', Mei: '05', Jun: '06',
+  Jul: '07', Agu: '08', Sep: '09', Okt: '10', Nov: '11', Des: '12',
+};
+
+/** "14 Okt 2026" -> "2026-10-14"; null bila format tak dikenali. */
+function parseTanggalID(s: string): string | null {
+  const m = s.trim().match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+  if (!m) return null;
+  const mon = BULAN_PENDEK[(m[2] ?? '').slice(0, 3)];
+  if (!mon) return null;
+  return `${m[3] ?? ''}-${mon}-${(m[1] ?? '').padStart(2, '0')}`;
+}
+
+function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [type, setType] = useState<RequestType>('cuti');
   const [startDate, setStartDate] = useState('14 Okt 2026');
   const [endDate, setEndDate] = useState('15 Okt 2026');
@@ -119,8 +154,10 @@ function NewRequestForm() {
   const [reason, setReason] = useState('');
   const [file, setFile] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    if (sending) return;
     if (!reason.trim()) {
       setError('Alasan wajib diisi.');
       return;
@@ -129,7 +166,29 @@ function NewRequestForm() {
       setError('Pengajuan sakit wajib melampirkan surat dokter.');
       return;
     }
+    const start = parseTanggalID(startDate);
+    const end = parseTanggalID(endDate);
+    if (!start || !end) {
+      setError('Format tanggal tidak dikenali. Contoh: "14 Okt 2026".');
+      return;
+    }
     setError(null);
+    setSending(true);
+    try {
+      // Best-effort ke Supabase; di mode demo kembalikan ok:false dan
+      // lanjutkan perilaku demo (toast + reset form).
+      await submitLeaveRequest({
+        type,
+        startDate: start,
+        endDate: end,
+        isHalfDay: type === 'ijin' && halfDay,
+        reason: reason.trim(),
+        attachmentUrl: file,
+      });
+      onSubmitted();
+    } finally {
+      setSending(false);
+    }
     showToast('Pengajuan terkirim ke PIC.');
     setReason('');
     setFile(null);
@@ -259,7 +318,7 @@ function NewRequestForm() {
       ) : null}
 
       <PlateButton onPress={handleSubmit} style={styles.submit} variant="primary">
-        Kirim Pengajuan
+        {sending ? 'Mengirim…' : 'Kirim Pengajuan'}
       </PlateButton>
     </View>
   );
@@ -340,24 +399,43 @@ function UsageRow({
 }
 
 /** --- Segmen: Pengajuanku --- */
-function MyRequestsTab() {
+function MyRequestsTab({
+  requests,
+  employee,
+}: {
+  requests: LeaveRequest[];
+  employee: Employee | null;
+}) {
   return (
     <View>
-      {MY_REQUESTS.map((r) => (
-        <RequestRow key={r.id} request={r} />
+      {requests.map((r) => (
+        <RequestRow key={r.id} request={r} employee={employee} />
       ))}
     </View>
   );
 }
 
-export function RequestRow({ request }: { request: LeaveRequest }) {
-  const employee = getEmployee(request.employeeId);
+export function RequestRow({
+  request,
+  employee,
+}: {
+  request: LeaveRequest;
+  employee?: Employee | null;
+}) {
+  let emp = employee ?? null;
+  if (!emp) {
+    try {
+      emp = getEmployee(request.employeeId);
+    } catch {
+      emp = null;
+    }
+  }
   const chip = REQ_STATUS_CHIP[request.status];
   return (
     <Plate style={styles.reqPlate}>
       <View style={styles.platePad}>
         <View style={styles.reqInner}>
-          <Avatar gradientId={employee.gradientId} name={employee.name} size={44} shape="square" />
+          <Avatar gradientId={emp?.gradientId ?? '01'} name={emp?.name ?? '?'} size={44} shape="square" />
           <View style={styles.reqText}>
             <Text style={styles.reqTitle}>
               {TYPE_LABEL[request.type]} • {request.dateRange}
