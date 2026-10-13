@@ -160,7 +160,7 @@ export default function TeamScreen() {
               onPress={() => router.push(`/employee/${e.id}`)}
               style={styles.dirRow}
             >
-              <Avatar gradientId={e.gradientId} name={e.name} size={46} />
+              <Avatar gradientId={e.gradientId} name={e.name} size={46} shape="square" />
               <View style={styles.dirText}>
                 <Text style={styles.dirName}>{e.name}</Text>
                 <Text style={styles.dirPos}>{e.position}</Text>
