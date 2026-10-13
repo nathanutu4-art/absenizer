@@ -10,7 +10,6 @@
  * dan dikembalikan sebagai fallback, bukan dilempar ke UI.
  */
 import type { AvatarGradientId } from '../components/Avatar';
-import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import {
   EMPLOYEES,
   GEOFENCE_M,
@@ -59,6 +58,9 @@ export interface CompanySettings {
   workStart: string;
   /** "18.00" */
   workEnd: string;
+  /** Kuota default tahunan (HR dapat mengubah di admin panel). */
+  cutiQuotaDefault: number;
+  ijinQuotaDefault: number;
 }
 
 export const DEMO_SETTINGS: CompanySettings = {
@@ -68,6 +70,8 @@ export const DEMO_SETTINGS: CompanySettings = {
   geofenceM: GEOFENCE_M,
   workStart: WORK_START,
   workEnd: WORK_END,
+  cutiQuotaDefault: 12,
+  ijinQuotaDefault: 12,
 };
 
 /** "09:00:00" -> "09.00" */
@@ -81,12 +85,28 @@ function formatJam(t: unknown): string | null {
 export async function getCompanySettings(): Promise<CompanySettings> {
   if (!isSupabaseConfigured()) return DEMO_SETTINGS;
   try {
-    const { data, error } = await supabase
+    // Coba baca kolom kuota default; bila migrasi belum dijalankan, ulangi
+    // tanpa kolom itu.
+    const full = await supabase
       .from('company_settings')
-      .select('office_name, office_lat, office_lng, geofence_radius_m, work_start, work_end')
+      .select(
+        'office_name, office_lat, office_lng, geofence_radius_m, work_start, work_end, cuti_quota_default, ijin_quota_default',
+      )
       .eq('is_active', true)
       .limit(1)
       .maybeSingle();
+    let data = full.data as Record<string, unknown> | null;
+    let error = full.error;
+    if (error) {
+      const retry = await supabase
+        .from('company_settings')
+        .select('office_name, office_lat, office_lng, geofence_radius_m, work_start, work_end')
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle();
+      data = retry.data as Record<string, unknown> | null;
+      error = retry.error;
+    }
     if (error || !data) return DEMO_SETTINGS;
     const row = data as {
       office_name?: string | null;
@@ -95,6 +115,8 @@ export async function getCompanySettings(): Promise<CompanySettings> {
       geofence_radius_m?: number | null;
       work_start?: string | null;
       work_end?: string | null;
+      cuti_quota_default?: number | null;
+      ijin_quota_default?: number | null;
     };
     return {
       officeName: row.office_name ?? DEMO_SETTINGS.officeName,
@@ -103,6 +125,8 @@ export async function getCompanySettings(): Promise<CompanySettings> {
       geofenceM: Number(row.geofence_radius_m) || DEMO_SETTINGS.geofenceM,
       workStart: formatJam(row.work_start) ?? DEMO_SETTINGS.workStart,
       workEnd: formatJam(row.work_end) ?? DEMO_SETTINGS.workEnd,
+      cutiQuotaDefault: Number(row.cuti_quota_default) || 12,
+      ijinQuotaDefault: Number(row.ijin_quota_default) || 12,
     };
   } catch {
     return DEMO_SETTINGS;
@@ -390,6 +414,8 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
  * "selfies" di path `<employeeId>/<YYYY-MM-DD>_<kind>.jpg`.
  * Mengembalikan storage path bila sukses, null bila gagal (bucket belum
  * ada, jaringan, dsb.) — tidak pernah melempar error.
+ * expo-image-manipulator dimuat malas agar modul native tak tersentuh
+ * saat aplikasi dibuka (hanya dipakai di alur clock-in).
  */
 export async function uploadSelfie(
   localUri: string,
@@ -398,6 +424,7 @@ export async function uploadSelfie(
 ): Promise<string | null> {
   if (!isSupabaseConfigured() || !localUri || !employeeId) return null;
   try {
+    const { manipulateAsync, SaveFormat } = await import('expo-image-manipulator');
     const resized = await manipulateAsync(
       localUri,
       [{ resize: { width: 800 } }],
@@ -544,6 +571,48 @@ export async function getMyLeaveRequests(): Promise<LeaveRequest[]> {  const emp
     }));
   } catch {
     return [];
+  }
+}
+
+export interface LeaveBalance {
+  cutiQuota: number;
+  cutiUsed: number;
+  ijinQuota: number;
+  ijinUsed: number;
+}
+
+/**
+ * Saldo cuti/ijin milikku tahun berjalan. Null bila mode demo atau baris
+ * belum ada (pemanggil memakai default dari company_settings).
+ */
+export async function getMyLeaveBalance(): Promise<LeaveBalance | null> {
+  const employeeId = await getMyEmployeeId();
+  if (!employeeId) return null;
+  try {
+    const year = new Date(
+      new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }),
+    ).getFullYear();
+    const { data, error } = await supabase
+      .from('leave_balances')
+      .select('cuti_quota, cuti_used, ijin_quota, ijin_used')
+      .eq('employee_id', employeeId)
+      .eq('year', year)
+      .maybeSingle();
+    if (error || !data) return null;
+    const r = data as {
+      cuti_quota?: number | null;
+      cuti_used?: number | null;
+      ijin_quota?: number | null;
+      ijin_used?: number | null;
+    };
+    return {
+      cutiQuota: Number(r.cuti_quota) || 0,
+      cutiUsed: Number(r.cuti_used) || 0,
+      ijinQuota: Number(r.ijin_quota) || 0,
+      ijinUsed: Number(r.ijin_used) || 0,
+    };
+  } catch {
+    return null;
   }
 }
 
