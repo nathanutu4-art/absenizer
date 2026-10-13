@@ -9,10 +9,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
 import { GradientView } from '../../src/components/GradientView';
 import { StatusChip } from '../../src/components/StatusChip';
 import { showToast } from '../../src/components/Toast';
+import type { IconName } from '../../src/data/icons';
 import {
   GEOFENCE_M,
   LATE_TOLERANCE_MIN,
@@ -133,24 +135,24 @@ export default function HomeScreen() {
   const statusChip =
     clock.phase === 'in' ? 'Belum Clock In' : clock.phase === 'out' ? 'Sudah Clock In' : 'Selesai';
 
-  const shortcuts =
+  const shortcuts: { label: string; icon: IconName; route: string }[] =
     role === 'karyawan'
       ? [
-          { label: 'Pengajuan', glyph: '📝', route: '/(tabs)/requests' },
-          { label: 'Tim', glyph: '👥', route: '/(tabs)/team' },
-          { label: 'Riwayat', glyph: '🕘', route: '/(tabs)/history' },
-          { label: 'Profil', glyph: '👤', route: '/(tabs)/profile' },
+          { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests' },
+          { label: 'Tim', icon: 'users', route: '/(tabs)/team' },
+          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history' },
+          { label: 'Profil', icon: 'user', route: '/(tabs)/profile' },
         ]
       : role === 'pic'
         ? [
-            { label: 'Persetujuan', glyph: '✅', route: '/(tabs)/approvals' },
-            { label: 'Tim', glyph: '👥', route: '/(tabs)/team' },
-            { label: 'Profil', glyph: '👤', route: '/(tabs)/profile' },
+            { label: 'Persetujuan', icon: 'check_circle', route: '/(tabs)/approvals' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile' },
           ]
         : [
-            { label: 'Ambil Alih', glyph: '🔁', route: '/(tabs)/takeover' },
-            { label: 'Tim', glyph: '👥', route: '/(tabs)/team' },
-            { label: 'Profil', glyph: '👤', route: '/(tabs)/profile' },
+            { label: 'Ambil Alih', icon: 'repeat', route: '/(tabs)/takeover' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile' },
           ];
 
   return (
@@ -174,7 +176,7 @@ export default function HomeScreen() {
                 onPress={() => showToast('Belum ada notifikasi baru.')}
                 style={styles.bell}
               >
-                <Text style={styles.bellGlyph}>🔔</Text>
+                <AppIcon color="#fff" name="bell" size={22} />
                 <View style={styles.bellDot} />
               </TouchableOpacity>
             </View>
@@ -245,13 +247,13 @@ export default function HomeScreen() {
         {/* INFO MINI */}
         <View style={styles.minis}>
           <View style={styles.mini}>
-            <Text style={styles.miniGlyph}>🕗</Text>
+            <AppIcon color={colors.ink2} name="clock" size={22} />
             <Text style={styles.miniText}>
               {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
             </Text>
           </View>
           <View style={styles.mini}>
-            <Text style={styles.miniGlyph}>📍</Text>
+            <AppIcon color={colors.ink2} name="map_pin" size={22} />
             <Text style={styles.miniText}>
               WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
             </Text>
@@ -266,7 +268,7 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcut}
             >
-              <Text style={styles.shortcutGlyph}>{s.glyph}</Text>
+              <AppIcon color={colors.indigo} name={s.icon} size={26} />
               <Text style={styles.shortcutLabel}>{s.label}</Text>
             </TouchableOpacity>
           ))}
