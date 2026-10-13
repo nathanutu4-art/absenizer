@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
 import { GradientView } from '../../src/components/GradientView';
 import { StatusChip } from '../../src/components/StatusChip';
@@ -50,7 +51,7 @@ export default function EmployeeDetailScreen() {
                 onPress={() => router.back()}
                 style={styles.backBtn}
               >
-                <Text style={styles.backText}>‹</Text>
+                <AppIcon color="#fff" name="chevron_left" size={22} />
               </TouchableOpacity>
               <Text style={styles.headerTitle}>Detail Karyawan</Text>
               <View style={styles.backBtn} />
