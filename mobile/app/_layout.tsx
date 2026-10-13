@@ -34,9 +34,9 @@ export default function RootLayout() {
 
   // Muat palet tema HR dari company_settings sekali saat aplikasi dibuka;
   // gagal diam-diam dan pakai palet default.
-  // EKSPERIMEN liquid-glass: setGlassMode(true) — set false untuk revert.
+  // EKSPERIMEN liquid-glass dimatikan — vintage dikembalikan.
   useEffect(() => {
-    setGlassMode(true);
+    setGlassMode(false);
     getThemePalette()
       .then((p) => {
         if (p) applyPalette(p);
