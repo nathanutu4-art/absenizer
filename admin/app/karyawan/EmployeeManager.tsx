@@ -11,7 +11,7 @@ interface Props {
 }
 
 /** Gambar dummy bila karyawan tidak mengunggah foto. */
-const DUMMY_PHOTO = "/dummy-avatar.png";
+const DUMMY_PHOTO = "/dummy-avatar.jpg";
 /** Batas ukuran file foto. */
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
