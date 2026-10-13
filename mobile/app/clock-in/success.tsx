@@ -3,11 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
-import { StatusChip } from '../../src/components/StatusChip';
-import { ThemedButton } from '../../src/components/ThemedButton';
+import { Plate } from '../../src/components/Plate';
+import { PlateButton } from '../../src/components/PlateButton';
+import { StampChip } from '../../src/components/StampChip';
 import { getEmployee } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
-import { colors, fontFamily, radius, spacing } from '../../src/theme';
+import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const ROLE_EMPLOYEE: Record<DemoRole, string> = {
   karyawan: 'nadia',
@@ -51,8 +52,11 @@ export default function SuccessScreen() {
     <View style={styles.root}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.checkWrap}>
-          <View style={styles.checkCircle}>
-            <AppIcon color="#fff" name="check" size={48} />
+          <View style={styles.checkPlate}>
+            <View style={styles.checkShadow} />
+            <View style={styles.checkCircle}>
+              <AppIcon color="#ffffff" name="check" size={56} />
+            </View>
           </View>
         </View>
         <Text style={styles.title}>Clock In Berhasil</Text>
@@ -62,39 +66,49 @@ export default function SuccessScreen() {
 
         <View style={styles.flagRow}>
           {clean ? (
-            <StatusChip label="Tanpa Penanda" tone="green" />
+            <StampChip color={colors.green} backgroundColor={colors.greenBg}>
+              Tanpa Penanda
+            </StampChip>
           ) : (
             flags.map((f) => (
-              <StatusChip key={f} label={f} tone="orange" style={styles.flagChip} />
+              <StampChip
+                key={f}
+                color={colors.orange}
+                backgroundColor={colors.orangeBg}
+                style={styles.flagChip}
+              >
+                {f}
+              </StampChip>
             ))
           )}
         </View>
 
         {/* Struk */}
-        <View style={styles.receipt}>
-          {rows.map(([label, value], i) => (
-            <View key={label}>
-              <View style={styles.row}>
-                <Text style={styles.rowLabel}>{label}</Text>
-                <Text
-                  style={[
-                    styles.rowValue,
-                    label === 'Verifikasi Wajah' && simFace && styles.rowWarn,
-                  ]}
-                >
-                  {value}
-                </Text>
+        <Plate style={styles.receiptPlate}>
+          <View style={styles.receiptInner}>
+            {rows.map(([label, value], i) => (
+              <View key={label}>
+                <View style={styles.row}>
+                  <Text style={styles.rowLabel}>{label}</Text>
+                  <Text
+                    style={[
+                      styles.rowValue,
+                      label === 'Verifikasi Wajah' && simFace && styles.rowWarn,
+                    ]}
+                  >
+                    {value}
+                  </Text>
+                </View>
+                {i < rows.length - 1 ? <View style={styles.dashed} /> : null}
               </View>
-              {i < rows.length - 1 ? <View style={styles.dashed} /> : null}
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        </Plate>
 
         <View style={styles.ctaWrap}>
-          <ThemedButton
-            onPress={() => router.replace('/(tabs)/home')}
-            title="Kembali ke Beranda"
-          />
+          <PlateButton onPress={() => router.replace('/(tabs)/home')} variant="paper">
+            Kembali ke Beranda
+          </PlateButton>
         </View>
       </SafeAreaView>
     </View>
@@ -111,22 +125,39 @@ function todayLong(): string {
   }).format(new Date());
 }
 
+const CHECK_SIZE = 112;
+
 const styles = StyleSheet.create({
   root: { backgroundColor: colors.bg, flex: 1 },
   safe: { flex: 1, padding: spacing.lg },
   checkWrap: { alignItems: 'center', marginTop: spacing.xl },
+  checkPlate: {
+    height: CHECK_SIZE,
+    position: 'relative',
+    width: CHECK_SIZE,
+  },
+  checkShadow: {
+    backgroundColor: colors.etchDeep,
+    borderRadius: CHECK_SIZE / 2,
+    height: CHECK_SIZE,
+    left: 4,
+    position: 'absolute',
+    top: 4,
+    width: CHECK_SIZE,
+  },
   checkCircle: {
     alignItems: 'center',
     backgroundColor: colors.green,
-    borderRadius: 48,
-    height: 96,
+    borderColor: colors.etch,
+    borderRadius: CHECK_SIZE / 2,
+    borderWidth: 1.5,
+    height: CHECK_SIZE,
     justifyContent: 'center',
-    width: 96,
+    width: CHECK_SIZE,
   },
-  checkGlyph: { color: '#fff', fontSize: 48, fontWeight: '800', marginTop: -4 },
   title: {
     color: colors.ink,
-    fontFamily: fontFamily('800'),
+    fontFamily: serifFamily('800'),
     fontSize: 22,
     marginTop: spacing.lg,
     textAlign: 'center',
@@ -145,12 +176,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   flagChip: { marginHorizontal: 4 },
-  receipt: {
-    backgroundColor: '#fff',
-    borderRadius: 17,
-    marginTop: spacing.lg,
-    padding: spacing.lg,
-  },
+  receiptPlate: { marginTop: spacing.lg },
+  receiptInner: { padding: spacing.lg },
   row: {
     alignItems: 'center',
     flexDirection: 'row',
