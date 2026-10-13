@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import type { Employee } from "@/lib/types";
@@ -9,6 +9,11 @@ import { formatTanggal } from "@/lib/types";
 interface Props {
   employees: Employee[];
 }
+
+/** Gambar dummy bila karyawan tidak mengunggah foto. */
+const DUMMY_PHOTO = "/dummy-avatar.png";
+/** Batas ukuran file foto. */
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
 const EMPTY = {
   full_name: "",
@@ -31,14 +36,27 @@ export default function EmployeeManager({ employees }: Props) {
   const [editing, setEditing] = useState<Employee | null>(null);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<{
-    kind: "ok" | "error";
+    kind: "ok" | "error" | "warning";
     text: string;
   } | null>(null);
+
+  // Bersihkan object URL pratinjau saat tidak dipakai lagi.
+  useEffect(() => {
+    return () => {
+      if (photoPreview && photoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
 
   function openAdd() {
     setEditing(null);
     setForm(EMPTY);
+    setPhotoFile(null);
+    setPhotoPreview(null);
     setMessage(null);
     setShowForm(true);
   }
@@ -59,12 +77,96 @@ export default function EmployeeManager({ employees }: Props) {
       is_hr: emp.is_hr,
       is_active: emp.is_active,
     });
+    setPhotoFile(null);
+    setPhotoPreview(emp.photo_url ?? null);
     setMessage(null);
     setShowForm(true);
   }
 
   function set<K extends keyof typeof EMPTY>(key: K, value: (typeof EMPTY)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0] ?? null;
+    if (f && f.size > MAX_PHOTO_BYTES) {
+      setMessage({ kind: "error", text: "Ukuran foto maksimal 5 MB." });
+      e.target.value = "";
+      return;
+    }
+    if (photoPreview && photoPreview.startsWith("blob:")) {
+      URL.revokeObjectURL(photoPreview);
+    }
+    setPhotoFile(f);
+    setPhotoPreview(f ? URL.createObjectURL(f) : editing?.photo_url ?? null);
+    setMessage(null);
+  }
+
+  /** True bila error berarti kolom photo_url belum ada (migrasi belum jalan). */
+  function isMissingPhotoColumn(err: unknown): boolean {
+    if (!err || typeof err !== "object") return false;
+    const e = err as { code?: string; message?: string };
+    return e.code === "42703" || (e.message ?? "").includes("photo_url");
+  }
+
+  /**
+   * Simpan baris karyawan; bila kolom photo_url belum ada di database,
+   * ulangi tanpa kolom itu agar tidak gagal total.
+   */
+  async function saveEmployeeRow(
+    sb: ReturnType<typeof getSupabase>,
+    payload: Record<string, unknown>,
+    editingId: string | null,
+  ): Promise<{ error: unknown; id?: string }> {
+    const withoutPhoto = { ...payload };
+    delete withoutPhoto.photo_url;
+    if (editingId) {
+      const first = await sb.from("employees").update(payload).eq("id", editingId);
+      if (first.error && isMissingPhotoColumn(first.error)) {
+        const retry = await sb.from("employees").update(withoutPhoto).eq("id", editingId);
+        return { error: retry.error };
+      }
+      return { error: first.error };
+    }
+    const first = await sb.from("employees").insert(payload).select("id").single();
+    if (first.error && isMissingPhotoColumn(first.error)) {
+      const retry = await sb.from("employees").insert(withoutPhoto).select("id").single();
+      return { error: retry.error, id: retry.data?.id };
+    }
+    return { error: first.error, id: first.data?.id };
+  }
+
+  /**
+   * Unggah foto ke bucket Storage "avatars" (publik).
+   * Gagal upload TIDAK menggagalkan penyimpanan karyawan — dipakai dummy.
+   */
+  async function uploadPhoto(
+    sb: ReturnType<typeof getSupabase>,
+    file: File,
+    employeeNo: string,
+  ): Promise<{ url: string; warning: string | null }> {
+    const rawExt = file.name.split(".").pop() ?? "";
+    const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const safeNo = employeeNo.replace(/[^a-zA-Z0-9_-]/g, "_") || "karyawan";
+    const path = `${safeNo}/${Date.now()}.${ext}`;
+    try {
+      const { error: upErr } = await sb.storage
+        .from("avatars")
+        .upload(path, file, {
+          contentType: file.type || "image/jpeg",
+          upsert: false,
+        });
+      if (upErr) throw upErr;
+      const { data } = sb.storage.from("avatars").getPublicUrl(path);
+      if (!data?.publicUrl) throw new Error("URL publik tidak tersedia.");
+      return { url: data.publicUrl, warning: null };
+    } catch (e) {
+      const reason = e instanceof Error ? e.message : "kesalahan tidak diketahui";
+      return {
+        url: DUMMY_PHOTO,
+        warning: `Foto gagal diupload (${reason}); dipakai gambar dummy.`,
+      };
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -81,6 +183,20 @@ export default function EmployeeManager({ employees }: Props) {
       return;
     }
 
+    const sb = getSupabase();
+
+    // Selesaikan foto dulu: unggah bila ada file baru, dummy bila tidak ada,
+    // pertahankan yang lama saat ubah tanpa file baru.
+    let photoUrl: string | null;
+    let photoWarning: string | null = null;
+    if (photoFile) {
+      const up = await uploadPhoto(sb, photoFile, form.employee_no.trim());
+      photoUrl = up.url;
+      photoWarning = up.warning;
+    } else {
+      photoUrl = editing ? editing.photo_url ?? null : DUMMY_PHOTO;
+    }
+
     const payload = {
       full_name: form.full_name.trim(),
       employee_no: form.employee_no.trim(),
@@ -92,27 +208,25 @@ export default function EmployeeManager({ employees }: Props) {
       work_mode: form.work_mode,
       pic_id: form.pic_id || null,
       user_id: form.user_id.trim() || null,
+      photo_url: photoUrl,
       is_hr: form.is_hr,
       is_active: form.is_active,
     };
 
+    const doneMsg = (base: string) =>
+      photoWarning ? { kind: "warning" as const, text: `${base} ${photoWarning}` } : { kind: "ok" as const, text: base };
+
     try {
-      const sb = getSupabase();
       if (editing) {
-        const { error } = await sb
-          .from("employees")
-          .update(payload)
-          .eq("id", editing.id);
-        if (error) throw error;
-        setMessage({ kind: "ok", text: "Data karyawan diperbarui." });
+        const res = await saveEmployeeRow(sb, payload, editing.id);
+        if (res.error) throw res.error;
+        setMessage(doneMsg("Data karyawan diperbarui."));
       } else {
         // 1) Buat baris karyawan dulu.
-        const { data: inserted, error: insErr } = await sb
-          .from("employees")
-          .insert(payload)
-          .select("id")
-          .single();
-        if (insErr) throw insErr;
+        const saved = await saveEmployeeRow(sb, payload, null);
+        if (saved.error) throw saved.error;
+        const insertedId = saved.id;
+        if (!insertedId) throw new Error("Gagal membuat data karyawan.");
 
         // 2) Buatkan akun login dengan kata sandi default "secret123".
         //    Bila email sudah terdaftar di Authentication, pakai akun itu
@@ -131,23 +245,25 @@ export default function EmployeeManager({ employees }: Props) {
             const { error: linkErr } = await sb
               .from("employees")
               .update({ user_id: authData.user.id })
-              .eq("id", inserted.id);
+              .eq("id", insertedId);
             if (linkErr) throw linkErr;
           }
           if (authData.session) {
             await sb.auth.signOut();
             sessionSwitched = true;
           }
-          setMessage({
-            kind: "ok",
-            text:
-              identities.length > 0
-                ? `Karyawan ditambahkan. Akun login: ${payload.email} / kata sandi "secret123".`
-                : `Karyawan ditambahkan. Akun ${payload.email} sudah ada di Authentication — dipakai yang itu (kata sandi tidak diubah).`,
-          });
+          setMessage(
+            identities.length > 0
+              ? doneMsg(
+                  `Karyawan ditambahkan. Akun login: ${payload.email} / kata sandi "secret123".`,
+                )
+              : doneMsg(
+                  `Karyawan ditambahkan. Akun ${payload.email} sudah ada di Authentication — dipakai yang itu (kata sandi tidak diubah).`,
+                ),
+          );
         } catch (authE) {
           // Rollback: hapus baris karyawan bila akun gagal dibuat.
-          await sb.from("employees").delete().eq("id", inserted.id);
+          await sb.from("employees").delete().eq("id", insertedId);
           throw authE;
         }
 
@@ -184,7 +300,7 @@ export default function EmployeeManager({ employees }: Props) {
       </div>
 
       {message && !showForm && (
-        <div className={`notice ${message.kind === "ok" ? "ok" : "error"}`}>
+        <div className={`notice ${message.kind}`}>
           {message.text}
         </div>
       )}
@@ -193,6 +309,28 @@ export default function EmployeeManager({ employees }: Props) {
         <div className="card">
           <h2>{editing ? "Ubah Karyawan" : "Tambah Karyawan"}</h2>
           <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="field">
+                <label>Foto profil</label>
+                <div className="photo-picker">
+                  <img
+                    src={photoPreview ?? DUMMY_PHOTO}
+                    alt="Pratinjau foto profil"
+                    className="photo-preview"
+                  />
+                  <div className="photo-input">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                    />
+                    <small className="hint">
+                      Opsional — bila kosong dipakai gambar dummy. Maksimal 5 MB.
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="row">
               <div className="field">
                 <label>Nama lengkap *</label>
@@ -324,9 +462,7 @@ export default function EmployeeManager({ employees }: Props) {
             )}
 
             {message && (
-              <div
-                className={`notice ${message.kind === "ok" ? "ok" : "error"}`}
-              >
+              <div className={`notice ${message.kind}`}>
                 {message.text}
               </div>
             )}
