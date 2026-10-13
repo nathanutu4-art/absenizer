@@ -8,16 +8,17 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppIcon } from '../../src/components/AppIcon';
-import { StatusChip } from '../../src/components/StatusChip';
-import { ThemedButton } from '../../src/components/ThemedButton';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { Plate } from '../../src/components/Plate';
+import { PlateButton } from '../../src/components/PlateButton';
+import { StampChip } from '../../src/components/StampChip';
 import {
   GEOFENCE_M,
   OFFICE_ADDRESS,
   OFFICE_NAME,
 } from '../../src/data/demo';
 import { recordClockIn } from '../../src/lib/clockState';
-import { colors, fontFamily, radius, spacing } from '../../src/theme';
+import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
 /**
  * Konfirmasi GPS — peta simulasi (styled view): pin kantor + pin pengguna +
@@ -57,85 +58,97 @@ export default function ConfirmScreen() {
     <View style={styles.root}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <AppIcon color={colors.ink} name="chevron_left" size={22} />
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={() => router.back()}
+          >
+            <MedallionIcon glyph="chevron_left" size={36} variant="ink" />
           </TouchableOpacity>
           <Text style={styles.title}>Konfirmasi GPS</Text>
-          <View style={styles.backBtn} />
+          <View style={styles.headerSpacer} />
         </View>
 
         {/* Peta simulasi */}
-        <View style={styles.mapBox}>
-          {/* lingkaran geofence */}
-          <View style={styles.geofence} />
-          {/* pin kantor */}
-          <View style={styles.officePin}>
-            <AppIcon color={colors.indigo} name="building" size={24} />
+        <Plate style={styles.mapPlate}>
+          <View style={styles.mapInner}>
+            {/* lingkaran geofence */}
+            <View style={styles.geofence} />
+            {/* pin kantor */}
+            <View style={styles.officePin}>
+              <MedallionIcon glyph="building" size={46} variant="ink" />
+            </View>
+            {/* pin pengguna */}
+            <View style={[styles.userPin, simFar && styles.userPinFar]}>
+              <View style={styles.userDot} />
+            </View>
+            <View style={styles.gpsChipWrap}>
+              <StampChip color={colors.green} backgroundColor={colors.greenBg}>
+                GPS Akurat ±8 m
+              </StampChip>
+            </View>
           </View>
-          {/* pin pengguna */}
-          <View style={[styles.userPin, simFar && styles.userPinFar]}>
-            <View style={styles.userDot} />
-          </View>
-          <View style={styles.gpsChip}>
-            <AppIcon color={colors.indigo} name="navigation" size={14} style={styles.gpsChipIcon} />
-            <Text style={styles.gpsChipText}>GPS Akurat • ± 8 m</Text>
-          </View>
-        </View>
+        </Plate>
 
         {/* Statistik jarak */}
-        <View style={styles.stats}>
-          <View style={styles.statCell}>
-            <Text style={styles.statValue}>{distanceLabel}</Text>
-            <Text style={styles.statLabel}>Jarak ke kantor</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statCell}>
-            <Text
-              style={[
-                styles.statValue,
-                simFar ? { color: colors.orange } : { color: colors.green },
-              ]}
-            >
-              {areaLabel}
-            </Text>
-            <Text style={styles.statLabel}>Status area</Text>
-          </View>
+        <View style={styles.statsRow}>
+          <Plate style={styles.statPlate}>
+            <View style={styles.statInner}>
+              <Text style={styles.statValue}>{distanceLabel}</Text>
+              <Text style={styles.statLabel}>Jarak ke kantor</Text>
+            </View>
+          </Plate>
+          <Plate style={styles.statPlate}>
+            <View style={styles.statInner}>
+              <Text
+                style={[
+                  styles.statValue,
+                  simFar ? { color: colors.orange } : { color: colors.green },
+                ]}
+              >
+                {areaLabel}
+              </Text>
+              <Text style={styles.statLabel}>Status area</Text>
+            </View>
+          </Plate>
         </View>
 
         {/* Kartu kantor */}
-        <View style={styles.officeCard}>
-          <AppIcon color={colors.indigo} name="map_pin" size={28} style={styles.officeGlyphIcon} />
-          <View style={styles.officeText}>
-            <Text style={styles.officeName}>{OFFICE_NAME}</Text>
-            <Text style={styles.officeAddress}>{OFFICE_ADDRESS}</Text>
-            <Text style={styles.officeMeta}>
-              Geofence {GEOFENCE_M.toLocaleString('id-ID')} m
-            </Text>
+        <Plate style={styles.officePlate}>
+          <View style={styles.officeInner}>
+            <MedallionIcon glyph="map_pin" size={44} variant="ink" />
+            <View style={styles.officeText}>
+              <Text style={styles.officeName}>{OFFICE_NAME}</Text>
+              <Text style={styles.officeAddress}>{OFFICE_ADDRESS}</Text>
+              <Text style={styles.officeMeta}>
+                Geofence {GEOFENCE_M.toLocaleString('id-ID')} m
+              </Text>
+            </View>
           </View>
-        </View>
+        </Plate>
 
         {/* Simulasi */}
-        <View style={styles.simBox}>
-          <View style={styles.simRow}>
-            <Text style={styles.simLabel}>
-              Simulasi: Posisi di luar area (&gt; 1.000 m)
+        <Plate style={styles.simPlate}>
+          <View style={styles.simInner}>
+            <View style={styles.simRow}>
+              <Text style={styles.simLabel}>
+                Simulasi: Posisi di luar area (&gt; 1.000 m)
+              </Text>
+              <Switch
+                onValueChange={setSimFar}
+                trackColor={{ false: colors.line, true: colors.orange }}
+                value={simFar}
+              />
+            </View>
+            <Text style={styles.simHint}>
+              Kehadiran di luar area tetap diterima dengan penanda oranye.
             </Text>
-            <Switch
-              onValueChange={setSimFar}
-              trackColor={{ false: colors.line, true: colors.orange }}
-              value={simFar}
-            />
           </View>
-          <Text style={styles.simHint}>
-            Kehadiran di luar area tetap diterima dengan penanda oranye.
-          </Text>
-        </View>
+        </Plate>
 
         <View style={styles.ctaWrap}>
-          <ThemedButton
-            onPress={handleConfirm}
-            title="Konfirmasi & Clock In"
-          />
+          <PlateButton onPress={handleConfirm} variant="primary">
+            Konfirmasi & Clock In
+          </PlateButton>
         </View>
       </SafeAreaView>
     </View>
@@ -152,24 +165,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  backBtn: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
+  headerSpacer: { height: 36, width: 36 },
+  title: {
+    color: colors.ink,
+    fontFamily: serifFamily('800'),
+    fontSize: 18,
   },
-  backText: { color: colors.ink, fontSize: 24, fontWeight: '700', marginTop: -3 },
-  title: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 17 },
-  mapBox: {
+  mapPlate: { marginHorizontal: spacing.lg, marginTop: spacing.sm },
+  mapInner: {
     alignItems: 'center',
-    backgroundColor: '#e3ecf5',
-    borderRadius: 22,
+    backgroundColor: colors.paper2,
+    borderRadius: radius.card,
     height: 300,
     justifyContent: 'center',
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.sm,
     overflow: 'hidden',
   },
   geofence: {
@@ -183,58 +191,33 @@ const styles = StyleSheet.create({
   },
   officePin: {
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 24,
-    elevation: 3,
-    height: 48,
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    width: 48,
   },
-  pinGlyph: { fontSize: 24 },
   userPin: { left: '58%', position: 'absolute', top: '38%' },
   userPinFar: { left: '82%', top: '12%' },
   userDot: {
     backgroundColor: colors.indigo,
-    borderColor: '#fff',
+    borderColor: '#ffffff',
     borderRadius: 12,
     borderWidth: 3,
-    elevation: 3,
     height: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
     width: 24,
   },
-  gpsChip: {
+  gpsChipWrap: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: radius.chip,
     bottom: 14,
-    flexDirection: 'row',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    left: 0,
     position: 'absolute',
+    right: 0,
   },
-  gpsChipIcon: { marginRight: 6 },
-  gpsChipText: {
-    color: colors.ink,
-    fontFamily: fontFamily('700'),
-    fontSize: 12,
-  },
-  stats: {
-    backgroundColor: '#fff',
-    borderRadius: radius.card,
+  statsRow: {
     flexDirection: 'row',
+    gap: spacing.sm,
     marginHorizontal: spacing.lg,
     marginTop: spacing.md,
-    padding: spacing.md,
   },
-  statCell: { alignItems: 'center', flex: 1 },
+  statPlate: { flex: 1 },
+  statInner: { alignItems: 'center', padding: spacing.md },
   statValue: {
     color: colors.ink,
     fontFamily: fontFamily('800'),
@@ -246,17 +229,13 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 4,
   },
-  statDivider: { backgroundColor: colors.line, width: 1 },
-  officeCard: {
-    backgroundColor: '#fff',
-    borderRadius: radius.card,
+  officePlate: { marginHorizontal: spacing.lg, marginTop: spacing.md },
+  officeInner: {
+    alignItems: 'center',
     flexDirection: 'row',
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
     padding: spacing.md,
   },
-  officeGlyphIcon: { marginRight: 12 },
-  officeText: { flex: 1 },
+  officeText: { flex: 1, marginLeft: 12 },
   officeName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
   officeAddress: {
     color: colors.ink2,
@@ -270,13 +249,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  simBox: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
-    padding: spacing.md,
-  },
+  simPlate: { marginHorizontal: spacing.lg, marginTop: spacing.md },
+  simInner: { padding: spacing.md },
   simRow: {
     alignItems: 'center',
     flexDirection: 'row',
