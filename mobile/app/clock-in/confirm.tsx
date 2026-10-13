@@ -1,4 +1,4 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
@@ -17,11 +17,14 @@ import { OFFICE_ADDRESS } from '../../src/data/demo';
 import {
   DEMO_SETTINGS,
   getCompanySettings,
+  getMyEmployeeId,
   saveAttendance,
+  uploadSelfie,
   type CompanySettings,
 } from '../../src/lib/db';
 import { recordClockIn } from '../../src/lib/clockState';
 import { distanceMeters, isInsideGeofence } from '../../src/lib/geo';
+import { getSelfiePhoto } from '../../src/lib/selfiePhoto';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
 /** Format jarak: "850 m" atau "1,4 km". */
@@ -38,8 +41,8 @@ function formatDistance(meters: number): string {
  * memaksa skenario demo. Di luar area TETAP DITERIMA + penanda oranye.
  */
 export default function ConfirmScreen() {
-  const { simFace } = useLocalSearchParams<{ simFace?: string }>();
   const [simFar, setSimFar] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [coords, setCoords] =
     useState<Pick<Location.LocationObjectCoords, 'latitude' | 'longitude' | 'accuracy'> | null>(null);
   const [locDenied, setLocDenied] = useState(false);
@@ -103,7 +106,9 @@ export default function ConfirmScreen() {
       ? `GPS ±${Math.round(coords.accuracy ?? 0)} m`
       : 'Mencari GPS…';
 
-  function handleConfirm() {
+  async function handleConfirm() {
+    if (busy) return;
+    setBusy(true);
     const now = new Intl.DateTimeFormat('id-ID', {
       hour: '2-digit',
       minute: '2-digit',
@@ -112,22 +117,33 @@ export default function ConfirmScreen() {
       .format(new Date())
       .replace(':', '.');
     const flags: string[] = [];
-    if (simFace) flags.push('Wajah Tidak Cocok');
     if (isFar) flags.push('Di Luar Area');
     recordClockIn(now, flags);
-    // Simpan ke Supabase bila terkonfigurasi (best-effort, tanpa blokir UI).
-    saveAttendance({
-      simFace: !!simFace,
-      isFar,
-      distanceM: realDist,
-      coords,
-    }).catch(() => {});
+    // Upload selfie (resize dulu) lalu simpan ke Supabase — best-effort,
+    // clock-in tidak diblokir bila upload gagal.
+    try {
+      const photoUri = getSelfiePhoto();
+      const employeeId = await getMyEmployeeId();
+      const selfieUrl =
+        photoUri && employeeId
+          ? await uploadSelfie(photoUri, employeeId, 'in')
+          : null;
+      await saveAttendance({
+        isFar,
+        distanceM: realDist,
+        coords,
+        selfieUrl,
+      });
+    } catch {
+      // Diabaikan — status lokal sudah tercatat.
+    } finally {
+      setBusy(false);
+    }
     router.push({
       pathname: '/clock-in/success',
       params: {
         time: now,
         distance: distanceLabel,
-        ...(simFace ? { simFace: '1' } : {}),
         ...(isFar ? { simFar: '1' } : {}),
       },
     });
@@ -231,7 +247,7 @@ export default function ConfirmScreen() {
 
         <View style={styles.ctaWrap}>
           <PlateButton onPress={handleConfirm} variant="primary">
-            Konfirmasi & Clock In
+            {busy ? 'Mengirim…' : 'Konfirmasi & Clock In'}
           </PlateButton>
         </View>
       </SafeAreaView>
