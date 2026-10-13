@@ -508,7 +508,7 @@ export default function EmployeeManager({ employees }: Props) {
                     </>
                   )}
                   <br />
-                  <span style={{ color: "#4d5a68", fontSize: "0.82rem" }}>
+                  <span style={{ color: "var(--muted)", fontSize: "0.82rem" }}>
                     Lahir: {formatTanggal(e.birth_date)}
                   </span>
                 </td>
