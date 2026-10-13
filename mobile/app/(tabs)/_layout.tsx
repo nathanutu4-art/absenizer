@@ -1,6 +1,8 @@
 import { Tabs } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Text } from 'react-native';
+import type { ColorValue } from 'react-native';
+import { AppIcon } from '../../src/components/AppIcon';
+import type { IconName } from '../../src/data/icons';
 import { PIC_REQUESTS } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
 import { colors, fontFamily } from '../../src/theme';
@@ -11,8 +13,14 @@ import { colors, fontFamily } from '../../src/theme';
  * - PIC: Beranda, Persetujuan (badge = jumlah menunggu), Tim, Profil
  * - HR: Beranda, Ambil Alih (badge = jumlah eskalasi), Tim, Profil
  */
-function TabIcon({ glyph }: { glyph: string }) {
-  return <Text style={{ fontSize: 22 }}>{glyph}</Text>;
+function tabIcon(name: IconName) {
+  return ({ color }: { color: ColorValue }) => (
+    <AppIcon
+      color={typeof color === 'string' ? color : colors.indigo}
+      name={name}
+      size={25}
+    />
+  );
 }
 
 const badgeStyle = {
@@ -56,14 +64,14 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: 'Beranda',
-          tabBarIcon: () => <TabIcon glyph="🏠" />,
+          tabBarIcon: tabIcon("home"),
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: 'Riwayat',
-          tabBarIcon: () => <TabIcon glyph="🕘" />,
+          tabBarIcon: tabIcon("clock"),
           href: role === 'karyawan' ? undefined : null,
         }}
       />
@@ -71,14 +79,14 @@ export default function TabsLayout() {
         name="team"
         options={{
           title: 'Tim',
-          tabBarIcon: () => <TabIcon glyph="👥" />,
+          tabBarIcon: tabIcon("users"),
         }}
       />
       <Tabs.Screen
         name="requests"
         options={{
           title: 'Pengajuan',
-          tabBarIcon: () => <TabIcon glyph="📝" />,
+          tabBarIcon: tabIcon("file_text"),
           href: role === 'karyawan' ? undefined : null,
         }}
       />
@@ -88,7 +96,7 @@ export default function TabsLayout() {
           title: 'Persetujuan',
           tabBarBadge: pendingCount > 0 ? String(pendingCount) : undefined,
           tabBarBadgeStyle: badgeStyle,
-          tabBarIcon: () => <TabIcon glyph="✅" />,
+          tabBarIcon: tabIcon("check_circle"),
           href: role === 'pic' ? undefined : null,
         }}
       />
@@ -98,7 +106,7 @@ export default function TabsLayout() {
           title: 'Ambil Alih',
           tabBarBadge: escalatedCount > 0 ? String(escalatedCount) : undefined,
           tabBarBadgeStyle: badgeStyle,
-          tabBarIcon: () => <TabIcon glyph="🔁" />,
+          tabBarIcon: tabIcon("repeat"),
           href: role === 'hr' ? undefined : null,
         }}
       />
@@ -106,7 +114,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: 'Profil',
-          tabBarIcon: () => <TabIcon glyph="👤" />,
+          tabBarIcon: tabIcon("user"),
         }}
       />
     </Tabs>
