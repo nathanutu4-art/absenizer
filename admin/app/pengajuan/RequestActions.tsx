@@ -28,9 +28,84 @@ export default function RequestActions({
   const [rejecting, setRejecting] = useState(false);
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [warn, setWarn] = useState<string | null>(null);
 
   if (status !== "menunggu") {
     return <span style={{ color: "#4d5a68", fontSize: "0.85rem" }}>Selesai</span>;
+  }
+
+  /** Jumlah hari kalender dari start s.d. end (inklusif). */
+  function dayCount(startISO: string, endISO: string): number {
+    const toUTC = (s: string) => {
+      const [y, m, d] = s.split("-").map(Number);
+      return Date.UTC(y, m - 1, d);
+    };
+    return Math.max(1, Math.round((toUTC(endISO) - toUTC(startISO)) / 86400000) + 1);
+  }
+
+  /**
+   * Kurangi kuota cuti/ijin karyawan di leave_balances untuk tahun pengajuan.
+   * Sakit tidak menyentuh kuota. Gagal di sini tidak menggagalkan persetujuan.
+   */
+  async function applyLeaveBalance(
+    sb: ReturnType<typeof getSupabase>,
+    leaveRequestId: string
+  ): Promise<void> {
+    const { data: req, error: reqErr } = await sb
+      .from("leave_requests")
+      .select("employee_id, type, start_date, end_date")
+      .eq("id", leaveRequestId)
+      .maybeSingle();
+    if (reqErr) throw reqErr;
+    if (!req || req.type === "sakit") return;
+
+    const year = Number(String(req.start_date).slice(0, 4));
+    const days = dayCount(req.start_date, req.end_date); // ijin setengah hari tetap 1
+
+    // Kuota default dari pengaturan perusahaan (fallback 12 bila kolom belum ada).
+    let cutiQuota = 12;
+    let ijinQuota = 12;
+    try {
+      const { data: settings, error: setErr } = await sb
+        .from("company_settings")
+        .select("cuti_quota_default, ijin_quota_default")
+        .eq("is_active", true)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (setErr) throw setErr;
+      if (settings?.cuti_quota_default != null) cutiQuota = settings.cuti_quota_default;
+      if (settings?.ijin_quota_default != null) ijinQuota = settings.ijin_quota_default;
+    } catch {
+      // Kolom kuota belum ada (migrasi belum jalan) — pakai 12/12.
+    }
+
+    const { data: bal, error: balErr } = await sb
+      .from("leave_balances")
+      .select("id, cuti_used, ijin_used")
+      .eq("employee_id", req.employee_id)
+      .eq("year", year)
+      .maybeSingle();
+    if (balErr) throw balErr;
+
+    if (!bal) {
+      const { error: insErr } = await sb.from("leave_balances").insert({
+        employee_id: req.employee_id,
+        year,
+        cuti_quota: cutiQuota,
+        cuti_used: req.type === "cuti" ? days : 0,
+        ijin_quota: ijinQuota,
+        ijin_used: req.type === "ijin" ? days : 0,
+      });
+      if (insErr) throw insErr;
+    } else {
+      const field = req.type === "cuti" ? "cuti_used" : "ijin_used";
+      const { error: updErr } = await sb
+        .from("leave_balances")
+        .update({ [field]: (bal[field] ?? 0) + days })
+        .eq("id", bal.id);
+      if (updErr) throw updErr;
+    }
   }
 
   async function decide(decision: "disetujui" | "ditolak", rejectNote: string) {
@@ -76,6 +151,19 @@ export default function RequestActions({
             : "Disetujui via panel admin",
       });
       if (auditErr) throw auditErr;
+
+      // Persetujuan cuti/ijin mengurangi kuota — gagal di sini hanya peringatan.
+      if (decision === "disetujui") {
+        try {
+          await applyLeaveBalance(sb, requestId);
+        } catch (balErr) {
+          setWarn(
+            `Pengajuan disetujui, tetapi kuota gagal diperbarui: ${
+              balErr instanceof Error ? balErr.message : "kesalahan tak dikenal"
+            }`
+          );
+        }
+      }
 
       router.refresh();
     } catch (err) {
@@ -145,6 +233,11 @@ export default function RequestActions({
       {error && (
         <div style={{ color: "#dc2626", fontSize: "0.82rem", marginTop: "0.35rem" }}>
           {error}
+        </div>
+      )}
+      {warn && (
+        <div style={{ color: "#b45309", fontSize: "0.82rem", marginTop: "0.35rem" }}>
+          {warn}
         </div>
       )}
     </div>
