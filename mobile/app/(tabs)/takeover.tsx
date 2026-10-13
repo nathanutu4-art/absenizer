@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StatusChip } from '../../src/components/StatusChip';
@@ -33,7 +34,7 @@ export default function TakeoverScreen() {
 
       {/* Banner audit persisten */}
       <View style={styles.auditBanner}>
-        <Text style={styles.auditGlyph}>🛡️</Text>
+        <AppIcon color={colors.orange} name="shield" size={28} style={styles.auditIcon} />
         <View style={styles.auditText}>
           <Text style={styles.auditTitle}>Penanda Audit Aktif</Text>
           <Text style={styles.auditSub}>
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     padding: spacing.md,
   },
-  auditGlyph: { fontSize: 26, marginRight: 12 },
+  auditIcon: { marginRight: 12 },
   auditText: { flex: 1 },
   auditTitle: { color: colors.orange, fontFamily: fontFamily('800'), fontSize: 14 },
   auditSub: {
