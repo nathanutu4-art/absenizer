@@ -143,7 +143,7 @@ export default function TeamScreen() {
       {/* Direktori */}
       <SectionTitle label="Direktori Karyawan" />
       <View style={styles.searchRow}>
-        <MedallionIcon glyph="search" size={32} style={styles.searchMedal} />
+        <MedallionIcon glyph="search" size={32} style={styles.searchMedal} variant="wadaIndigo" />
         <TextInput
           onChangeText={setQuery}
           placeholder="Cari nama karyawan…"
