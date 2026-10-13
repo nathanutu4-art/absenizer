@@ -55,7 +55,7 @@ export default function EmployeeDetailScreen() {
               <View style={styles.backSpacer} />
             </View>
             <View style={styles.profileRow}>
-              <Avatar gradientId={employee.gradientId} name={employee.name} size={76} />
+              <Avatar gradientId={employee.gradientId} name={employee.name} size={76} shape="square" />
               <View style={styles.profileText}>
                 <Text style={styles.name}>{employee.name}</Text>
                 <Text style={styles.position}>{employee.position}</Text>
@@ -93,7 +93,7 @@ export default function EmployeeDetailScreen() {
           </View>
           <Plate style={styles.picWrap}>
             <View style={styles.picRow}>
-              <Avatar gradientId={pic.gradientId} name={pic.name} size={46} />
+              <Avatar gradientId={pic.gradientId} name={pic.name} size={46} shape="square" />
               <View style={styles.picText}>
                 <Text style={styles.picName}>{pic.name}</Text>
                 <Text style={styles.picPos}>{pic.position}</Text>
