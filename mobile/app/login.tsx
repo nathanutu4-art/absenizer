@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useState } from 'react';
 import {
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,10 +11,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from '../src/components/AppIcon';
 import { GradientView } from '../src/components/GradientView';
 import { SegmentedControl } from '../src/components/SegmentedControl';
 import { ThemedButton } from '../src/components/ThemedButton';
 import { APP_VERSION, COMPANY_NAME } from '../src/data/demo';
+import { ILLUSTRATION_LOGIN } from '../src/data/illustrations-login';
 import { supabase } from '../src/lib/supabase';
 import { SESSION_KEY, type DemoRole } from '../src/lib/session';
 import { showToast } from '../src/components/Toast';
@@ -98,17 +101,12 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Ilustrasi meja kantor sederhana */}
-          <View style={styles.illustration}>
-            <View style={styles.window} />
-            <View style={styles.deskTop} />
-            <View style={styles.monitor} />
-            <View style={styles.monitorStand} />
-            <View style={styles.keyboard} />
-            <View style={styles.mug} />
-            <View style={styles.plant} />
-            <View style={styles.plantPot} />
-          </View>
+          {/* Ilustrasi meja kantor */}
+          <Image
+            resizeMode="contain"
+            source={{ uri: ILLUSTRATION_LOGIN }}
+            style={styles.illustrationImage}
+          />
 
           <Text style={styles.title}>Selamat Datang di AbsensiKu</Text>
           <Text style={styles.subtitle}>
@@ -118,7 +116,7 @@ export default function LoginScreen() {
           <View style={styles.card}>
             <Text style={styles.label}>Email perusahaan</Text>
             <View style={styles.inputRow}>
-              <Text style={styles.icon}>✉️</Text>
+              <AppIcon color={colors.ink3} name="mail" size={18} style={styles.inputIcon} />
               <TextInput
                 autoCapitalize="none"
                 keyboardType="email-address"
@@ -132,7 +130,7 @@ export default function LoginScreen() {
 
             <Text style={styles.label}>Kata sandi</Text>
             <View style={styles.inputRow}>
-              <Text style={styles.icon}>🔒</Text>
+              <AppIcon color={colors.ink3} name="lock" size={18} style={styles.inputIcon} />
               <TextInput
                 onChangeText={setPassword}
                 placeholder="••••••••"
@@ -149,7 +147,7 @@ export default function LoginScreen() {
                 style={styles.rememberRow}
               >
                 <View style={[styles.checkbox, remember && styles.checkboxOn]}>
-                  {remember ? <Text style={styles.checkmark}>✓</Text> : null}
+                  {remember ? <AppIcon color="#fff" name="check" size={13} /> : null}
                 </View>
                 <Text style={styles.rememberText}>Ingat saya</Text>
               </TouchableOpacity>
@@ -275,6 +273,7 @@ const styles = StyleSheet.create({
     right: '8%',
     width: 28,
   },
+  illustrationImage: { height: 170, marginBottom: spacing.sm, width: '100%' },
   title: {
     color: '#fff',
     fontFamily: fontFamily('800'),
@@ -308,6 +307,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 12,
   },
+  inputIcon: { marginRight: 8 },
   icon: { fontSize: 16, marginRight: 8 },
   input: {
     color: colors.ink,
