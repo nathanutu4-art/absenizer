@@ -2,16 +2,36 @@ import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from '../../src/components/Avatar';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
-import { StatusChip } from '../../src/components/StatusChip';
+import { StampChip } from '../../src/components/StampChip';
 import {
   PIC_REQUESTS,
   STATUS_LABEL,
   TYPE_LABEL,
   getEmployee,
   type LeaveRequest,
+  type RequestStatus,
 } from '../../src/data/demo';
-import { colors, fontFamily, radius, spacing } from '../../src/theme';
+import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
+
+const STATUS_CHIP: Record<RequestStatus, { color: string; backgroundColor: string }> = {
+  menunggu: { color: colors.yellowText, backgroundColor: colors.yellowBg },
+  disetujui: { color: colors.green, backgroundColor: colors.greenBg },
+  ditolak: { color: colors.red, backgroundColor: colors.redBg },
+};
+
+/** Judul seksi ukiran: serif + garis ganda di bawah. */
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <View style={styles.secWrap}>
+      <Text style={styles.secTitle}>{children}</Text>
+      <View style={styles.ruleThick} />
+      <View style={styles.ruleThin} />
+    </View>
+  );
+}
 
 /** Persetujuan PIC — daftar menunggu + yang sudah diputus. */
 export default function ApprovalsScreen() {
@@ -22,24 +42,29 @@ export default function ApprovalsScreen() {
     <ScreenContainer>
       <View style={styles.headerRow}>
         <Text style={styles.header}>Persetujuan</Text>
-        <View style={styles.pendingChip}>
-          <Text style={styles.pendingText}>{pending.length} Menunggu</Text>
+        <StampChip color={colors.red} backgroundColor={colors.redBg}>
+          {pending.length} Menunggu
+        </StampChip>
+      </View>
+
+      <Plate style={styles.infoPlate}>
+        <View style={styles.platePad}>
+          <View style={styles.infoRow}>
+            <MedallionIcon glyph="info" size={40} />
+            <Text style={[styles.infoText, styles.infoBody]}>
+              Tinjau pengajuan dari anggota tim Anda. Penolakan wajib disertai
+              catatan.
+            </Text>
+          </View>
         </View>
-      </View>
+      </Plate>
 
-      <View style={styles.infoCard}>
-        <Text style={styles.infoText}>
-          ℹ️ Tinjau pengajuan dari anggota tim Anda. Penolakan wajib disertai
-          catatan.
-        </Text>
-      </View>
-
-      <Text style={styles.sectionTitle}>Menunggu Persetujuan</Text>
+      <SectionTitle>Menunggu Persetujuan</SectionTitle>
       {pending.map((r) => (
         <ApprovalRow key={r.id} request={r} />
       ))}
 
-      <Text style={styles.sectionTitle}>Sudah Diputus</Text>
+      <SectionTitle>Sudah Diputus</SectionTitle>
       {decided.map((r) => (
         <ApprovalRow key={r.id} request={r} />
       ))}
@@ -49,26 +74,29 @@ export default function ApprovalsScreen() {
 
 export function ApprovalRow({ request }: { request: LeaveRequest }) {
   const employee = getEmployee(request.employeeId);
-  const tone =
-    request.status === 'menunggu'
-      ? 'yellow'
-      : request.status === 'disetujui'
-        ? 'green'
-        : 'red';
+  const chip = STATUS_CHIP[request.status];
   return (
     <TouchableOpacity
+      activeOpacity={0.9}
       onPress={() => router.push(`/pic/detail?id=${request.id}`)}
-      style={styles.row}
     >
-      <Avatar gradientId={employee.gradientId} name={employee.name} size={46} />
-      <View style={styles.rowText}>
-        <Text style={styles.rowName}>{employee.name}</Text>
-        <Text style={styles.rowDesc}>
-          {TYPE_LABEL[request.type]} • {request.dateRange}
-        </Text>
-        <Text style={styles.rowDate}>{request.submittedAt}</Text>
-      </View>
-      <StatusChip label={STATUS_LABEL[request.status]} tone={tone} />
+      <Plate style={styles.rowPlate}>
+        <View style={styles.platePad}>
+          <View style={styles.row}>
+          <Avatar gradientId={employee.gradientId} name={employee.name} size={46} />
+          <View style={styles.rowText}>
+            <Text style={styles.rowName}>{employee.name}</Text>
+            <Text style={styles.rowDesc}>
+              {TYPE_LABEL[request.type]} • {request.dateRange}
+            </Text>
+            <Text style={styles.rowDate}>{request.submittedAt}</Text>
+            </View>
+            <StampChip color={chip.color} backgroundColor={chip.backgroundColor}>
+              {STATUS_LABEL[request.status]}
+            </StampChip>
+          </View>
+        </View>
+      </Plate>
     </TouchableOpacity>
   );
 }
@@ -80,36 +108,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: spacing.sm,
   },
-  header: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 19 },
-  pendingChip: {
-    backgroundColor: colors.red,
-    borderRadius: radius.chip,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  pendingText: { color: '#fff', fontFamily: fontFamily('700'), fontSize: 12 },
-  infoCard: {
-    backgroundColor: colors.blueBg,
-    borderRadius: radius.input,
-    marginTop: spacing.md,
-    padding: spacing.md,
-  },
+  header: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 22 },
+  infoPlate: { marginTop: spacing.md },
+  platePad: { padding: spacing.md },
+  infoRow: { alignItems: 'center', flexDirection: 'row' },
   infoText: { color: colors.blue, fontFamily: fontFamily('500'), fontSize: 12.5 },
-  sectionTitle: {
+  infoBody: { flex: 1, marginLeft: 10 },
+  secWrap: { marginBottom: spacing.sm, marginTop: spacing.lg },
+  secTitle: {
     color: colors.ink,
-    fontFamily: fontFamily('800'),
+    fontFamily: serifFamily('800'),
     fontSize: 15,
-    marginBottom: spacing.sm,
-    marginTop: spacing.lg,
+    letterSpacing: 0.4,
   },
-  row: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    flexDirection: 'row',
-    marginBottom: spacing.sm,
-    padding: spacing.md,
-  },
+  ruleThick: { backgroundColor: colors.ink, height: 3, marginTop: 6 },
+  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  rowPlate: { marginBottom: spacing.sm },
+  row: { alignItems: 'center', flexDirection: 'row' },
   rowText: { flex: 1, marginLeft: 12 },
   rowName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
   rowDesc: {
