@@ -2,7 +2,6 @@ import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
-  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -10,21 +9,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
-import { Plate } from '../../src/components/Plate';
 import { StampChip } from '../../src/components/StampChip';
 import { setSelfiePhoto } from '../../src/lib/selfiePhoto';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
 /**
  * Ambil Selfie — pratinjau kamera depan asli (expo-camera).
- * Tombol shutter mengambil foto sungguhan lalu lanjut ke tantangan kedip.
- * Toggle "Wajah tidak cocok" mensimulasikan hasil verifikasi (CompreFace
- * self-hosted belum disambungkan) — hasil tetap diterima dengan penanda.
+ * Tombol shutter mengambil foto sungguhan lalu lanjut ke konfirmasi GPS.
+ * Tidak ada verifikasi wajah: clock-in hanya foto + lokasi.
  */
 export default function SelfieScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
-  const [simFace, setSimFace] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -49,10 +45,7 @@ export default function SelfieScreen() {
     } finally {
       setBusy(false);
     }
-    router.push({
-      pathname: '/clock-in/liveness',
-      params: simFace ? { simFace: '1' } : {},
-    });
+    router.push('/clock-in/confirm');
   }
 
   const camReady = permission?.granted === true;
@@ -111,26 +104,6 @@ export default function SelfieScreen() {
             Posisikan wajah di dalam oval
           </Text>
         </View>
-
-        {/* Simulasi */}
-        <Plate
-          shadowColor="rgba(255,255,255,0.16)"
-          style={styles.simPlate}
-        >
-          <View style={styles.simInner}>
-            <View style={styles.simRow}>
-              <Text style={styles.simLabel}>Simulasi: Wajah tidak cocok</Text>
-              <Switch
-                onValueChange={setSimFace}
-                trackColor={{ false: '#3a4657', true: colors.orange }}
-                value={simFace}
-              />
-            </View>
-            <Text style={styles.simHint}>
-              Untuk demo — hasil tetap diterima dengan penanda.
-            </Text>
-          </View>
-        </Plate>
 
         {/* Shutter */}
         <View style={styles.shutterRow}>
@@ -221,24 +194,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily('500'),
     fontSize: 13,
     position: 'absolute',
-  },
-  simPlate: { marginHorizontal: spacing.lg, marginTop: spacing.md },
-  simInner: {
-    backgroundColor: colors.darkSurface,
-    borderRadius: radius.card,
-    padding: spacing.md,
-  },
-  simRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  simLabel: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
-  simHint: {
-    color: 'rgba(255,255,255,0.55)',
-    fontFamily: fontFamily('400'),
-    fontSize: 11,
-    marginTop: 6,
   },
   shutterRow: { alignItems: 'center', marginTop: spacing.lg },
 });
