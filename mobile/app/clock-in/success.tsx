@@ -21,10 +21,9 @@ const ROLE_EMPLOYEE: Record<DemoRole, string> = {
  * Sukses Clock In — struk dengan baris putus-putus + daftar penanda.
  */
 export default function SuccessScreen() {
-  const { time, distance, simFace, simFar } = useLocalSearchParams<{
+  const { time, distance, simFar } = useLocalSearchParams<{
     time?: string;
     distance?: string;
-    simFace?: string;
     simFar?: string;
   }>();
   const [name, setName] = useState('—');
@@ -36,7 +35,6 @@ export default function SuccessScreen() {
   }, []);
 
   const flags: string[] = [];
-  if (simFace) flags.push('Wajah Tidak Cocok');
   if (simFar) flags.push('Di Luar Area');
   const clean = flags.length === 0;
 
@@ -44,10 +42,6 @@ export default function SuccessScreen() {
     ['Nama', name],
     ['Mode Kerja', 'WFO'],
     ['Jarak', distance ?? '120 m'],
-    [
-      'Verifikasi Wajah',
-      simFace ? 'Tidak cocok — diberi penanda' : 'Cocok (96%)',
-    ],
     ['Status', clean ? 'Tercatat' : 'Tercatat dengan penanda'],
   ];
 
@@ -98,14 +92,7 @@ export default function SuccessScreen() {
               <View key={label}>
                 <View style={styles.row}>
                   <Text style={styles.rowLabel}>{label}</Text>
-                  <Text
-                    style={[
-                      styles.rowValue,
-                      label === 'Verifikasi Wajah' && simFace && styles.rowWarn,
-                    ]}
-                  >
-                    {value}
-                  </Text>
+                  <Text style={styles.rowValue}>{value}</Text>
                 </View>
                 {i < rows.length - 1 ? <View style={styles.dashed} /> : null}
               </View>
@@ -209,7 +196,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'right',
   },
-  rowWarn: { color: colors.orange },
   dashed: {
     borderBottomColor: colors.line,
     borderBottomWidth: 1,
