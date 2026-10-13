@@ -21,6 +21,7 @@ import { APP_VERSION, COMPANY_NAME } from '../src/data/demo';
 import { ILLUSTRATION_LOGIN } from '../src/data/illustrations-login';
 import { HATCH_TILE } from '../src/data/medallions';
 import { supabase } from '../src/lib/supabase';
+import { isSupabaseConfigured, resolveMyRole } from '../src/lib/db';
 import { SESSION_KEY, type DemoRole } from '../src/lib/session';
 import { showToast } from '../src/components/Toast';
 import { colors, fontFamily, serifFamily, spacing } from '../src/theme';
@@ -57,6 +58,7 @@ export default function LoginScreen() {
         password,
       });
       if (authError) throw authError;
+      // Simpan sesi dulu agar resolveMyRole bisa mencocokkan employee.
       await SecureStore.setItemAsync(
         SESSION_KEY,
         JSON.stringify({
@@ -64,8 +66,26 @@ export default function LoginScreen() {
           email: data.user.email,
           role,
           remember,
+          demo: false,
         }),
       );
+      // Bila Supabase terkonfigurasi, ambil peran sebenarnya dari DB
+      // (HR bila is_hr, PIC bila ada bawahan); fallback ke pilihan login.
+      if (isSupabaseConfigured()) {
+        const resolvedRole = await resolveMyRole(role);
+        if (resolvedRole !== role) {
+          await SecureStore.setItemAsync(
+            SESSION_KEY,
+            JSON.stringify({
+              userId: data.user.id,
+              email: data.user.email,
+              role: resolvedRole,
+              remember,
+              demo: false,
+            }),
+          );
+        }
+      }
       showToast('Selamat datang kembali!');
       router.replace('/(tabs)/home');
     } catch (e) {
