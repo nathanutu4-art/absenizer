@@ -62,7 +62,7 @@ export default function OpeningScreen() {
             </View>
             <StampChip
               backgroundColor={colors.plate}
-              color={colors.ink}
+              color={colors.wadaApricot}
               style={styles.kicker}
             >
               Absensi Karyawan
