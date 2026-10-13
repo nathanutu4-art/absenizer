@@ -331,14 +331,7 @@ export default function SettingsForm({ initial }: Props) {
           aksen (tombol & tab aktif), sekunder. Berlaku setelah aplikasi dibuka
           ulang.
         </p>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-            gap: 10,
-            marginTop: 10,
-          }}
-        >
+        <div className="palette-grid">
           {PALETTES.map((p) => {
             const active =
               palette.indigo.toLowerCase() === p.indigo.toLowerCase() &&
@@ -349,36 +342,15 @@ export default function SettingsForm({ initial }: Props) {
                 key={p.name}
                 type="button"
                 onClick={() => setPalette({ ...p })}
-                style={{
-                  border: active ? "2px solid #1c2733" : "1px solid #c9bfa3",
-                  borderRadius: 6,
-                  padding: 10,
-                  background: "#fffdf4",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
+                className={`palette-card${active ? " selected" : ""}`}
               >
-                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                <div className="palette-swatches">
                   {[p.indigo, p.apricot, p.olive].map((c) => (
-                    <span
-                      key={c}
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: 4,
-                        background: c,
-                        border: "1px solid #1c2733",
-                        display: "inline-block",
-                      }}
-                    />
+                    <span key={c} style={{ background: c }} />
                   ))}
                 </div>
-                <div style={{ fontSize: 13, fontWeight: 600 }}>{p.name}</div>
-                {active && (
-                  <div style={{ fontSize: 12, color: "#16a34a" }}>
-                    ✓ Terpilih
-                  </div>
-                )}
+                <div className="palette-name">{p.name}</div>
+                {active && <div className="palette-picked">✓ Terpilih</div>}
               </button>
             );
           })}
@@ -386,7 +358,7 @@ export default function SettingsForm({ initial }: Props) {
         <div className="row" style={{ marginTop: 12 }}>
           <div className="field">
             <label htmlFor="pal_indigo">Primer (header)</label>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div className="palette-custom">
               <input
                 id="pal_indigo"
                 type="color"
@@ -394,7 +366,6 @@ export default function SettingsForm({ initial }: Props) {
                 onChange={(e) =>
                   setPalette({ ...palette, name: "Kustom", indigo: e.target.value })
                 }
-                style={{ width: 44, height: 34, padding: 2 }}
               />
               <input
                 type="text"
@@ -403,13 +374,12 @@ export default function SettingsForm({ initial }: Props) {
                   setPalette({ ...palette, name: "Kustom", indigo: e.target.value })
                 }
                 placeholder="#051230"
-                style={{ width: 90 }}
               />
             </div>
           </div>
           <div className="field">
             <label htmlFor="pal_apricot">Aksen (tombol)</label>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div className="palette-custom">
               <input
                 id="pal_apricot"
                 type="color"
@@ -417,7 +387,6 @@ export default function SettingsForm({ initial }: Props) {
                 onChange={(e) =>
                   setPalette({ ...palette, name: "Kustom", apricot: e.target.value })
                 }
-                style={{ width: 44, height: 34, padding: 2 }}
               />
               <input
                 type="text"
@@ -426,13 +395,12 @@ export default function SettingsForm({ initial }: Props) {
                   setPalette({ ...palette, name: "Kustom", apricot: e.target.value })
                 }
                 placeholder="#f68c50"
-                style={{ width: 90 }}
               />
             </div>
           </div>
           <div className="field">
             <label htmlFor="pal_olive">Sekunder</label>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div className="palette-custom">
               <input
                 id="pal_olive"
                 type="color"
@@ -440,7 +408,6 @@ export default function SettingsForm({ initial }: Props) {
                 onChange={(e) =>
                   setPalette({ ...palette, name: "Kustom", olive: e.target.value })
                 }
-                style={{ width: 44, height: 34, padding: 2 }}
               />
               <input
                 type="text"
@@ -449,7 +416,6 @@ export default function SettingsForm({ initial }: Props) {
                   setPalette({ ...palette, name: "Kustom", olive: e.target.value })
                 }
                 placeholder="#a6a159"
-                style={{ width: 90 }}
               />
             </div>
           </div>
