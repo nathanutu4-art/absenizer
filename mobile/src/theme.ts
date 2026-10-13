@@ -1,5 +1,5 @@
 /**
- * Tema AbsensiKu — gaya ukiran vintage (etching), mengikuti hi-fi yang dirombak.
+ * Tema Absenizer — gaya ukiran vintage (etching), mengikuti hi-fi yang dirombak.
  *
  * Kertas: #fffdf4 (paper), #f6efdb (paper2). Tinta: #1c2733 (etch), #223140.
  * Primer indigo dipertahankan: #0057ba, #00468f, #00325e.
