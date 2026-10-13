@@ -13,12 +13,13 @@ import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
 import { StampChip } from '../../src/components/StampChip';
+import { OFFICE_ADDRESS } from '../../src/data/demo';
 import {
-  GEOFENCE_M,
-  OFFICE_ADDRESS,
-  OFFICE_COORD,
-  OFFICE_NAME,
-} from '../../src/data/demo';
+  DEMO_SETTINGS,
+  getCompanySettings,
+  saveAttendance,
+  type CompanySettings,
+} from '../../src/lib/db';
 import { recordClockIn } from '../../src/lib/clockState';
 import { distanceMeters, isInsideGeofence } from '../../src/lib/geo';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
@@ -42,6 +43,18 @@ export default function ConfirmScreen() {
   const [coords, setCoords] =
     useState<Pick<Location.LocationObjectCoords, 'latitude' | 'longitude' | 'accuracy'> | null>(null);
   const [locDenied, setLocDenied] = useState(false);
+  // Pengaturan kantor dari Supabase; fallback ke konstanta demo saat memuat.
+  const [settings, setSettings] = useState<CompanySettings | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    getCompanySettings().then((s) => {
+      if (alive) setSettings(s);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -72,8 +85,10 @@ export default function ConfirmScreen() {
     };
   }, []);
 
-  const realDist = coords ? distanceMeters(coords, OFFICE_COORD) : null;
-  const realInside = coords ? isInsideGeofence(coords, OFFICE_COORD, GEOFENCE_M) : null;
+  const office = settings ?? DEMO_SETTINGS;
+  const officeCoord = { latitude: office.officeLat, longitude: office.officeLng };
+  const realDist = coords ? distanceMeters(coords, officeCoord) : null;
+  const realInside = coords ? isInsideGeofence(coords, officeCoord, office.geofenceM) : null;
   // Toggle simulasi menimpa hasil GPS asli (untuk demo).
   const isFar = simFar || (realInside === false);
   const distanceLabel = simFar
@@ -100,6 +115,13 @@ export default function ConfirmScreen() {
     if (simFace) flags.push('Wajah Tidak Cocok');
     if (isFar) flags.push('Di Luar Area');
     recordClockIn(now, flags);
+    // Simpan ke Supabase bila terkonfigurasi (best-effort, tanpa blokir UI).
+    saveAttendance({
+      simFace: !!simFace,
+      isFar,
+      distanceM: realDist,
+      coords,
+    }).catch(() => {});
     router.push({
       pathname: '/clock-in/success',
       params: {
@@ -174,10 +196,10 @@ export default function ConfirmScreen() {
           <View style={styles.officeInner}>
             <MedallionIcon glyph="map_pin" size={44} variant="ink" />
             <View style={styles.officeText}>
-              <Text style={styles.officeName}>{OFFICE_NAME}</Text>
+              <Text style={styles.officeName}>{office.officeName}</Text>
               <Text style={styles.officeAddress}>{OFFICE_ADDRESS}</Text>
               <Text style={styles.officeMeta}>
-                Geofence {GEOFENCE_M.toLocaleString('id-ID')} m
+                Geofence {office.geofenceM.toLocaleString('id-ID')} m
               </Text>
               {coords && (
                 <Text style={styles.officeMeta}>
