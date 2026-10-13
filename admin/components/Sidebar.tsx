@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { getSupabase } from "@/lib/supabase";
 
 const NAV = [
   { href: "/", label: "Dashboard" },
@@ -13,6 +14,13 @@ const NAV = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    await getSupabase().auth.signOut();
+    router.replace("/login");
+  }
+
   return (
     <aside className="sidebar">
       <div className="brand">Absenizer</div>
@@ -28,6 +36,9 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
+      <button className="logout-btn" onClick={handleLogout}>
+        Keluar
+      </button>
     </aside>
   );
 }
