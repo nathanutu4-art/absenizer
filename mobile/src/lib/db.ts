@@ -27,6 +27,7 @@ import {
 } from '../data/demo';
 import { getSession, type DemoRole } from './session';
 import { supabase } from './supabase';
+import type { ThemePalette } from '../theme';
 
 // ---------------------------------------------------------------------------
 // Konfigurasi
@@ -130,6 +131,47 @@ export async function getCompanySettings(): Promise<CompanySettings> {
     };
   } catch {
     return DEMO_SETTINGS;
+  }
+}
+
+/**
+ * Palet tema aktif dari company_settings.theme_palette (JSON).
+ * Null bila Supabase tidak dikonfigurasi, baris/kolom tidak ada, atau
+ * nilainya tidak valid — tidak pernah melempar error.
+ */
+export async function getThemePalette(): Promise<ThemePalette | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase
+      .from('company_settings')
+      .select('theme_palette')
+      .eq('is_active', true)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return null;
+    const raw = (data as { theme_palette?: unknown }).theme_palette as {
+      name?: unknown;
+      indigo?: unknown;
+      apricot?: unknown;
+      olive?: unknown;
+    } | null;
+    if (!raw) return null;
+    if (
+      typeof raw.indigo !== 'string' ||
+      typeof raw.apricot !== 'string' ||
+      typeof raw.olive !== 'string'
+    ) {
+      return null;
+    }
+    return {
+      name: typeof raw.name === 'string' ? raw.name : '',
+      indigo: raw.indigo,
+      apricot: raw.apricot,
+      olive: raw.olive,
+    };
+  } catch {
+    return null;
   }
 }
 
