@@ -75,7 +75,7 @@ export default function ConfirmScreen() {
             <View style={styles.geofence} />
             {/* pin kantor */}
             <View style={styles.officePin}>
-              <MedallionIcon glyph="building" size={46} variant="ink" />
+              <MedallionIcon glyph="building" size={46} variant="wadaIndigo" />
             </View>
             {/* pin pengguna */}
             <View style={[styles.userPin, simFar && styles.userPinFar]}>
