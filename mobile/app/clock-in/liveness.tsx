@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from '../../src/components/AppIcon';
 import { colors, fontFamily, spacing } from '../../src/theme';
 
 /**
@@ -75,7 +76,7 @@ export default function LivenessScreen() {
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>‹</Text>
+            <AppIcon color="#fff" name="chevron_left" size={22} />
           </TouchableOpacity>
           <Text style={styles.title}>Tantangan Kedip</Text>
           <View style={styles.backBtn} />
