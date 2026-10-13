@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { AppIcon } from './AppIcon';
 import { Avatar } from './Avatar';
 import { StatusChip } from './StatusChip';
 import { ThemedButton } from './ThemedButton';
@@ -80,7 +81,7 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
       <SafeAreaView style={styles.safe} edges={['top']}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={styles.backText}>‹</Text>
+            <AppIcon color={colors.ink} name="chevron_left" size={22} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{title}</Text>
           <View style={styles.backBtn} />
@@ -89,7 +90,7 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
       <ScrollView contentContainerStyle={styles.scroll}>
         {hrMode ? (
           <View style={styles.auditBanner}>
-            <Text style={styles.auditGlyph}>🛡️</Text>
+            <AppIcon color={colors.orange} name="shield" size={28} style={styles.auditIcon} />
             <View style={styles.auditText}>
               <Text style={styles.auditTitle}>
                 Pengambilalihan oleh HR — Teraudit
@@ -136,7 +137,7 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
               onPress={() => showToast('Membuka lampiran…')}
               style={styles.attachBox}
             >
-              <Text style={styles.attachGlyph}>📄</Text>
+              <AppIcon color={colors.ink2} name="file_text" size={26} style={styles.attachIcon} />
               <Text style={styles.attachName}>{request.attachment}</Text>
             </TouchableOpacity>
           </View>
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     padding: spacing.md,
   },
-  auditGlyph: { fontSize: 26, marginRight: 12 },
+  auditIcon: { marginRight: 12 },
   auditText: { flex: 1 },
   auditTitle: { color: colors.orange, fontFamily: fontFamily('800'), fontSize: 14 },
   auditSub: {
@@ -303,7 +304,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: spacing.md,
   },
-  attachGlyph: { fontSize: 26, marginRight: 12 },
+  attachIcon: { marginRight: 12 },
   attachName: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
   timeline: { paddingLeft: 4 },
   node: { alignItems: 'center', flexDirection: 'row' },
