@@ -14,7 +14,7 @@ import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StampChip } from '../../src/components/StampChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
-import { getEmployees } from '../../src/lib/db';
+import { getAwayEmployees, getEmployees, type AwayEmployee } from '../../src/lib/db';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_LABEL: Record<Employee['status'], string> = {
@@ -45,27 +45,39 @@ interface Birthday {
   dateLabel: string;
 }
 
-function upcomingBirthdays(): Birthday[] {
-  const now = new Date();
-  const list: Birthday[] = EMPLOYEES.map((e) => {
-    const [y = 0, m = 1, d = 1] = e.birthISO.split('-').map(Number);
-    const thisYear = new Date(now.getFullYear(), m - 1, d);
-    const next =
-      thisYear.getTime() >= new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
-        ? thisYear
-        : new Date(now.getFullYear() + 1, m - 1, d);
-    const daysLeft = Math.round(
-      (next.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) /
-        86400000,
-    );
-    const turningAge = next.getFullYear() - y;
-    const dateLabel = new Intl.DateTimeFormat('id-ID', {
-      day: 'numeric',
-      month: 'short',
-    }).format(next);
-    return { employee: e, daysLeft, turningAge, dateLabel };
-  });
-  return list.sort((a, b) => a.daysLeft - b.daysLeft).slice(0, 6);
+/**
+ * Ulang tahun pada bulan berjalan (Asia/Jakarta) saja,
+ * diurutkan berdasarkan tanggal.
+ */
+function birthdaysThisMonth(list: Employee[]): Birthday[] {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
+  const curY = get('year');
+  const curM = get('month');
+  const curD = get('day');
+  const out: (Birthday & { day: number })[] = [];
+  for (const e of list) {
+    const [y = 0, m = 0, d = 0] = e.birthISO.split('-').map(Number);
+    if (!y || m !== curM) continue;
+    out.push({
+      employee: e,
+      daysLeft: d - curD,
+      turningAge: curY - y,
+      dateLabel: new Intl.DateTimeFormat('id-ID', {
+        day: 'numeric',
+        month: 'short',
+      }).format(new Date(curY, m - 1, d)),
+      day: d,
+    });
+  }
+  return out
+    .sort((a, b) => a.day - b.day)
+    .map(({ day: _day, ...rest }) => rest);
 }
 
 function awayRingColor(status: Employee['status']): string {
@@ -90,8 +102,28 @@ export default function TeamScreen() {
       alive = false;
     };
   }, []);
-  const birthdays = useMemo(upcomingBirthdays, []);
-  const away = EMPLOYEES.filter((e) => e.status !== 'hadir');
+  const birthdays = useMemo(() => birthdaysThisMonth(directorySrc), [directorySrc]);
+
+  // "Sedang Tidak Masuk" dari data real (pengajuan disetujui yang mencakup
+  // hari ini). null = DB tak terjangkau → pakai demo; [] = sembunyikan seksi.
+  const [awayDb, setAwayDb] = useState<AwayEmployee[] | null>(null);
+  useEffect(() => {
+    let alive = true;
+    getAwayEmployees().then((list) => {
+      if (alive) setAwayDb(list);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const awayItems: { id: string; name: string; status: Employee['status'] }[] =
+    awayDb === null
+      ? EMPLOYEES.filter((e) => e.status !== 'hadir').map((e) => ({
+          id: e.id,
+          name: e.name,
+          status: e.status,
+        }))
+      : awayDb.map((a) => ({ id: a.employeeId, name: a.name, status: a.type }));
   const directory = directorySrc.filter((e) =>
     e.name.toLowerCase().includes(query.toLowerCase()),
   );
@@ -104,34 +136,38 @@ export default function TeamScreen() {
         <View style={styles.ruleThin} />
       </View>
 
-      {/* Sedang tidak masuk */}
-      <SectionTitle label="Sedang Tidak Masuk" />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.awayRow}>
-        {away.map((e) => (
-          <TouchableOpacity
-            key={e.id}
-            onPress={() => router.push(`/employee/${e.id}`)}
-            style={styles.awayItem}
-          >
-            <View
-              style={[styles.awayRing, { borderColor: awayRingColor(e.status) }]}
-            >
-              <MedallionIcon glyph="user" size={48} />
-            </View>
-            <Text style={styles.awayName} numberOfLines={1}>
-              {e.name.split(' ')[0]}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-      <View style={styles.legend}>
-        <LegendDot color={colors.red} label="Sakit" />
-        <LegendDot color={colors.blue} label="Cuti" />
-        <LegendDot color={colors.yellowRing} label="Ijin" />
-      </View>
+      {/* Sedang tidak masuk — disembunyikan bila tidak ada */}
+      {awayItems.length > 0 ? (
+        <>
+          <SectionTitle label="Sedang Tidak Masuk" />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.awayRow}>
+            {awayItems.map((e) => (
+              <TouchableOpacity
+                key={e.id}
+                onPress={() => router.push(`/employee/${e.id}`)}
+                style={styles.awayItem}
+              >
+                <View
+                  style={[styles.awayRing, { borderColor: awayRingColor(e.status) }]}
+                >
+                  <MedallionIcon glyph="user" size={48} />
+                </View>
+                <Text style={styles.awayName} numberOfLines={1}>
+                  {e.name.split(' ')[0]}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <View style={styles.legend}>
+            <LegendDot color={colors.red} label="Sakit" />
+            <LegendDot color={colors.blue} label="Cuti" />
+            <LegendDot color={colors.yellowRing} label="Ijin" />
+          </View>
+        </>
+      ) : null}
 
-      {/* Ulang tahun terdekat */}
-      <SectionTitle label="Ulang Tahun Terdekat" />
+      {/* Ulang tahun bulan ini */}
+      <SectionTitle label="Ulang Tahun Bulan Ini" />
       <View style={styles.birthGrid}>
         {birthdays.map((b) => (
           <Plate key={b.employee.id} style={styles.birthCard}>
@@ -145,7 +181,11 @@ export default function TeamScreen() {
                 <Text style={styles.ageText}>{b.turningAge} thn</Text>
               </View>
               <Text style={styles.countdown}>
-                {b.daysLeft === 0 ? 'Hari ini!' : `${b.daysLeft} hari lagi`}
+                {b.daysLeft === 0
+                  ? 'Hari ini!'
+                  : b.daysLeft > 0
+                    ? `${b.daysLeft} hari lagi`
+                    : `${-b.daysLeft} hari lalu`}
               </Text>
             </View>
           </Plate>
