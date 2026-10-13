@@ -8,12 +8,15 @@ import {
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RootErrorBoundary } from '../src/components/RootErrorBoundary';
 import { ToastHost } from '../src/components/Toast';
+import { getThemePalette } from '../src/lib/db';
+import { applyPalette } from '../src/theme';
 
 /**
- * Layout akar: memuat Plus Jakarta Sans, lalu stack navigasi.
+ * Layout akar: memuat Plus Jakarta Sans + palet tema dari Supabase,
+ * lalu stack navigasi.
  * Alur: index (Opening) -> login -> (tabs) -> layar stack.
  * Detail (employee/[id], pic/detail, hr/detail) berada di luar tab bar.
  */
@@ -25,8 +28,20 @@ export default function RootLayout() {
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
+  const [themeReady, setThemeReady] = useState(false);
 
-  if (!fontsLoaded) return null;
+  // Muat palet tema HR dari company_settings sekali saat aplikasi dibuka;
+  // gagal diam-diam dan pakai palet default.
+  useEffect(() => {
+    getThemePalette()
+      .then((p) => {
+        if (p) applyPalette(p);
+      })
+      .catch(() => {})
+      .finally(() => setThemeReady(true));
+  }, []);
+
+  if (!fontsLoaded || !themeReady) return null;
 
   return (
     <RootErrorBoundary>
@@ -36,7 +51,6 @@ export default function RootLayout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="clock-in/selfie" />
-        <Stack.Screen name="clock-in/liveness" />
         <Stack.Screen name="clock-in/confirm" />
         <Stack.Screen name="clock-in/success" />
         <Stack.Screen name="pic/detail" />
