@@ -15,6 +15,7 @@ export interface Employee {
   is_hr: boolean;
   is_top_boss: boolean;
   is_active: boolean;
+  photo_url: string | null;
   created_at: string;
 }
 
