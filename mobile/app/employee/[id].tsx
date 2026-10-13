@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../../src/components/Avatar';
@@ -7,8 +7,9 @@ import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { StampChip } from '../../src/components/StampChip';
-import { getEmployee, getPicOf } from '../../src/data/demo';
+import { getPicOf, type Employee } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
+import { getEmployees } from '../../src/lib/db';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_LABEL = { hadir: 'Hadir', sakit: 'Sakit', cuti: 'Cuti', ijin: 'Ijin' } as const;
@@ -16,17 +17,52 @@ const STATUS_LABEL = { hadir: 'Hadir', sakit: 'Sakit', cuti: 'Cuti', ijin: 'Ijin
 /** Detail Karyawan — hero ukiran + kartu keterangan + kartu PIC. */
 export default function EmployeeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  let employee;
-  try {
-    employee = getEmployee(id);
-  } catch {
+  const [loaded, setLoaded] = useState(false);
+  const [employee, setEmployee] = useState<Employee | null>(null);
+  const [pic, setPic] = useState<Employee | null>(null);
+
+  // Muat dari Supabase bila tersedia (fallback demo di dalam getEmployees).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const list = await getEmployees();
+      if (!alive) return;
+      const emp = list.find((e) => e.id === id) ?? null;
+      setEmployee(emp);
+      if (emp) {
+        let p: Employee | null = null;
+        if (emp.picId) p = list.find((e) => e.id === emp.picId) ?? null;
+        if (!p) {
+          try {
+            p = getPicOf(emp);
+          } catch {
+            p = null;
+          }
+        }
+        setPic(p);
+      }
+      setLoaded(true);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  if (!loaded) {
+    return (
+      <SafeAreaView style={styles.fallback}>
+        <Text style={styles.fallbackText}>Memuat…</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!employee) {
     return (
       <SafeAreaView style={styles.fallback}>
         <Text style={styles.fallbackText}>Karyawan tidak ditemukan.</Text>
       </SafeAreaView>
     );
   }
-  const pic = getPicOf(employee);
 
   const kv: [string, string][] = [
     ['Nomor Karyawan', employee.employeeNo],
@@ -91,15 +127,19 @@ export default function EmployeeDetailScreen() {
             <View style={styles.ruleThick} />
             <View style={styles.ruleThin} />
           </View>
-          <Plate style={styles.picWrap}>
-            <View style={styles.picRow}>
-              <Avatar gradientId={pic.gradientId} name={pic.name} size={46} shape="square" />
-              <View style={styles.picText}>
-                <Text style={styles.picName}>{pic.name}</Text>
-                <Text style={styles.picPos}>{pic.position}</Text>
+          {pic ? (
+            <Plate style={styles.picWrap}>
+              <View style={styles.picRow}>
+                <Avatar gradientId={pic.gradientId} name={pic.name} size={46} shape="square" />
+                <View style={styles.picText}>
+                  <Text style={styles.picName}>{pic.name}</Text>
+                  <Text style={styles.picPos}>{pic.position}</Text>
+                </View>
               </View>
-            </View>
-          </Plate>
+            </Plate>
+          ) : (
+            <Text style={styles.fallbackText}>Belum ada PIC terdaftar.</Text>
+          )}
         </View>
       </ScrollView>
     </View>
