@@ -30,7 +30,7 @@ export default function OpeningScreen() {
           {/* Brand */}
           <View style={styles.brandRow}>
             <Image source={{ uri: LOGO_MARK }} style={styles.brandBadge} />
-            <Text style={styles.brandText}>AbsensiKu</Text>
+            <Text style={styles.brandText}>Absenizer</Text>
           </View>
 
           {/* Ilustrasi ukiran berbingkai ganda di atas sunburst */}
