@@ -20,6 +20,7 @@ const EMPTY = {
   join_date: new Date().toISOString().slice(0, 10),
   work_mode: "WFO" as "WFO" | "WFH",
   pic_id: "",
+  user_id: "",
   is_hr: false,
   is_active: true,
 };
@@ -54,6 +55,7 @@ export default function EmployeeManager({ employees }: Props) {
       join_date: emp.join_date,
       work_mode: emp.work_mode,
       pic_id: emp.pic_id ?? "",
+      user_id: emp.user_id ?? "",
       is_hr: emp.is_hr,
       is_active: emp.is_active,
     });
@@ -89,6 +91,7 @@ export default function EmployeeManager({ employees }: Props) {
       join_date: form.join_date,
       work_mode: form.work_mode,
       pic_id: form.pic_id || null,
+      user_id: form.user_id.trim() || null,
       is_hr: form.is_hr,
       is_active: form.is_active,
     };
@@ -112,8 +115,10 @@ export default function EmployeeManager({ employees }: Props) {
         if (insErr) throw insErr;
 
         // 2) Buatkan akun login dengan kata sandi default "secret123".
-        //    signUp mengalihkan sesi ke user baru, jadi setelah ini admin
-        //    keluar dan perlu login kembali.
+        //    Bila email sudah terdaftar di Authentication, pakai akun itu
+        //    (tidak dibuat duplikat). signUp yang berhasil mengalihkan sesi
+        //    ke user baru → admin perlu login kembali.
+        let sessionSwitched = false;
         try {
           const { data: authData, error: authErr } = await sb.auth.signUp({
             email: payload.email,
@@ -121,28 +126,39 @@ export default function EmployeeManager({ employees }: Props) {
             options: { data: { full_name: payload.full_name } },
           });
           if (authErr) throw authErr;
-          const newUserId = authData.user?.id;
-          if (newUserId) {
+          const identities = authData.user?.identities ?? [];
+          if (authData.user?.id && identities.length > 0) {
             const { error: linkErr } = await sb
               .from("employees")
-              .update({ user_id: newUserId })
+              .update({ user_id: authData.user.id })
               .eq("id", inserted.id);
             if (linkErr) throw linkErr;
           }
+          if (authData.session) {
+            await sb.auth.signOut();
+            sessionSwitched = true;
+          }
+          setMessage({
+            kind: "ok",
+            text:
+              identities.length > 0
+                ? `Karyawan ditambahkan. Akun login: ${payload.email} / kata sandi "secret123".`
+                : `Karyawan ditambahkan. Akun ${payload.email} sudah ada di Authentication — dipakai yang itu (kata sandi tidak diubah).`,
+          });
         } catch (authE) {
           // Rollback: hapus baris karyawan bila akun gagal dibuat.
           await sb.from("employees").delete().eq("id", inserted.id);
           throw authE;
         }
 
-        await sb.auth.signOut();
-        // Sesi kini milik user baru, jadi kembali ke halaman login.
-        // Akun yang dibuat: email di atas dengan kata sandi "secret123".
-        router.replace("/login");
-        return;
+        setShowForm(false);
+        if (sessionSwitched) {
+          // Sesi kini milik user baru → kembali ke halaman login.
+          router.replace("/login");
+          return;
+        }
+        router.refresh();
       }
-      setShowForm(false);
-      router.refresh();
     } catch (err) {
       setMessage({
         kind: "error",
@@ -290,6 +306,22 @@ export default function EmployeeManager({ employees }: Props) {
                 <label htmlFor="is_active">Aktif</label>
               </div>
             </div>
+            {editing && (
+              <div className="row">
+                <div className="field">
+                  <label>UID Auth (opsional)</label>
+                  <input
+                    type="text"
+                    value={form.user_id}
+                    onChange={(e) => set("user_id", e.target.value)}
+                    placeholder="UID dari Authentication → Users"
+                  />
+                  <small className="hint">
+                    Hubungkan manual ke akun yang sudah ada di Authentication.
+                  </small>
+                </div>
+              </div>
+            )}
 
             {message && (
               <div
