@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,12 +10,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppIcon } from '../../src/components/AppIcon';
-import { Avatar } from '../../src/components/Avatar';
 import { GradientView } from '../../src/components/GradientView';
-import { StatusChip } from '../../src/components/StatusChip';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
+import { Plate } from '../../src/components/Plate';
+import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import type { IconName } from '../../src/data/icons';
+import { HATCH_TILE, SUNBURST_INK } from '../../src/data/medallions';
 import {
   GEOFENCE_M,
   LATE_TOLERANCE_MIN,
@@ -27,7 +29,7 @@ import {
 } from '../../src/data/demo';
 import { getActiveRole, type DemoRole } from '../../src/lib/session';
 import { recordClockOut, useClockState } from '../../src/lib/clockState';
-import { colors, fontFamily, radius, spacing } from '../../src/theme';
+import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 function useWibClock(): string {
   const [now, setNow] = useState(() => new Date());
@@ -74,6 +76,20 @@ const ROLE_LABEL: Record<DemoRole, string> = {
   pic: 'PIC',
   hr: 'HR',
 };
+
+/** Judul seksi ukiran: serif + garis ganda (3px, jeda 3px, 1px). */
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={styles.sectionTitle}>{children}</Text>
+      <View style={styles.doubleRule}>
+        <View style={styles.ruleThick} />
+        <View style={styles.ruleGap} />
+        <View style={styles.ruleThin} />
+      </View>
+    </View>
+  );
+}
 
 export default function HomeScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
@@ -160,10 +176,15 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO */}
         <GradientView kind="hero" style={styles.hero}>
+          <Image
+            source={{ uri: HATCH_TILE }}
+            resizeMode="repeat"
+            style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
+          />
           <SafeAreaView edges={['top']}>
             <View style={styles.heroTop}>
               <View style={styles.greetingRow}>
-                <Avatar gradientId={me.gradientId} name={me.name} size={46} />
+                <MedallionIcon glyph="user" size={52} variant="cream" />
                 <View style={styles.greetingText}>
                   <Text style={styles.greetingSmall}>
                     Selamat datang, {ROLE_LABEL[role]}
@@ -173,44 +194,48 @@ export default function HomeScreen() {
                 </View>
               </View>
               <TouchableOpacity
+                accessibilityRole="button"
                 onPress={() => showToast('Belum ada notifikasi baru.')}
                 style={styles.bell}
               >
-                <AppIcon color="#fff" name="bell" size={22} />
+                <MedallionIcon glyph="bell" size={44} variant="cream" />
                 <View style={styles.bellDot} />
               </TouchableOpacity>
             </View>
 
-            {/* Kartu status kaca */}
-            <View style={styles.glassCard}>
-              <StatusChip
-                label={statusChip}
-                tone={clock.phase === 'in' ? 'neutral' : 'green'}
-                style={styles.statusChip}
-              />
-              <View style={styles.timeCols}>
-                <View style={styles.timeCol}>
-                  <Text style={styles.timeValue}>{clock.inTime ?? '--.--'}</Text>
-                  <Text style={styles.timeLabel}>Jam Masuk</Text>
-                </View>
-                <View style={styles.timeDivider} />
-                <View style={styles.timeCol}>
-                  <Text style={styles.timeValue}>{clock.outTime ?? '--.--'}</Text>
-                  <Text style={styles.timeLabel}>Jam Pulang</Text>
-                </View>
-                <View style={styles.timeDivider} />
-                <View style={styles.timeCol}>
-                  <Text style={styles.timeValue}>
-                    {clock.inTime && clock.outTime ? '8j 03m' : '--'}
-                  </Text>
-                  <Text style={styles.timeLabel}>Durasi</Text>
+            {/* Kartu status */}
+            <Plate style={styles.statusPlate}>
+              <View style={styles.statusInner}>
+                <StampChip
+                  backgroundColor={clock.phase === 'in' ? colors.paper2 : colors.greenBg}
+                  color={clock.phase === 'in' ? colors.ink2 : colors.green}
+                >
+                  {statusChip}
+                </StampChip>
+                <View style={styles.timeCols}>
+                  <View style={styles.timeCol}>
+                    <Text style={styles.timeValue}>{clock.inTime ?? '--.--'}</Text>
+                    <Text style={styles.timeLabel}>Jam Masuk</Text>
+                  </View>
+                  <View style={styles.timeDivider} />
+                  <View style={styles.timeCol}>
+                    <Text style={styles.timeValue}>{clock.outTime ?? '--.--'}</Text>
+                    <Text style={styles.timeLabel}>Jam Pulang</Text>
+                  </View>
+                  <View style={styles.timeDivider} />
+                  <View style={styles.timeCol}>
+                    <Text style={styles.timeValue}>
+                      {clock.inTime && clock.outTime ? '8j 03m' : '--'}
+                    </Text>
+                    <Text style={styles.timeLabel}>Durasi</Text>
+                  </View>
                 </View>
               </View>
-            </View>
+            </Plate>
           </SafeAreaView>
         </GradientView>
 
-        {/* TOMBOL CLOCK */}
+        {/* MEDALI CLOCK */}
         <View style={styles.clockWrap}>
           <View style={styles.clockCenter}>
             <Animated.View
@@ -219,20 +244,25 @@ export default function HomeScreen() {
                 { opacity: clock.phase === 'done' ? 0 : ringOpacity, transform: [{ scale: ringScale }] },
               ]}
             />
+            <View style={styles.clockShadow} />
             <TouchableOpacity
               accessibilityRole="button"
               activeOpacity={0.85}
               onPress={handleClockPress}
-              style={clock.phase === 'done' && styles.clockDimmed}
+              style={[
+                styles.clockPlate,
+                clock.phase === 'out' && styles.clockPlateOut,
+                clock.phase === 'done' && styles.clockDimmed,
+              ]}
             >
-              <GradientView
-                imageStyle={{ borderRadius: 84 }}
-                kind={clock.phase === 'out' ? 'clockOut' : 'primary'}
-                style={[styles.clockButton, clock.phase === 'done' && styles.clockDone]}
-              >
-                <Text style={styles.clockLabel}>{clockLabel}</Text>
-                <Text style={styles.clockTime}>{wib} WIB</Text>
-              </GradientView>
+              <Image
+                source={{ uri: SUNBURST_INK }}
+                resizeMode="contain"
+                style={styles.sunburst}
+              />
+              <MedallionIcon glyph="clock" size={112} variant="ink" />
+              <Text style={styles.clockLabel}>{clockLabel}</Text>
+              <Text style={styles.clockTime}>{wib} WIB</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.clockHint}>
@@ -244,108 +274,132 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        {/* INFO MINI */}
-        <View style={styles.minis}>
-          <View style={styles.mini}>
-            <AppIcon color={colors.ink2} name="clock" size={22} />
-            <Text style={styles.miniText}>
-              {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
-            </Text>
+        {/* JAM KERJA */}
+        <Plate style={styles.hoursPlate}>
+          <View style={styles.hoursInner}>
+            <View style={styles.hoursRow}>
+              <MedallionIcon glyph="clock" size={40} variant="ink" />
+              <Text style={styles.hoursText}>
+                {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
+              </Text>
+            </View>
+            <View style={styles.hoursDivider} />
+            <View style={styles.hoursRow}>
+              <MedallionIcon glyph="map_pin" size={40} variant="ink" />
+              <Text style={styles.hoursText}>
+                WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
+              </Text>
+            </View>
           </View>
-          <View style={styles.mini}>
-            <AppIcon color={colors.ink2} name="map_pin" size={22} />
-            <Text style={styles.miniText}>
-              WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
-            </Text>
-          </View>
-        </View>
+        </Plate>
 
         {/* SHORTCUT */}
         <View style={styles.shortcutGrid}>
           {shortcuts.map((s) => (
             <TouchableOpacity
+              accessibilityRole="button"
               key={s.label}
               onPress={() => router.push(s.route as never)}
-              style={styles.shortcut}
+              style={styles.shortcutTouch}
             >
-              <AppIcon color={colors.indigo} name={s.icon} size={26} />
-              <Text style={styles.shortcutLabel}>{s.label}</Text>
+              <Plate style={styles.shortcutPlate}>
+                <View style={styles.shortcutInner}>
+                  <MedallionIcon glyph={s.icon} size={44} variant="ink" />
+                  <Text style={styles.shortcutLabel}>{s.label}</Text>
+                </View>
+              </Plate>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Sisa Kuota</Text>
-            {QUOTAS.slice(0, 2).map((q) => (
-              <View key={q.type} style={styles.quotaRow}>
-                <Text style={styles.quotaLabel}>
-                  {q.type === 'cuti' ? 'Cuti' : 'Ijin'}
-                </Text>
-                <Text style={styles.quotaValue}>
-                  {q.total !== null ? `${q.total - q.used} dari ${q.total} tersisa` : 'Tanpa batas'}
-                </Text>
-              </View>
-            ))}
-            <TouchableOpacity onPress={() => router.push('/(tabs)/requests')}>
-              <Text style={styles.linkText}>Lihat semua kuota →</Text>
-            </TouchableOpacity>
-          </View>
+          <Plate style={styles.sectionPlate}>
+            <View style={styles.sectionInner}>
+              <SectionTitle>Sisa Kuota</SectionTitle>
+              {QUOTAS.slice(0, 2).map((q) => (
+                <View key={q.type} style={styles.quotaRow}>
+                  <Text style={styles.quotaLabel}>
+                    {q.type === 'cuti' ? 'Cuti' : 'Ijin'}
+                  </Text>
+                  <Text style={styles.quotaValue}>
+                    {q.total !== null ? `${q.total - q.used} dari ${q.total} tersisa` : 'Tanpa batas'}
+                  </Text>
+                </View>
+              ))}
+              <TouchableOpacity onPress={() => router.push('/(tabs)/requests')}>
+                <Text style={styles.linkText}>Lihat semua kuota →</Text>
+              </TouchableOpacity>
+            </View>
+          </Plate>
         ) : null}
         {role === 'pic' ? (
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/approvals')}
-            style={styles.card}
+            style={styles.sectionTouch}
           >
-            <Text style={styles.sectionTitle}>Menunggu Persetujuan</Text>
-            <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
-            <Text style={styles.linkText}>Tinjau sekarang →</Text>
+            <Plate style={styles.sectionPlateTight}>
+              <View style={styles.sectionInner}>
+                <SectionTitle>Menunggu Persetujuan</SectionTitle>
+                <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
+                <Text style={styles.linkText}>Tinjau sekarang →</Text>
+              </View>
+            </Plate>
           </TouchableOpacity>
         ) : null}
         {role === 'hr' ? (
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/takeover')}
-            style={styles.card}
+            style={styles.sectionTouch}
           >
-            <Text style={styles.sectionTitle}>Bisa Diambil Alih</Text>
-            <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
-            <Text style={styles.linkText}>Tinjau sekarang →</Text>
+            <Plate style={styles.sectionPlateTight}>
+              <View style={styles.sectionInner}>
+                <SectionTitle>Bisa Diambil Alih</SectionTitle>
+                <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
+                <Text style={styles.linkText}>Tinjau sekarang →</Text>
+              </View>
+            </Plate>
           </TouchableOpacity>
         ) : null}
 
         {/* AKTIVITAS TERAKHIR */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Aktivitas Terakhir</Text>
-          <View style={styles.activityRow}>
-            <View style={styles.activityDot} />
-            <View style={styles.activityText}>
-              <Text style={styles.activityTitle}>Clock in • 08.02</Text>
-              <Text style={styles.activitySub}>Senin, 12 Okt 2026 • Tepat waktu</Text>
+        <Plate style={styles.sectionPlate}>
+          <View style={styles.sectionInner}>
+            <SectionTitle>Aktivitas Terakhir</SectionTitle>
+            <View style={styles.activityRow}>
+              <MedallionIcon glyph="check" size={38} variant="ink" />
+              <View style={styles.activityText}>
+                <Text style={styles.activityTitle}>Clock in • 08.02</Text>
+                <Text style={styles.activitySub}>Senin, 12 Okt 2026 • Tepat waktu</Text>
+              </View>
+              <StampChip color={colors.green} backgroundColor={colors.greenBg}>
+                Hadir
+              </StampChip>
             </View>
-            <StatusChip label="Hadir" tone="green" />
-          </View>
-          <View style={styles.activityDivider} />
-          <View style={styles.activityRow}>
-            <View style={styles.activityDot} />
-            <View style={styles.activityText}>
-              <Text style={styles.activityTitle}>Pengajuan cuti disetujui</Text>
-              <Text style={styles.activitySub}>3 Okt 2026 • oleh Dimas Prasetyo</Text>
+            <View style={styles.activityDivider} />
+            <View style={styles.activityRow}>
+              <MedallionIcon glyph="file_text" size={38} variant="ink" />
+              <View style={styles.activityText}>
+                <Text style={styles.activityTitle}>Pengajuan cuti disetujui</Text>
+                <Text style={styles.activitySub}>3 Okt 2026 • oleh Dimas Prasetyo</Text>
+              </View>
+              <StampChip color={colors.blue} backgroundColor={colors.blueBg}>
+                Cuti
+              </StampChip>
             </View>
-            <StatusChip label="Cuti" tone="blue" />
           </View>
-        </View>
+        </Plate>
       </ScrollView>
     </View>
   );
 }
 
+const CLOCK_DIAMETER = 224;
+
 const styles = StyleSheet.create({
   root: { backgroundColor: colors.bg, flex: 1 },
   scroll: { paddingBottom: spacing.xl },
   hero: {
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
     paddingBottom: spacing.lg,
   },
   heroTop: {
@@ -358,80 +412,103 @@ const styles = StyleSheet.create({
   greetingRow: { alignItems: 'center', flexDirection: 'row', flex: 1 },
   greetingText: { marginLeft: 12, flex: 1 },
   greetingSmall: {
-    color: 'rgba(255,255,255,0.8)',
-    fontFamily: fontFamily('500'),
+    color: 'rgba(255,255,255,0.85)',
+    fontFamily: serifFamily('700'),
     fontSize: 12,
   },
-  greetingName: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 18 },
-  dateLine: {
-    color: 'rgba(255,255,255,0.8)',
-    fontFamily: fontFamily('400'),
-    fontSize: 12,
+  greetingName: {
+    color: '#ffffff',
+    fontFamily: serifFamily('800'),
+    fontSize: 20,
     marginTop: 2,
   },
-  bell: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 14,
-    height: 44,
-    justifyContent: 'center',
-    width: 44,
+  dateLine: {
+    color: 'rgba(255,255,255,0.8)',
+    fontFamily: 'serif',
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 2,
   },
-  bellGlyph: { fontSize: 20 },
+  bell: { position: 'relative' },
   bellDot: {
-    backgroundColor: '#f59e0b',
+    backgroundColor: colors.clockOutFrom,
     borderRadius: 5,
     height: 10,
     position: 'absolute',
-    right: 10,
-    top: 10,
+    right: 4,
+    top: 4,
     width: 10,
   },
-  glassCard: {
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderColor: 'rgba(255,255,255,0.3)',
-    borderRadius: radius.card,
-    borderWidth: 1,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
-    padding: spacing.md,
-  },
-  statusChip: { backgroundColor: 'rgba(255,255,255,0.9)' },
+  statusPlate: { marginHorizontal: spacing.lg, marginTop: spacing.md },
+  statusInner: { padding: spacing.md },
   timeCols: { flexDirection: 'row', marginTop: spacing.md },
   timeCol: { alignItems: 'center', flex: 1 },
-  timeValue: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 18 },
+  timeValue: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 18 },
   timeLabel: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 11,
     marginTop: 2,
   },
-  timeDivider: { backgroundColor: 'rgba(255,255,255,0.3)', width: 1 },
-  clockWrap: { alignItems: 'center', marginTop: -10, paddingTop: spacing.lg },
-  clockCenter: { alignItems: 'center', justifyContent: 'center' },
+  timeDivider: { backgroundColor: colors.line, width: 1 },
+  clockWrap: { alignItems: 'center', paddingTop: spacing.lg },
+  clockCenter: {
+    alignItems: 'center',
+    height: CLOCK_DIAMETER,
+    justifyContent: 'center',
+    width: CLOCK_DIAMETER,
+  },
   pulseRing: {
     borderColor: colors.indigo,
-    borderRadius: 96,
+    borderRadius: 120,
     borderWidth: 2,
-    height: 192,
+    height: 240,
+    left: -8,
     position: 'absolute',
-    width: 192,
+    top: -8,
+    width: 240,
   },
-  clockButton: {
+  clockShadow: {
+    backgroundColor: colors.etch,
+    borderRadius: CLOCK_DIAMETER / 2,
+    height: CLOCK_DIAMETER,
+    left: 3,
+    position: 'absolute',
+    top: 3,
+    width: CLOCK_DIAMETER,
+  },
+  clockPlate: {
     alignItems: 'center',
-    borderRadius: 84,
-    height: 168,
+    backgroundColor: colors.surface,
+    borderColor: colors.etch,
+    borderRadius: CLOCK_DIAMETER / 2,
+    borderWidth: 1.5,
+    height: CLOCK_DIAMETER,
     justifyContent: 'center',
-    width: 168,
+    overflow: 'hidden',
+    width: CLOCK_DIAMETER,
   },
+  clockPlateOut: { backgroundColor: colors.orangeBg },
   clockDimmed: { opacity: 0.55 },
-  clockDone: { opacity: 0.55 },
-  clockLabel: { color: '#fff', fontFamily: fontFamily('800'), fontSize: 21 },
+  sunburst: {
+    height: 200,
+    left: (CLOCK_DIAMETER - 200) / 2,
+    opacity: 0.6,
+    position: 'absolute',
+    top: (CLOCK_DIAMETER - 200) / 2,
+    width: 200,
+  },
+  clockLabel: {
+    color: colors.ink,
+    fontFamily: serifFamily('800'),
+    fontSize: 19,
+    marginTop: 6,
+  },
   clockTime: {
-    color: 'rgba(255,255,255,0.9)',
+    color: colors.ink2,
     fontFamily: fontFamily('600'),
     fontSize: 13,
-    marginTop: 4,
+    marginTop: 2,
   },
   clockHint: {
     color: colors.ink2,
@@ -439,55 +516,51 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: spacing.md,
   },
-  minis: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.lg,
-    paddingHorizontal: spacing.lg,
-  },
-  mini: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
+  hoursPlate: { marginHorizontal: spacing.lg, marginTop: spacing.lg },
+  hoursInner: { padding: spacing.md },
+  hoursRow: { alignItems: 'center', flexDirection: 'row' },
+  hoursText: {
+    color: colors.ink2,
     flex: 1,
-    flexDirection: 'row',
-    padding: spacing.md,
+    fontFamily: fontFamily('500'),
+    fontSize: 12,
+    marginLeft: 12,
   },
-  miniGlyph: { fontSize: 20, marginRight: 8 },
-  miniText: { color: colors.ink2, flex: 1, fontFamily: fontFamily('500'), fontSize: 12 },
+  hoursDivider: { backgroundColor: colors.line, height: 1, marginVertical: spacing.sm },
   shortcutGrid: {
     flexDirection: 'row',
     gap: spacing.sm,
     marginTop: spacing.md,
     paddingHorizontal: spacing.lg,
   },
-  shortcut: {
+  shortcutTouch: { flex: 1 },
+  shortcutPlate: { flex: 1 },
+  shortcutInner: {
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    flex: 1,
+    paddingHorizontal: 4,
     paddingVertical: spacing.md,
   },
-  shortcutGlyph: { fontSize: 24 },
   shortcutLabel: {
     color: colors.ink,
     fontFamily: fontFamily('600'),
     fontSize: 12,
     marginTop: 6,
+    textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: radius.card,
-    marginHorizontal: spacing.lg,
-    marginTop: spacing.md,
-    padding: spacing.lg,
-  },
+  sectionTouch: { marginTop: spacing.md },
+  sectionPlate: { marginHorizontal: spacing.lg, marginTop: spacing.md },
+  sectionPlateTight: { marginHorizontal: spacing.lg },
+  sectionInner: { padding: spacing.lg },
+  sectionHead: { marginBottom: spacing.sm },
   sectionTitle: {
     color: colors.ink,
-    fontFamily: fontFamily('800'),
-    fontSize: 15,
-    marginBottom: spacing.sm,
+    fontFamily: serifFamily('800'),
+    fontSize: 16,
   },
+  doubleRule: { marginTop: 6 },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleGap: { height: 3 },
+  ruleThin: { backgroundColor: colors.ink, height: 1 },
   quotaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -503,17 +576,11 @@ const styles = StyleSheet.create({
   },
   roleBig: {
     color: colors.indigo,
-    fontFamily: fontFamily('800'),
+    fontFamily: serifFamily('800'),
     fontSize: 26,
   },
   activityRow: { alignItems: 'center', flexDirection: 'row', paddingVertical: 8 },
-  activityDot: {
-    backgroundColor: colors.indigo,
-    borderRadius: 5,
-    height: 10,
-    width: 10,
-  },
-  activityText: { flex: 1, marginLeft: 12 },
+  activityText: { flex: 1, marginLeft: 12, marginRight: 8 },
   activityTitle: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
   activitySub: {
     color: colors.ink3,
@@ -521,5 +588,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  activityDivider: { backgroundColor: colors.line, height: 1, marginLeft: 22 },
+  activityDivider: { backgroundColor: colors.line, height: 1, marginLeft: 50 },
 });
