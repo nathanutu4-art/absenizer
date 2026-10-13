@@ -9,10 +9,11 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppIcon } from './AppIcon';
 import { Avatar } from './Avatar';
-import { StatusChip } from './StatusChip';
-import { ThemedButton } from './ThemedButton';
+import { MedallionIcon } from './MedallionIcon';
+import { Plate } from './Plate';
+import { PlateButton } from './PlateButton';
+import { StampChip } from './StampChip';
 import { showToast } from './Toast';
 import {
   STATUS_LABEL,
@@ -20,8 +21,9 @@ import {
   getEmployee,
   getPicOf,
   type LeaveRequest,
+  type RequestStatus,
 } from '../data/demo';
-import { colors, fontFamily, radius, spacing } from '../theme';
+import { colors, fontFamily, serifFamily, spacing } from '../theme';
 
 interface Props {
   request: LeaveRequest;
@@ -29,6 +31,23 @@ interface Props {
   title: string;
   /** True untuk alur HR: tampilkan banner audit + teks pengambilalihan. */
   hrMode?: boolean;
+}
+
+const STATUS_CHIP: Record<RequestStatus, { color: string; backgroundColor: string }> = {
+  menunggu: { color: colors.yellowText, backgroundColor: colors.yellowBg },
+  disetujui: { color: colors.green, backgroundColor: colors.greenBg },
+  ditolak: { color: colors.red, backgroundColor: colors.redBg },
+};
+
+/** Judul blok ukiran: serif + garis ganda di bawah. */
+function BlockTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <View style={styles.blockWrap}>
+      <Text style={styles.blockTitle}>{children}</Text>
+      <View style={styles.ruleThick} />
+      <View style={styles.ruleThin} />
+    </View>
+  );
 }
 
 /**
@@ -41,13 +60,7 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
   const employee = getEmployee(request.employeeId);
   const pic = getPicOf(employee);
   const pending = request.status === 'menunggu';
-
-  const tone =
-    request.status === 'menunggu'
-      ? 'yellow'
-      : request.status === 'disetujui'
-        ? 'green'
-        : 'red';
+  const chip = STATUS_CHIP[request.status];
 
   function decide(approved: boolean) {
     if (!approved && !note.trim()) {
@@ -81,31 +94,39 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
       <SafeAreaView style={styles.safe} edges={['top']}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <AppIcon color={colors.ink} name="chevron_left" size={22} />
+            <MedallionIcon glyph="chevron_left" size={36} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{title}</Text>
-          <View style={styles.backBtn} />
+          <View style={styles.backBtnSpacer} />
         </View>
       </SafeAreaView>
       <ScrollView contentContainerStyle={styles.scroll}>
         {hrMode ? (
-          <View style={styles.auditBanner}>
-            <AppIcon color={colors.orange} name="shield" size={28} style={styles.auditIcon} />
-            <View style={styles.auditText}>
-              <Text style={styles.auditTitle}>
-                Pengambilalihan oleh HR — Teraudit
-              </Text>
-              <Text style={styles.auditSub}>
-                Menyetujui/menolak di sini dicatat sebagai pengambilalihan HR
-                dalam log audit.
-              </Text>
+          <Plate style={styles.auditPlate}>
+            <View style={styles.platePad}>
+              <View style={styles.auditRow}>
+              <MedallionIcon glyph="shield" size={48} />
+                <View style={styles.auditText}>
+                  <StampChip color={colors.orange} backgroundColor={colors.orangeBg}>
+                    Audit
+                  </StampChip>
+                  <Text style={styles.auditTitle}>
+                    Pengambilalihan oleh HR — Teraudit
+                  </Text>
+                  <Text style={styles.auditSub}>
+                    Menyetujui/menolak di sini dicatat sebagai pengambilalihan HR
+                    dalam log audit.
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
+          </Plate>
         ) : null}
 
-        {/* Kartu pengajuan */}
-        <View style={styles.card}>
-          <View style={styles.cardTop}>
+        {/* Kartu identitas pengajuan */}
+        <Plate style={styles.card}>
+          <View style={styles.platePadLg}>
+            <View style={styles.cardTop}>
             <Avatar gradientId={employee.gradientId} name={employee.name} size={52} />
             <View style={styles.cardText}>
               <Text style={styles.cardName}>{employee.name}</Text>
@@ -113,40 +134,54 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
                 {TYPE_LABEL[request.type]} • {request.dateRange}
               </Text>
             </View>
-            <StatusChip label={STATUS_LABEL[request.status]} tone={tone} />
+            <StampChip color={chip.color} backgroundColor={chip.backgroundColor}>
+              {STATUS_LABEL[request.status]}
+            </StampChip>
           </View>
-          {rows.map(([label, value]) => (
-            <View key={label} style={styles.kvRow}>
+          {rows.map(([label, value], i) => (
+            <View
+              key={label}
+              style={[
+                styles.kvRow,
+                i < rows.length - 1 && styles.kvDivider,
+              ]}
+            >
               <Text style={styles.kvLabel}>{label}</Text>
               <Text style={styles.kvValue}>{value}</Text>
             </View>
-          ))}
-        </View>
+            ))}
+            </View>
+        </Plate>
 
         {/* ALASAN */}
-        <View style={styles.card}>
-          <Text style={styles.blockTitle}>ALASAN</Text>
-          <Text style={styles.reason}>{request.reason}</Text>
-        </View>
+        <Plate style={styles.card}>
+          <View style={styles.platePadLg}>
+            <BlockTitle>Alasan</BlockTitle>
+            <Text style={styles.reason}>{request.reason}</Text>
+          </View>
+        </Plate>
 
         {/* Lampiran */}
         {request.attachment ? (
-          <View style={styles.card}>
-            <Text style={styles.blockTitle}>LAMPIRAN</Text>
-            <TouchableOpacity
-              onPress={() => showToast('Membuka lampiran…')}
-              style={styles.attachBox}
-            >
-              <AppIcon color={colors.ink2} name="file_text" size={26} style={styles.attachIcon} />
-              <Text style={styles.attachName}>{request.attachment}</Text>
-            </TouchableOpacity>
-          </View>
+          <Plate style={styles.card}>
+            <View style={styles.platePadLg}>
+              <BlockTitle>Lampiran</BlockTitle>
+              <TouchableOpacity
+                onPress={() => showToast('Membuka lampiran…')}
+                style={styles.attachBox}
+              >
+                <MedallionIcon glyph="file_text" size={40} />
+                <Text style={styles.attachName}>{request.attachment}</Text>
+              </TouchableOpacity>
+            </View>
+          </Plate>
         ) : null}
 
         {/* Timeline */}
-        <View style={styles.card}>
-          <Text style={styles.blockTitle}>LINIMASA</Text>
-          <View style={styles.timeline}>
+        <Plate style={styles.card}>
+          <View style={styles.platePadLg}>
+            <BlockTitle>Linimasa</BlockTitle>
+            <View style={styles.timeline}>
             <View style={styles.node}>
               <View style={[styles.nodeDot, styles.nodeDone]} />
               <View>
@@ -173,14 +208,16 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
                 ) : null}
               </View>
             </View>
+            </View>
           </View>
-        </View>
+        </Plate>
 
         {/* Keputusan */}
         {pending ? (
-          <View style={styles.card}>
-            <Text style={styles.blockTitle}>CATATAN KEPUTUSAN</Text>
-            <TextInput
+          <Plate style={styles.card}>
+            <View style={styles.platePadLg}>
+              <BlockTitle>Catatan Keputusan</BlockTitle>
+              <TextInput
               multiline
               numberOfLines={3}
               onChangeText={setNote}
@@ -196,25 +233,28 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <View style={styles.decisionRow}>
-              <ThemedButton
+              <PlateButton
                 onPress={() => decide(false)}
                 style={styles.decisionBtn}
-                title="Tolak"
                 variant="danger"
-              />
-              <ThemedButton
+              >
+                Tolak
+              </PlateButton>
+              <PlateButton
                 onPress={() => decide(true)}
                 style={styles.decisionBtn}
-                title="Setujui"
-                variant="success"
-              />
+                variant="primary"
+              >
+                Setujui
+              </PlateButton>
             </View>
-            <Text style={styles.decisionHint}>
-              {hrMode
-                ? 'Keputusan ini dicatat sebagai pengambilalihan HR.'
-                : 'Keputusan diteruskan ke karyawan dan HR.'}
-            </Text>
-          </View>
+              <Text style={styles.decisionHint}>
+                {hrMode
+                  ? 'Keputusan ini dicatat sebagai pengambilalihan HR.'
+                  : 'Keputusan diteruskan ke karyawan dan HR.'}
+              </Text>
+            </View>
+          </Plate>
         ) : null}
       </ScrollView>
     </View>
@@ -231,44 +271,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  backBtn: {
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  backText: { color: colors.ink, fontSize: 24, fontWeight: '700', marginTop: -3 },
-  headerTitle: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 17 },
+  backBtn: { height: 36, width: 36 },
+  backBtnSpacer: { height: 36, width: 36 },
+  headerTitle: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 17 },
   scroll: { padding: spacing.lg, paddingTop: spacing.sm },
-  auditBanner: {
-    backgroundColor: colors.orangeBg,
-    borderColor: colors.orange,
-    borderRadius: radius.card,
-    borderWidth: 1,
-    flexDirection: 'row',
-    marginBottom: spacing.md,
-    padding: spacing.md,
+  blockWrap: { marginBottom: spacing.sm },
+  blockTitle: {
+    color: colors.ink,
+    fontFamily: serifFamily('800'),
+    fontSize: 12,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
-  auditIcon: { marginRight: 12 },
-  auditText: { flex: 1 },
-  auditTitle: { color: colors.orange, fontFamily: fontFamily('800'), fontSize: 14 },
+  ruleThick: { backgroundColor: colors.ink, height: 3, marginTop: 6 },
+  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  auditPlate: { marginBottom: spacing.md },
+  auditRow: { alignItems: 'center', flexDirection: 'row' },
+  auditText: { flex: 1, marginLeft: 12 },
+  auditTitle: {
+    color: colors.orange,
+    fontFamily: serifFamily('800'),
+    fontSize: 14,
+    marginTop: 6,
+  },
   auditSub: {
     color: colors.ink2,
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 3,
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: radius.card,
-    marginBottom: spacing.md,
-    padding: spacing.lg,
-  },
+  card: { marginBottom: spacing.md },
+  platePad: { padding: spacing.md },
+  platePadLg: { padding: spacing.lg },
   cardTop: { alignItems: 'center', flexDirection: 'row', marginBottom: spacing.sm },
   cardText: { flex: 1, marginLeft: 12 },
-  cardName: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 16 },
+  cardName: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 16 },
   cardDesc: {
     color: colors.ink2,
     fontFamily: fontFamily('500'),
@@ -280,7 +317,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 7,
   },
-  kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12.5 },
+  kvDivider: { borderBottomColor: colors.line, borderBottomWidth: 1 },
+  kvLabel: {
+    color: colors.ink3,
+    fontFamily: fontFamily('500'),
+    fontSize: 12.5,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+  },
   kvValue: {
     color: colors.ink,
     flex: 1,
@@ -289,32 +333,33 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     textAlign: 'right',
   },
-  blockTitle: {
-    color: colors.ink3,
-    fontFamily: fontFamily('700'),
-    fontSize: 11,
-    letterSpacing: 1,
-    marginBottom: spacing.sm,
-  },
   reason: { color: colors.ink, fontFamily: fontFamily('400'), fontSize: 14 },
   attachBox: {
     alignItems: 'center',
-    backgroundColor: colors.bg,
-    borderRadius: 15,
+    backgroundColor: colors.paper2,
+    borderColor: colors.ink,
+    borderRadius: 3,
+    borderStyle: 'dashed',
+    borderWidth: 1.5,
     flexDirection: 'row',
     padding: spacing.md,
   },
-  attachIcon: { marginRight: 12 },
-  attachName: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
+  attachName: {
+    color: colors.ink,
+    flex: 1,
+    fontFamily: fontFamily('600'),
+    fontSize: 13,
+    marginLeft: 12,
+  },
   timeline: { paddingLeft: 4 },
   node: { alignItems: 'center', flexDirection: 'row' },
-  nodeDot: { borderRadius: 9, height: 18, marginRight: 12, width: 18 },
-  nodeDone: { backgroundColor: colors.green },
-  nodeCurrent: { backgroundColor: colors.yellowRing },
+  nodeDot: { height: 16, marginRight: 12, width: 16 },
+  nodeDone: { backgroundColor: colors.green, borderColor: colors.etch, borderWidth: 1 },
+  nodeCurrent: { backgroundColor: colors.yellowRing, borderColor: colors.etch, borderWidth: 1 },
   nodeLine: {
-    backgroundColor: colors.line,
+    backgroundColor: colors.ink,
     height: 22,
-    marginLeft: 8,
+    marginLeft: 7,
     width: 2,
   },
   nodeTitle: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 13.5 },
@@ -325,10 +370,10 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   input: {
-    backgroundColor: colors.bg,
-    borderColor: colors.line,
-    borderRadius: radius.input,
-    borderWidth: 1,
+    backgroundColor: colors.surface,
+    borderColor: colors.etch,
+    borderRadius: 3,
+    borderWidth: 1.5,
     color: colors.ink,
     fontFamily: fontFamily('400'),
     fontSize: 14,
