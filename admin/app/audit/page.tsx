@@ -83,7 +83,7 @@ export default async function AuditPage() {
                     {l.entity_id && (
                       <>
                         <br />
-                        <span className="mono" style={{ color: "#4d5a68" }}>
+                        <span className="mono" style={{ color: "var(--muted)" }}>
                           {l.entity_id.slice(0, 8)}…
                         </span>
                       </>
