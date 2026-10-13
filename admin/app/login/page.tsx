@@ -63,8 +63,11 @@ export default function LoginPage() {
   return (
     <div className="login-wrap">
       <div className="card login-card">
-        <div className="brand">Absenizer</div>
-        <div className="brand-sub">Panel Admin HR — Login</div>
+        <div className="login-brand">
+          <span className="brand-mark">A</span>
+          Absenizer
+        </div>
+        <div className="login-sub">Panel Admin HR — Login</div>
         <form onSubmit={handleSubmit}>
           <div className="field">
             <label>Email</label>
