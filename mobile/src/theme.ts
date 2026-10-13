@@ -1,30 +1,42 @@
 /**
- * Tema AbsensiKu — token desain dari high-fidelity prototype.
+ * Tema AbsensiKu — gaya ukiran vintage (etching), mengikuti hi-fi yang dirombak.
  *
- * Primer indigo: #0057ba (indigo), #00468f (indigo-deep), #00325e (indigo-dark).
- * Teks: #223140 (ink), #5c7287 (ink2), #93a3b1 (ink3).
- * Latar: #f1f3f6 (bg), garis: #dfe2ea (line).
- *
+ * Kertas: #fffdf4 (paper), #f6efdb (paper2). Tinta: #1c2733 (etch), #223140.
+ * Primer indigo dipertahankan: #0057ba, #00468f, #00325e.
  * Warna status pengajuan: Sakit = merah, Cuti = biru, Ijin = kuning.
+ *
+ * Bahasa visual: kartu plat tinta (border 1.5px, radius 4px, bayangan keras
+ * offset), tombol cap stempel (uppercase, radius 3px, bayangan keras),
+ * chip stempel miring -0.6°, ikon medali ukiran, headline serif.
  */
 
 export const colors = {
-  // --- Primer ---
+  // --- Primer (dipertahankan) ---
   indigo: '#0057ba',
   indigoDeep: '#00468f',
   indigoDark: '#00325e',
-  /** Ujung terang gradasi tombol primer (#2f7ed0). */
+  /** Ujung terang gradasi hero (#2f7ed0). */
   indigoBright: '#2f7ed0',
 
-  // --- Teks & netral ---
-  ink: '#223140',
-  ink2: '#5c7287',
-  ink3: '#93a3b1',
-  line: '#dfe2ea',
-  bg: '#f1f3f6',
-  surface: '#ffffff',
+  // --- Kertas & tinta ukiran ---
+  /** Latar utama: kertas krem. */
+  bg: '#fffdf4',
+  /** Kertas sekunder / plat ilustrasi. */
+  paper2: '#f6efdb',
+  plate: '#f8f2df',
+  /** Tinta utama. */
+  ink: '#1c2733',
+  ink2: '#4d5a68',
+  ink3: '#8a7f63',
+  /** Tinta SVG / border kartu. */
+  etch: '#223140',
+  etchDeep: '#16222e',
+  /** Garis kartu. */
+  line: '#c9bfa3',
+  /** Permukaan kartu: kertas. */
+  surface: '#fffdf4',
 
-  // --- Semantik ---
+  // --- Semantik (dipertahankan) ---
   green: '#16a34a',
   greenBg: '#e8f7ee',
   red: '#dc2626',
@@ -36,6 +48,10 @@ export const colors = {
   yellowBg: '#fdf6e0',
   orange: '#ea580c',
   orangeBg: '#fdeee2',
+
+  // --- Tombol keputusan ---
+  approve: '#14532d',
+  reject: '#7f1d1d',
 
   // --- Gradasi clock-out ---
   clockOutFrom: '#f59e0b',
@@ -64,14 +80,14 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  /** Kartu */
-  card: 20,
-  /** Tombol */
-  button: 14,
-  /** Chip */
-  chip: 999,
-  /** Input */
-  input: 13,
+  /** Kartu plat: sudut tegas. */
+  card: 4,
+  /** Tombol cap: sudut tegas. */
+  button: 3,
+  /** Chip stempel. */
+  chip: 2,
+  /** Input. */
+  input: 3,
 } as const;
 
 /**
@@ -93,13 +109,25 @@ export function fontFamily(weight: '400' | '500' | '600' | '700' | '800'): strin
   }
 }
 
+/**
+ * Serif untuk headline (Playfair Display di hi-fi). Tanpa bundel font biner,
+ * pakai serif sistem sebagai pendekatan terdekat.
+ */
+export function serifFamily(weight: '700' | '800' | '900' = '800'): string {
+  // Android: 'serif' -> Noto Serif; iOS: Georgia.
+  return weight === '700' ? 'serif' : 'serif';
+}
+
+/** Offset bayangan keras plat cetak (tanpa blur). */
+export const plateShadow = 3;
+
 export const typography = {
   heroTitle: {
     fontSize: 26,
-    fontFamily: fontFamily('800'),
+    fontFamily: serifFamily('800'),
     color: '#ffffff',
   },
-  title: { fontSize: 22, fontFamily: fontFamily('800'), color: colors.ink },
+  title: { fontSize: 22, fontFamily: serifFamily('800'), color: colors.ink },
   subtitle: { fontSize: 16, fontFamily: fontFamily('700'), color: colors.ink },
   body: { fontSize: 14, fontFamily: fontFamily('400'), color: colors.ink },
   caption: { fontSize: 12, fontFamily: fontFamily('400'), color: colors.ink2 },
