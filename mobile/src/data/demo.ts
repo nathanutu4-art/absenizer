@@ -44,6 +44,8 @@ export interface Employee {
   tenure: string; // "5 tahun 3 bulan"
   status: AttendanceStatus;
   role: DemoRole;
+  /** Id PIC dari DB (opsional). */
+  picId?: string;
 }
 
 export const EMPLOYEES: Employee[] = [
