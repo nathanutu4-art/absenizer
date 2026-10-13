@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
 import { ProgressBar } from '../../src/components/ProgressBar';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
@@ -14,6 +15,7 @@ import { SegmentedControl } from '../../src/components/SegmentedControl';
 import { StatusChip } from '../../src/components/StatusChip';
 import { ThemedButton } from '../../src/components/ThemedButton';
 import { showToast } from '../../src/components/Toast';
+import type { IconName } from '../../src/data/icons';
 import {
   MY_REQUESTS,
   QUOTAS,
@@ -28,10 +30,10 @@ import { colors, fontFamily, radius, spacing } from '../../src/theme';
 
 type Segment = 'baru' | 'kuota' | 'riwayat';
 
-const TYPE_CARD: Record<RequestType, { bg: string; fg: string; glyph: string }> = {
-  cuti: { bg: colors.blueBg, fg: colors.blue, glyph: '🏖️' },
-  ijin: { bg: colors.yellowBg, fg: colors.yellowText, glyph: '📋' },
-  sakit: { bg: colors.redBg, fg: colors.red, glyph: '🤒' },
+const TYPE_CARD: Record<RequestType, { bg: string; fg: string; icon: IconName }> = {
+  cuti: { bg: colors.blueBg, fg: colors.blue, icon: 'umbrella' },
+  ijin: { bg: colors.yellowBg, fg: colors.yellowText, icon: 'clipboard' },
+  sakit: { bg: colors.redBg, fg: colors.red, icon: 'thermometer' },
 };
 
 const REQ_STATUS_TONE: Record<RequestStatus, 'yellow' | 'green' | 'red'> = {
@@ -108,7 +110,7 @@ function NewRequestForm() {
                 active && { borderColor: c.fg, borderWidth: 2 },
               ]}
             >
-              <Text style={styles.typeGlyph}>{c.glyph}</Text>
+              <AppIcon color={c.fg} name={c.icon} size={26} />
               <Text style={[styles.typeLabel, { color: c.fg }]}>
                 {TYPE_LABEL[t]}
               </Text>
@@ -172,7 +174,7 @@ function NewRequestForm() {
             onPress={() => setFile('surat-dokter.pdf')}
             style={styles.uploadZone}
           >
-            <Text style={styles.uploadGlyph}>📎</Text>
+            <AppIcon color={colors.red} name="paperclip" size={22} style={styles.uploadIcon} />
             <Text style={styles.uploadText}>
               {file ?? 'Ketuk untuk melampirkan surat dokter'}
             </Text>
@@ -180,15 +182,17 @@ function NewRequestForm() {
         </View>
       ) : null}
 
-      <View style={styles.infoBanner}>
-        <Text style={styles.infoText}>
-          ℹ️ Pengajuan diteruskan ke PIC Anda untuk persetujuan.
+      <View style={[styles.infoBanner, styles.bannerRow]}>
+        <AppIcon color={colors.blue} name="info" size={18} style={styles.bannerIcon} />
+        <Text style={[styles.infoText, styles.bannerText]}>
+          Pengajuan diteruskan ke PIC Anda untuk persetujuan.
         </Text>
       </View>
 
       {error ? (
         <View style={styles.errorBanner}>
-          <Text style={styles.errorText}>⚠️ {error}</Text>
+          <AppIcon color={colors.red} name="alert_triangle" size={18} style={styles.errorIcon} />
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : null}
 
@@ -212,7 +216,7 @@ function QuotaTab() {
           <View key={q.type} style={styles.quotaCard}>
             <View style={styles.quotaTop}>
               <View style={[styles.quotaIcon, { backgroundColor: c.bg }]}>
-                <Text style={styles.quotaGlyph}>{c.glyph}</Text>
+                <AppIcon color={c.fg} name={c.icon} size={24} />
               </View>
               <View style={styles.quotaText}>
                 <Text style={styles.quotaTitle}>{TYPE_LABEL[q.type]}</Text>
@@ -354,7 +358,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.lg,
   },
-  uploadGlyph: { fontSize: 22, marginRight: 10 },
+  uploadIcon: { marginRight: 10 },
   uploadText: { color: colors.red, fontFamily: fontFamily('600'), fontSize: 13 },
   infoBanner: {
     backgroundColor: colors.blueBg,
@@ -363,13 +367,19 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   infoText: { color: colors.blue, fontFamily: fontFamily('500'), fontSize: 12.5 },
+  bannerRow: { alignItems: 'center', flexDirection: 'row' },
+  bannerIcon: { marginRight: 10 },
+  bannerText: { flex: 1 },
   errorBanner: {
+    alignItems: 'center',
     backgroundColor: colors.redBg,
     borderRadius: radius.input,
+    flexDirection: 'row',
     marginTop: spacing.sm,
     padding: spacing.md,
   },
-  errorText: { color: colors.red, fontFamily: fontFamily('600'), fontSize: 13 },
+  errorIcon: { marginRight: 8 },
+  errorText: { color: colors.red, flex: 1, fontFamily: fontFamily('600'), fontSize: 13 },
   submit: { marginTop: spacing.lg },
   quotaCard: {
     backgroundColor: '#fff',
