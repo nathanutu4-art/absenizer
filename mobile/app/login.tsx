@@ -97,33 +97,6 @@ export default function LoginScreen() {
     }
   }
 
-  /**
-   * Mode demo untuk testing — HANYA untuk build uji coba, hapus sebelum produksi.
-   * Melewati Supabase auth dan menyimpan sesi demo lokal sesuai peran terpilih.
-   */
-  async function handleDemoLogin() {
-    setError(null);
-    setLoading(true);
-    try {
-      await SecureStore.setItemAsync(
-        SESSION_KEY,
-        JSON.stringify({
-          demo: true,
-          email: 'demo@perusahaan.co.id',
-          userId: 'demo-user',
-          role,
-          remember,
-        }),
-      );
-      showToast('Selamat datang kembali!');
-      router.replace('/(tabs)/home');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Gagal masuk mode demo.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <View style={styles.root}>
       {/* Hero ukiran */}
@@ -239,15 +212,6 @@ export default function LoginScreen() {
               >
                 {loading ? 'Memuat…' : 'Masuk'}
               </PlateButton>
-              <TouchableOpacity
-                disabled={loading}
-                onPress={handleDemoLogin}
-                style={styles.demoLinkWrap}
-              >
-                <Text style={styles.demoLink}>
-                  {loading ? 'Memuat…' : 'Masuk sebagai Demo'}
-                </Text>
-              </TouchableOpacity>
               <Text style={styles.hint}>
                 Belum punya akun? Hubungi Admin HR — akun dibuatkan oleh HR.
               </Text>
@@ -360,13 +324,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   loginBtn: { marginTop: spacing.lg },
-  demoLinkWrap: { alignItems: 'center', marginTop: spacing.md },
-  demoLink: {
-    color: colors.indigo,
-    fontFamily: fontFamily('600'),
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
   hint: {
     color: colors.ink3,
     fontFamily: fontFamily('400'),
