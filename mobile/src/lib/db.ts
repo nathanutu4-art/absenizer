@@ -479,6 +479,66 @@ export async function uploadSelfie(
   }
 }
 
+export interface ClockOutInput {
+  coords: { latitude: number; longitude: number } | null;
+  /** Path storage foto selfie clock-out (bucket "selfies"); null bila tak ada/gagal. */
+  selfieUrl?: string | null;
+}
+
+/**
+ * Simpan clock-out ke Supabase (best-effort): update baris kehadiran hari
+ * ini dengan clock_out_at (+ selfie & lokasi bila ada).
+ * Dilewati total di mode demo / tanpa employee. Mengembalikan true bila
+ * baris berhasil diperbarui.
+ */
+export async function saveClockOut(input: ClockOutInput): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const employeeId = await getMyEmployeeId();
+    if (!employeeId) return false;
+
+    const now = new Date();
+    const date = jakartaToday();
+
+    const { data, error } = await supabase
+      .from('attendance')
+      .update({
+        clock_out_at: now.toISOString(),
+        clock_out_selfie_url: input.selfieUrl ?? null,
+        clock_out_lat: input.coords?.latitude ?? null,
+        clock_out_lng: input.coords?.longitude ?? null,
+        synced_at: now.toISOString(),
+      })
+      .eq('employee_id', employeeId)
+      .eq('date', date)
+      .select('id')
+      .maybeSingle();
+    if (error || !data) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * URL bertanda tangan (signed URL, berlaku 1 jam) untuk file di bucket
+ * privat "selfies". null bila path kosong / gagal dibuat.
+ */
+export async function getSelfieSignedUrl(
+  path: string | null | undefined,
+): Promise<string | null> {
+  if (!isSupabaseConfigured() || !path) return null;
+  try {
+    const { data, error } = await supabase.storage
+      .from('selfies')
+      .createSignedUrl(path, 3600);
+    if (error || !data?.signedUrl) return null;
+    return data.signedUrl;
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Pengajuan cuti/ijin/sakit
 // ---------------------------------------------------------------------------
@@ -688,6 +748,12 @@ interface DbAttendanceRow {
   clock_in_at: string | null;
   clock_out_at: string | null;
   is_late: boolean;
+  clock_in_selfie_url: string | null;
+  clock_out_selfie_url: string | null;
+  clock_in_lat: number | null;
+  clock_in_lng: number | null;
+  clock_out_lat: number | null;
+  clock_out_lng: number | null;
 }
 
 /**
@@ -701,7 +767,9 @@ export async function getMyAttendance(): Promise<HistoryRow[]> {
   try {
     const { data, error } = await supabase
       .from('attendance')
-      .select('id, date, clock_in_at, clock_out_at, is_late')
+      .select(
+        'id, date, clock_in_at, clock_out_at, is_late, clock_in_selfie_url, clock_out_selfie_url, clock_in_lat, clock_in_lng, clock_out_lat, clock_out_lng',
+      )
       .eq('employee_id', employeeId)
       .order('date', { ascending: false })
       .limit(30);
@@ -737,6 +805,13 @@ export async function getMyAttendance(): Promise<HistoryRow[]> {
         clockOut: formatJamSingkat(r.clock_out_at),
         status: (r.is_late ? 'Terlambat' : 'Hadir') as HistoryRow['status'],
         flags: flagsById.get(r.id) ?? [],
+        // Detail untuk popup: path storage selfie + koordinat.
+        clockInSelfiePath: r.clock_in_selfie_url,
+        clockOutSelfiePath: r.clock_out_selfie_url,
+        clockInLat: r.clock_in_lat,
+        clockInLng: r.clock_in_lng,
+        clockOutLat: r.clock_out_lat,
+        clockOutLng: r.clock_out_lng,
       };
     });
   } catch {
