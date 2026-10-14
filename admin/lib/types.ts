@@ -34,6 +34,8 @@ export interface CompanySettings {
   /** Kolom dari migration-quota-defaults.sql; null bila migrasi belum jalan. */
   cuti_quota_default: number | null;
   ijin_quota_default: number | null;
+  /** Kolom dari migration-theme-palette.sql; null bila migrasi belum jalan. */
+  theme_palette: { name: string; indigo: string; apricot: string; olive: string } | null;
 }
 
 export type LeaveType = "cuti" | "ijin" | "sakit";
