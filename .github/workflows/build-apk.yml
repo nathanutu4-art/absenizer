@@ -41,10 +41,10 @@ jobs:
       - name: Build debug APK
         run: |
           cd android
-          ./gradlew assembleRelease --no-daemon -x lint
+          ./gradlew assembleDebug --no-daemon -x lint
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: absenizer-debug-apk
-          path: mobile/android/app/build/outputs/apk/release/app-release.apk
+          path: path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
