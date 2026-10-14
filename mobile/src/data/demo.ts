@@ -258,6 +258,14 @@ export interface HistoryRow {
   clockOut: string;
   status: 'Hadir' | 'Terlambat' | 'Cuti' | 'Sakit' | 'Ijin';
   flags: string[];
+  /** Path storage selfie clock-in (bucket "selfies"); null bila tak ada. */
+  clockInSelfiePath?: string | null;
+  /** Path storage selfie clock-out (bucket "selfies"); null bila tak ada. */
+  clockOutSelfiePath?: string | null;
+  clockInLat?: number | null;
+  clockInLng?: number | null;
+  clockOutLat?: number | null;
+  clockOutLng?: number | null;
 }
 
 export const HISTORY_SUMMARY = [

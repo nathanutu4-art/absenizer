@@ -12,6 +12,7 @@ import { Avatar } from '../../src/components/Avatar';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
+import { Skeleton } from '../../src/components/Skeleton';
 import { StampChip } from '../../src/components/StampChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
 import { DUMMY_AVATAR } from '../../src/data/dummy-avatar';
@@ -100,11 +101,16 @@ export default function TeamScreen() {
   const [query, setQuery] = useState('');
   // Direktori dimuat dari Supabase bila tersedia; tampilkan demo saat memuat.
   const [directorySrc, setDirectorySrc] = useState<Employee[]>(EMPLOYEES);
+  const [dirLoading, setDirLoading] = useState(true);
   useEffect(() => {
     let alive = true;
-    getEmployees().then((list) => {
-      if (alive) setDirectorySrc(list);
-    });
+    getEmployees()
+      .then((list) => {
+        if (alive) setDirectorySrc(list);
+      })
+      .finally(() => {
+        if (alive) setDirLoading(false);
+      });
     return () => {
       alive = false;
     };
@@ -235,7 +241,38 @@ export default function TeamScreen() {
           value={query}
         />
       </View>
-      {directory.map((e) => {
+      {dirLoading ? (
+        <>
+          <Plate style={styles.dirWrap}>
+            <View style={styles.dirRow}>
+              <Skeleton width={46} height={46} borderRadius={2} />
+              <View style={styles.dirSkeletonText}>
+                <Skeleton width={140} height={14} />
+                <Skeleton width={100} height={12} style={styles.dirSkeletonGap} />
+              </View>
+            </View>
+          </Plate>
+          <Plate style={styles.dirWrap}>
+            <View style={styles.dirRow}>
+              <Skeleton width={46} height={46} borderRadius={2} />
+              <View style={styles.dirSkeletonText}>
+                <Skeleton width={120} height={14} />
+                <Skeleton width={90} height={12} style={styles.dirSkeletonGap} />
+              </View>
+            </View>
+          </Plate>
+          <Plate style={styles.dirWrap}>
+            <View style={styles.dirRow}>
+              <Skeleton width={46} height={46} borderRadius={2} />
+              <View style={styles.dirSkeletonText}>
+                <Skeleton width={150} height={14} />
+                <Skeleton width={95} height={12} style={styles.dirSkeletonGap} />
+              </View>
+            </View>
+          </Plate>
+        </>
+      ) : (
+      directory.map((e) => {
         const stamp = STAMP_COLORS[STATUS_TONE[e.status]];
         return (
           <Plate key={e.id} style={styles.dirWrap}>
@@ -260,7 +297,8 @@ export default function TeamScreen() {
             </TouchableOpacity>
           </Plate>
         );
-      })}
+      })
+      )}
     </ScreenContainer>
   );
 }
@@ -383,6 +421,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   dirWrap: { marginBottom: spacing.sm },
+  dirSkeletonText: { flex: 1, marginLeft: 12 },
+  dirSkeletonGap: { marginTop: 6 },
   dirRow: {
     alignItems: 'center',
     flexDirection: 'row',

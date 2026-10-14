@@ -45,6 +45,44 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Simpan sesi Supabase ke SecureStore, resolve peran dari DB bila
+   * tersedia, lalu masuk ke beranda. Dipakai login form & tombol demo.
+   */
+  async function persistSession(
+    userId: string,
+    email: string | undefined,
+    fallbackRole: DemoRole,
+  ) {
+    await SecureStore.setItemAsync(
+      SESSION_KEY,
+      JSON.stringify({
+        userId,
+        email,
+        role: fallbackRole,
+        remember,
+        demo: false,
+      }),
+    );
+    if (isSupabaseConfigured()) {
+      const resolvedRole = await resolveMyRole(fallbackRole);
+      if (resolvedRole !== fallbackRole) {
+        await SecureStore.setItemAsync(
+          SESSION_KEY,
+          JSON.stringify({
+            userId,
+            email,
+            role: resolvedRole,
+            remember,
+            demo: false,
+          }),
+        );
+      }
+    }
+    showToast('Selamat datang kembali!');
+    router.replace('/(tabs)/home');
+  }
+
   async function handleLogin() {
     setError(null);
     if (!email.trim() || !password) {
@@ -58,39 +96,35 @@ export default function LoginScreen() {
         password,
       });
       if (authError) throw authError;
-      // Simpan sesi dulu agar resolveMyRole bisa mencocokkan employee.
-      await SecureStore.setItemAsync(
-        SESSION_KEY,
-        JSON.stringify({
-          userId: data.user.id,
-          email: data.user.email,
-          role,
-          remember,
-          demo: false,
-        }),
-      );
-      // Bila Supabase terkonfigurasi, ambil peran sebenarnya dari DB
-      // (HR bila is_hr, PIC bila ada bawahan); fallback ke pilihan login.
-      if (isSupabaseConfigured()) {
-        const resolvedRole = await resolveMyRole(role);
-        if (resolvedRole !== role) {
-          await SecureStore.setItemAsync(
-            SESSION_KEY,
-            JSON.stringify({
-              userId: data.user.id,
-              email: data.user.email,
-              role: resolvedRole,
-              remember,
-              demo: false,
-            }),
-          );
-        }
-      }
-      showToast('Selamat datang kembali!');
-      router.replace('/(tabs)/home');
+      await persistSession(data.user.id, data.user.email, role);
     } catch (e) {
       setError(
         e instanceof Error ? e.message : 'Gagal masuk. Periksa koneksi Anda.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Tombol demo: login Supabase sungguhan memakai akun prasta@gosit.us
+   * (kata sandi default "secret123"), bukan sesi demo lokal.
+   */
+  async function handleDemoLogin() {
+    setError(null);
+    setLoading(true);
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: 'prasta@gosit.us',
+        password: 'secret123',
+      });
+      if (authError) throw authError;
+      await persistSession(data.user.id, data.user.email, role);
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : 'Gagal masuk sebagai demo. Periksa koneksi Anda.',
       );
     } finally {
       setLoading(false);
@@ -212,6 +246,15 @@ export default function LoginScreen() {
               >
                 {loading ? 'Memuat…' : 'Masuk'}
               </PlateButton>
+              <TouchableOpacity
+                disabled={loading}
+                onPress={handleDemoLogin}
+                style={styles.demoLinkWrap}
+              >
+                <Text style={styles.demoLink}>
+                  {loading ? 'Memuat…' : 'Masuk sebagai Demo (prasta@gosit.us)'}
+                </Text>
+              </TouchableOpacity>
               <Text style={styles.hint}>
                 Belum punya akun? Hubungi Admin HR — akun dibuatkan oleh HR.
               </Text>
@@ -324,6 +367,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   loginBtn: { marginTop: spacing.lg },
+  demoLinkWrap: { alignItems: 'center', marginTop: spacing.md },
+  demoLink: {
+    color: colors.indigo,
+    fontFamily: fontFamily('600'),
+    fontSize: 14,
+    textDecorationLine: 'underline',
+  },
   hint: {
     color: colors.ink3,
     fontFamily: fontFamily('400'),
@@ -339,4 +389,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

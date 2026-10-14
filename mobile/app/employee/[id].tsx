@@ -6,6 +6,7 @@ import { Avatar } from '../../src/components/Avatar';
 import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
+import { Skeleton } from '../../src/components/Skeleton';
 import { StampChip } from '../../src/components/StampChip';
 import { getPicOf, type Employee } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
@@ -13,6 +14,15 @@ import { getEmployees } from '../../src/lib/db';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 const STATUS_LABEL = { hadir: 'Hadir', sakit: 'Sakit', cuti: 'Cuti', ijin: 'Ijin' } as const;
+
+/**
+ * Foto profil valid hanya bila URL absolut (http/https) atau data-URI.
+ * Nilai relatif seperti "/dummy-avatar.jpg" dari DB dikembalikan sebagai
+ * undefined agar Avatar menampilkan fallback gradasi/inisial.
+ */
+function validPhoto(url?: string | null): string | undefined {
+  return url && /^(https?:\/\/|data:)/i.test(url) ? url : undefined;
+}
 
 /** Detail Karyawan — hero ukiran + kartu keterangan + kartu PIC. */
 export default function EmployeeDetailScreen() {
@@ -51,7 +61,18 @@ export default function EmployeeDetailScreen() {
   if (!loaded) {
     return (
       <SafeAreaView style={styles.fallback}>
-        <Text style={styles.fallbackText}>Memuat…</Text>
+        <View style={styles.skeletonHead}>
+          <Skeleton width={76} height={76} borderRadius={2} />
+          <View style={styles.skeletonHeadText}>
+            <Skeleton width={160} height={22} />
+            <Skeleton width={110} height={14} style={styles.skeletonGap} />
+          </View>
+        </View>
+        <View style={styles.skeletonBody}>
+          <Skeleton width="100%" height={54} style={styles.skeletonGap} />
+          <Skeleton width="100%" height={54} style={styles.skeletonGap} />
+          <Skeleton width="100%" height={54} style={styles.skeletonGap} />
+        </View>
       </SafeAreaView>
     );
   }
@@ -91,7 +112,7 @@ export default function EmployeeDetailScreen() {
               <View style={styles.backSpacer} />
             </View>
             <View style={styles.profileRow}>
-              <Avatar gradientId={employee.gradientId} name={employee.name} size={76} shape="square" photoUri={employee.photoUrl} />
+              <Avatar gradientId={employee.gradientId} name={employee.name} size={76} shape="square" photoUri={validPhoto(employee.photoUrl)} />
               <View style={styles.profileText}>
                 <Text style={styles.name}>{employee.name}</Text>
                 <Text style={styles.position}>{employee.position}</Text>
@@ -130,7 +151,7 @@ export default function EmployeeDetailScreen() {
           {pic ? (
             <Plate style={styles.picWrap}>
               <View style={styles.picRow}>
-                <Avatar gradientId={pic.gradientId} name={pic.name} size={46} shape="square" photoUri={pic.photoUrl} />
+                <Avatar gradientId={pic.gradientId} name={pic.name} size={46} shape="square" photoUri={validPhoto(pic.photoUrl)} />
                 <View style={styles.picText}>
                   <Text style={styles.picName}>{pic.name}</Text>
                   <Text style={styles.picPos}>{pic.position}</Text>
@@ -155,6 +176,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fallbackText: { color: colors.ink2, fontFamily: fontFamily('500') },
+  skeletonHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    width: '100%',
+  },
+  skeletonHeadText: { flex: 1, marginLeft: spacing.md },
+  skeletonGap: { marginTop: spacing.sm },
+  skeletonBody: { marginTop: spacing.lg, paddingHorizontal: spacing.lg, width: '100%' },
   hero: {
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
