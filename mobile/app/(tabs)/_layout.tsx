@@ -1,5 +1,6 @@
-import { Tabs } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { Tabs, usePathname } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated } from 'react-native';
 import { AppIcon } from '../../src/components/AppIcon';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import type { IconName } from '../../src/data/icons';
@@ -36,10 +37,31 @@ const badgeStyle = {
 
 export default function TabsLayout() {
   const [role, setRole] = useState<DemoRole | null>(null);
+  const pathname = usePathname();
+  // Animasi pergantian tab: fade-in + geser naik halus (~200ms).
+  const fade = useRef(new Animated.Value(1)).current;
+  const slide = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     getActiveRole().then(setRole);
   }, []);
+
+  useEffect(() => {
+    fade.setValue(0);
+    slide.setValue(10);
+    Animated.parallel([
+      Animated.timing(fade, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slide, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [pathname, fade, slide]);
 
   if (!role) return null;
 
@@ -52,6 +74,9 @@ export default function TabsLayout() {
   ).length;
 
   return (
+    <Animated.View
+      style={{ flex: 1, opacity: fade, transform: [{ translateY: slide }] }}
+    >
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -131,5 +156,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    </Animated.View>
   );
 }

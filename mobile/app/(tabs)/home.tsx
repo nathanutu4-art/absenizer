@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
+import { Skeleton } from '../../src/components/Skeleton';
 import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import type { IconName } from '../../src/data/icons';
@@ -30,7 +31,8 @@ import {
   getEmployee,
 } from '../../src/data/demo';
 import { getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { getMyEmployee } from '../../src/lib/db';
+import { getCompanySettings, getMyEmployee, getMyLeaveBalance, saveClockOut } from '../../src/lib/db';
+import { calcDuration } from '../../src/lib/duration';
 import { recordClockOut, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -102,7 +104,14 @@ export default function HomeScreen() {
   // Nama & foto pengguna yang login (dari DB bila tersedia).
   const [meName, setMeName] = useState<string | null>(null);
   const [mePhoto, setMePhoto] = useState<string | null>(null);
+  const [meLoading, setMeLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(true);
+
+  // Sisa kuota cuti/ijin dari database (leave_balances); fallback ke
+  // default company_settings bila baris belum ada. Sesi demo: data demo.
+  const [quotaRows, setQuotaRows] = useState<
+    { label: string; remaining: string }[]
+  >([]);
 
   useEffect(() => {
     getActiveRole().then(setRole);
@@ -119,6 +128,57 @@ export default function HomeScreen() {
       if (me) {
         setMeName(me.name);
         setMePhoto(me.photoUrl ?? null);
+      }
+      setMeLoading(false);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const session = await getSession();
+      if (!alive) return;
+      if (session?.demo !== false) {
+        // Sesi demo: tampilkan angka demo.
+        setQuotaRows(
+          QUOTAS.slice(0, 2).map((q) => ({
+            label: q.type === 'cuti' ? 'Cuti' : 'Ijin',
+            remaining:
+              q.total !== null
+                ? `${q.total - q.used} dari ${q.total} tersisa`
+                : 'Tanpa batas',
+          })),
+        );
+        return;
+      }
+      try {
+        const [balance, settings] = await Promise.all([
+          getMyLeaveBalance(),
+          getCompanySettings(),
+        ]);
+        if (!alive) return;
+        // Kuota penuh bila belum ada pemakaian (used = 0/null);
+        // sisa = kuota - terpakai.
+        const cutiQuota = balance?.cutiQuota ?? settings.cutiQuotaDefault;
+        const cutiUsed = balance?.cutiUsed ?? 0;
+        const ijinQuota = balance?.ijinQuota ?? settings.ijinQuotaDefault;
+        const ijinUsed = balance?.ijinUsed ?? 0;
+        setQuotaRows([
+          {
+            label: 'Cuti',
+            remaining: `${cutiQuota - cutiUsed} dari ${cutiQuota} tersisa`,
+          },
+          {
+            label: 'Ijin',
+            remaining: `${ijinQuota - ijinUsed} dari ${ijinQuota} tersisa`,
+          },
+        ]);
+      } catch {
+        if (!alive) return;
+        setQuotaRows([]);
       }
     })();
     return () => {
@@ -172,6 +232,10 @@ export default function HomeScreen() {
     } else if (clock.phase === 'out') {
       recordClockOut(nowShort());
       showToast('Clock out tercatat. Sampai jumpa!');
+      // Simpan clock-out ke Supabase (best-effort; status lokal sudah benar).
+      saveClockOut({ coords: null }).then((ok) => {
+        if (!ok) showToast('Clock out tersimpan lokal; sinkronisasi menyusul.');
+      });
     } else {
       showToast('Absensi hari ini sudah lengkap.');
     }
@@ -225,7 +289,11 @@ export default function HomeScreen() {
                   <Text style={styles.greetingSmall}>
                     Selamat datang, {ROLE_LABEL[role]}
                   </Text>
-                  <Text style={styles.greetingName}>{meName ?? me.name}</Text>
+                  {meLoading ? (
+                    <Skeleton width={140} height={22} style={styles.nameSkeleton} />
+                  ) : (
+                    <Text style={styles.greetingName}>{meName ?? me.name}</Text>
+                  )}
                   <Text style={styles.dateLine}>{todayLine()}</Text>
                 </View>
               </View>
@@ -261,7 +329,7 @@ export default function HomeScreen() {
                   <View style={styles.timeDivider} />
                   <View style={styles.timeCol}>
                     <Text style={styles.timeValue}>
-                      {clock.inTime && clock.outTime ? '8j 03m' : '--'}
+                      {calcDuration(clock.inTime, clock.outTime)}
                     </Text>
                     <Text style={styles.timeLabel}>Durasi</Text>
                   </View>
@@ -355,16 +423,19 @@ export default function HomeScreen() {
           <Plate style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Sisa Kuota</SectionTitle>
-              {QUOTAS.slice(0, 2).map((q) => (
-                <View key={q.type} style={styles.quotaRow}>
-                  <Text style={styles.quotaLabel}>
-                    {q.type === 'cuti' ? 'Cuti' : 'Ijin'}
-                  </Text>
-                  <Text style={styles.quotaValue}>
-                    {q.total !== null ? `${q.total - q.used} dari ${q.total} tersisa` : 'Tanpa batas'}
-                  </Text>
-                </View>
-              ))}
+              {quotaRows.length === 0 ? (
+                <>
+                  <Skeleton width="100%" height={16} style={styles.quotaSkeleton} />
+                  <Skeleton width="100%" height={16} style={styles.quotaSkeleton} />
+                </>
+              ) : (
+                quotaRows.map((q) => (
+                  <View key={q.label} style={styles.quotaRow}>
+                    <Text style={styles.quotaLabel}>{q.label}</Text>
+                    <Text style={styles.quotaValue}>{q.remaining}</Text>
+                  </View>
+                ))
+              )}
               <TouchableOpacity onPress={() => router.push('/(tabs)/requests')}>
                 <Text style={styles.linkText}>Lihat semua kuota →</Text>
               </TouchableOpacity>
@@ -473,6 +544,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginTop: 2,
   },
+  nameSkeleton: { marginTop: 4 },
   dateLine: {
     color: 'rgba(255,255,255,0.8)',
     fontFamily: 'serif',
@@ -631,6 +703,7 @@ const styles = StyleSheet.create({
   },
   quotaLabel: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
   quotaValue: { color: colors.ink2, fontFamily: fontFamily('400'), fontSize: 13 },
+  quotaSkeleton: { marginVertical: 6 },
   linkText: {
     color: colors.indigo,
     fontFamily: fontFamily('700'),

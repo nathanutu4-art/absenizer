@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AttendanceDetailModal } from '../../src/components/AttendanceDetailModal';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
+import { Skeleton } from '../../src/components/Skeleton';
 import { StampChip } from '../../src/components/StampChip';
 import { HISTORY_ROWS, type HistoryRow } from '../../src/data/demo';
 import { getMyAttendance } from '../../src/lib/db';
+import { calcDuration } from '../../src/lib/duration';
 import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -38,6 +41,8 @@ export default function HistoryScreen() {
   // fallback demo. Sesi demo: tampilkan baris demo.
   const [rows, setRows] = useState<HistoryRow[]>([]);
   const [loading, setLoading] = useState(true);
+  // Baris yang dibuka di popup detail; null = popup tertutup.
+  const [selectedRow, setSelectedRow] = useState<HistoryRow | null>(null);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -127,14 +132,36 @@ export default function HistoryScreen() {
       {/* Baris riwayat */}
       <View style={styles.list}>
         {loading ? (
-          <Text style={styles.emptyText}>Memuat riwayat…</Text>
+          <>
+            {[0, 1, 2].map((i) => (
+              <Plate key={i} style={styles.itemWrap}>
+                <View style={styles.item}>
+                  <View style={styles.dateBlock}>
+                    <Skeleton width={30} height={24} />
+                    <Skeleton width={30} height={12} style={styles.rowSkeletonGap} />
+                  </View>
+                  <View style={styles.divider} />
+                  <View style={styles.itemBody}>
+                    <Skeleton width="70%" height={16} />
+                    <Skeleton width="45%" height={12} style={styles.rowSkeletonGap} />
+                  </View>
+                </View>
+              </Plate>
+            ))}
+          </>
         ) : rows.length === 0 ? (
           <Text style={styles.emptyText}>Belum ada riwayat kehadiran.</Text>
         ) : (
           rows.map((row) => {
           const stamp = STAMP_COLORS[STATUS_TONE[row.status]];
+          const duration = calcDuration(row.clockIn, row.clockOut);
           return (
             <Plate key={row.id} style={styles.itemWrap}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                activeOpacity={0.85}
+                onPress={() => setSelectedRow(row)}
+              >
               <View style={styles.item}>
                 <View style={styles.dateBlock}>
                   <Text style={styles.dayNum}>{row.dayNum}</Text>
@@ -150,6 +177,9 @@ export default function HistoryScreen() {
                       {row.status}
                     </StampChip>
                   </View>
+                  <Text style={styles.durationText}>
+                    Masuk {row.clockIn} • Pulang {row.clockOut} • Durasi {duration}
+                  </Text>
                   {row.flags.length > 0 ? (
                     <View style={styles.flagRow}>
                       {row.flags.map((f) => (
@@ -164,13 +194,20 @@ export default function HistoryScreen() {
                       ))}
                     </View>
                   ) : null}
+                  <Text style={styles.detailLink}>Lihat detail →</Text>
                 </View>
               </View>
+              </TouchableOpacity>
             </Plate>
           );
           })
         )}
       </View>
+
+      <AttendanceDetailModal
+        row={selectedRow}
+        onClose={() => setSelectedRow(null)}
+      />
     </ScreenContainer>
   );
 }
@@ -256,6 +293,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   itemTime: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  durationText: {
+    color: colors.ink3,
+    fontFamily: fontFamily('500'),
+    fontSize: 12,
+    marginTop: 4,
+  },
+  rowSkeletonGap: { marginTop: 6 },
   flagRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
   flagChip: { marginRight: 6, marginTop: 4 },
+  detailLink: {
+    color: colors.indigo,
+    fontFamily: fontFamily('600'),
+    fontSize: 12,
+    marginTop: 8,
+  },
 });
