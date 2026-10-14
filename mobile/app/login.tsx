@@ -107,8 +107,8 @@ export default function LoginScreen() {
   }
 
   /**
-   * Tombol demo: login Supabase sungguhan memakai akun prasta@gosit.us
-   * (kata sandi default "secret123"), bukan sesi demo lokal.
+   * Tombol demo: login Supabase sungguhan memakai akun prasta@gosit.us,
+   * bukan sesi demo lokal.
    */
   async function handleDemoLogin() {
     setError(null);
@@ -116,7 +116,7 @@ export default function LoginScreen() {
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: 'prasta@gosit.us',
-        password: 'secret123',
+        password: 'Passbiasa1',
       });
       if (authError) throw authError;
       await persistSession(data.user.id, data.user.email, role);
