@@ -134,15 +134,16 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.root}>
-      <ScrollView>
+    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.scroll}>
         <GradientView kind="hero" style={styles.hero}>
           <Image
             source={{ uri: HATCH_TILE }}
             resizeMode="repeat"
             style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
           />
-          <SafeAreaView edges={['top']}>
+          <View>
             <Text style={styles.headerTitle}>Profil</Text>
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
@@ -164,7 +165,7 @@ export default function ProfileScreen() {
                 </StampChip>
               </View>
             </View>
-          </SafeAreaView>
+          </View>
         </GradientView>
 
         <View style={styles.body}>
@@ -172,7 +173,7 @@ export default function ProfileScreen() {
             <Text style={styles.loadingText}>Memuat profil…</Text>
           ) : (
             kv.map(([label, value]) => (
-              <Plate key={label} style={styles.kvWrap}>
+              <Plate glass key={label} style={styles.kvWrap}>
                 <View style={styles.kvRow}>
                   <Text style={styles.kvLabel}>{label}</Text>
                   <Text style={styles.kvValue}>{value}</Text>
@@ -182,7 +183,7 @@ export default function ProfileScreen() {
           )}
 
           {pic ? (
-          <Plate style={styles.picWrap}>
+          <Plate glass style={styles.picWrap}>
             <View style={styles.picInner}>
               <View style={styles.sectionHead}>
                 <Text style={styles.cardTitle}>PIC Saya</Text>
@@ -222,7 +223,7 @@ export default function ProfileScreen() {
           </Plate>
           ) : null}
 
-          <Plate style={styles.picWrap}>
+          <Plate glass style={styles.picWrap}>
             <View style={styles.picInner}>
               <View style={styles.sectionHead}>
                 <Text style={styles.cardTitle}>Ganti Kata Sandi</Text>
@@ -241,7 +242,7 @@ export default function ProfileScreen() {
                       setPwMsg(null);
                     }}
                     placeholder="Kata sandi baru (min. 6 karakter)"
-                    placeholderTextColor={colors.ink3}
+                    placeholderTextColor={'rgba(255,255,255,0.5)'}
                     secureTextEntry
                     style={styles.pwInput}
                     value={newPass}
@@ -252,7 +253,7 @@ export default function ProfileScreen() {
                       setPwMsg(null);
                     }}
                     placeholder="Ulangi kata sandi baru"
-                    placeholderTextColor={colors.ink3}
+                    placeholderTextColor={'rgba(255,255,255,0.5)'}
                     secureTextEntry
                     style={styles.pwInput}
                     value={confirmPass}
@@ -288,12 +289,15 @@ export default function ProfileScreen() {
           </PlateButton>
         </View>
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: colors.bg, flex: 1 },
+  root: { flex: 1 },
+  safe: { flex: 1 },
+  scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   hero: {
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
@@ -341,29 +345,30 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   statusChip: { marginTop: 10 },
-  body: { padding: spacing.lg },
+  body: { paddingTop: spacing.md },
   kvWrap: { marginBottom: spacing.sm },
   loadingText: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.8)',
     fontFamily: fontFamily('500'),
     fontSize: 14,
     marginVertical: spacing.md,
     textAlign: 'center',
   },
   kvRow: { paddingHorizontal: spacing.md, paddingVertical: 10 },
-  kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12 },
+  kvLabel: { color: 'rgba(255,255,255,0.7)', fontFamily: fontFamily('500'), fontSize: 12 },
   kvValue: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('600'),
     fontSize: 14,
     marginTop: 3,
   },
   picWrap: { marginTop: spacing.sm },
   pwInput: {
-    backgroundColor: colors.surface,
-    borderColor: colors.line,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.35)',
     borderRadius: 4,
     borderWidth: 1.5,
+    color: '#ffffff',
     fontFamily: fontFamily('500'),
     fontSize: 14,
     marginTop: spacing.sm,
@@ -377,7 +382,7 @@ const styles = StyleSheet.create({
   },
   pwBtn: { marginTop: spacing.md },
   pwNote: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.8)',
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: spacing.xs,
@@ -385,18 +390,18 @@ const styles = StyleSheet.create({
   picInner: { padding: spacing.lg },
   sectionHead: { marginBottom: spacing.sm },
   cardTitle: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 15,
     marginBottom: 6,
   },
-  ruleThick: { backgroundColor: colors.ink, height: 3 },
-  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3 },
+  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
   picRow: { alignItems: 'center', flexDirection: 'row' },
   picText: { flex: 1, marginLeft: 12 },
-  picName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  picName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   picPos: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.8)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
