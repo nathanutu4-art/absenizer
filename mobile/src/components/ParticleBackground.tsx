@@ -96,7 +96,9 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
 
         const v = views.current[i];
         if (v) {
-          v.setNativeProps({ style: { left: p.x, top: p.y } });
+          v.setNativeProps({
+            transform: [{ translateX: p.x }, { translateY: p.y }],
+          });
         }
       }
       raf = requestAnimationFrame(tick);
@@ -115,13 +117,14 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
           }}
           style={{
             position: 'absolute',
-            left: p.x,
-            top: p.y,
+            left: 0,
+            top: 0,
             width: p.size,
             height: p.size,
             borderRadius: p.size / 2,
             backgroundColor: '#051230',
             opacity: p.opacity,
+            transform: [{ translateX: p.x }, { translateY: p.y }],
           }}
         />
       ))}
