@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { Avatar } from '../../src/components/Avatar';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
@@ -101,9 +100,6 @@ function photoFor(e: Employee): string {
 /** Info Karyawan — tidak masuk, ulang tahun terdekat, direktori. */
 export default function TeamScreen() {
   const [query, setQuery] = useState('');
-  // Partikel background interaktif (seperti dashboard).
-  const particles = useRef<ParticleHandle | null>(null);
-  const lastTouch = useRef<{ x: number; y: number } | null>(null);
   // Direktori dimuat dari Supabase bila tersedia; tampilkan demo saat memuat.
   const [directorySrc, setDirectorySrc] = useState<Employee[]>(EMPLOYEES);
   const [dirLoading, setDirLoading] = useState(true);
@@ -162,31 +158,12 @@ export default function TeamScreen() {
   );
 
   return (
-    <View
-      style={styles.root}
-      onTouchMove={(e) => {
-        const t = e.nativeEvent.touches[0];
-        if (!t) return;
-        const last = lastTouch.current;
-        if (last) {
-          // Kecepatan swipe → dorong partikel di sekitar jari.
-          const vx = (t.pageX - last.x) * 0.6;
-          const vy = (t.pageY - last.y) * 0.6;
-          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
-        }
-        lastTouch.current = { x: t.pageX, y: t.pageY };
-      }}
-      onTouchEnd={() => {
-        lastTouch.current = null;
-      }}
-    >
+    <View style={styles.root}>
       {/* Background: putih dengan sentuhan gradient lembut */}
       <LinearGradient
         colors={['#ffffff', '#eef3fa']}
         style={StyleSheet.absoluteFill}
       />
-      {/* Partikel interaktif */}
-      <ParticleBackground ref={particles} />
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
       <Text style={styles.header}>Info Karyawan</Text>

@@ -5,7 +5,6 @@ import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
-import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
 import { StampChip } from '../../src/components/StampChip';
@@ -54,11 +53,6 @@ export default function ProfileScreen() {
   const [confirmPass, setConfirmPass] = useState('');
   const [pwBusy, setPwBusy] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
-
-  // Partikel background interaktif (seperti dashboard).
-  const particles = useRef<ParticleHandle | null>(null);
-  const lastTouch = useRef<{ x: number; y: number } | null>(null);
-  const lastScrollY = useRef(0);
 
   useEffect(() => {
     let alive = true;
@@ -140,45 +134,14 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View
-      style={styles.root}
-      onTouchMove={(e) => {
-        const t = e.nativeEvent.touches[0];
-        if (!t) return;
-        const last = lastTouch.current;
-        if (last) {
-          // Kecepatan swipe → dorong partikel di sekitar jari.
-          const vx = (t.pageX - last.x) * 0.6;
-          const vy = (t.pageY - last.y) * 0.6;
-          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
-        }
-        lastTouch.current = { x: t.pageX, y: t.pageY };
-      }}
-      onTouchEnd={() => {
-        lastTouch.current = null;
-      }}
-    >
+    <View style={styles.root}>
       {/* Background: putih dengan sentuhan gradient lembut */}
       <LinearGradient
         colors={['#ffffff', '#eef3fa']}
         style={StyleSheet.absoluteFill}
       />
-      {/* Partikel interaktif */}
-      <ParticleBackground ref={particles} />
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        onScroll={(e) => {
-          const y = e.nativeEvent.contentOffset.y;
-          const vy = (y - lastScrollY.current) * 0.8;
-          lastScrollY.current = y;
-          // Scroll mendorong partikel berlawanan arah (efek parallax).
-          if (Math.abs(vy) > 0.5) {
-            particles.current?.impulse(200, y + 400, 0, -vy, 500);
-          }
-        }}
-        scrollEventThrottle={16}
-      >
+      <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
           <Image
             source={{ uri: HATCH_TILE }}

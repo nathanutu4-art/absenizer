@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { AttendanceDetailModal } from '../../src/components/AttendanceDetailModal';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
@@ -45,10 +44,6 @@ export default function HistoryScreen() {
   const [loading, setLoading] = useState(true);
   // Baris yang dibuka di popup detail; null = popup tertutup.
   const [selectedRow, setSelectedRow] = useState<HistoryRow | null>(null);
-  // Partikel background interaktif (seperti dashboard).
-  const particles = useRef<ParticleHandle | null>(null);
-  const lastTouch = useRef<{ x: number; y: number } | null>(null);
-  const lastScrollY = useRef(0);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -100,46 +95,13 @@ export default function HistoryScreen() {
   );
 
   return (
-    <View
-      style={styles.root}
-      onTouchMove={(e) => {
-        const t = e.nativeEvent.touches[0];
-        if (!t) return;
-        const last = lastTouch.current;
-        if (last) {
-          // Kecepatan swipe → dorong partikel di sekitar jari.
-          const vx = (t.pageX - last.x) * 0.6;
-          const vy = (t.pageY - last.y) * 0.6;
-          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
-        }
-        lastTouch.current = { x: t.pageX, y: t.pageY };
-      }}
-      onTouchEnd={() => {
-        lastTouch.current = null;
-      }}
-    >
+    <View style={styles.root}>
       {/* Background: putih dengan sentuhan gradient lembut */}
       <LinearGradient
         colors={['#ffffff', '#eef3fa']}
         style={StyleSheet.absoluteFill}
       />
-      {/* Partikel interaktif */}
-      <ParticleBackground ref={particles} />
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        onScroll={(e) => {
-          const y = e.nativeEvent.contentOffset.y;
-          const vy = (y - lastScrollY.current) * 0.8;
-          lastScrollY.current = y;
-          // Scroll mendorong partikel berlawanan arah (efek parallax).
-          if (Math.abs(vy) > 0.5) {
-            particles.current?.impulse(
-              200, y + 400, 0, -vy, 500,
-            );
-          }
-        }}
-        scrollEventThrottle={16}
-      >
+      <ScrollView contentContainerStyle={styles.scroll}>
       <SafeAreaView edges={['top']}>
       {/* Tajuk arsip */}
       <View style={styles.headerRow}>

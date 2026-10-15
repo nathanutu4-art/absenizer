@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { Avatar } from '../../src/components/Avatar';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
@@ -64,9 +63,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 /** Pengajuan — Buat Baru / Sisa Kuota / Pengajuanku. */
 export default function RequestsScreen() {
   const [segment, setSegment] = useState<Segment>('baru');
-  // Partikel background interaktif (seperti dashboard).
-  const particles = useRef<ParticleHandle | null>(null);
-  const lastTouch = useRef<{ x: number; y: number } | null>(null);
   // Daftar "Pengajuanku": data real bila tersedia, demo saat memuat/kosong.
   const [requests, setRequests] = useState<LeaveRequest[]>(MY_REQUESTS);
   const [me, setMe] = useState<Employee | null>(null);
@@ -88,30 +84,12 @@ export default function RequestsScreen() {
   }, [reloadRequests]);
 
   return (
-    <View
-      style={styles.root}
-      onTouchMove={(e) => {
-        const t = e.nativeEvent.touches[0];
-        if (!t) return;
-        const last = lastTouch.current;
-        if (last) {
-          const vx = (t.pageX - last.x) * 0.6;
-          const vy = (t.pageY - last.y) * 0.6;
-          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
-        }
-        lastTouch.current = { x: t.pageX, y: t.pageY };
-      }}
-      onTouchEnd={() => {
-        lastTouch.current = null;
-      }}
-    >
+    <View style={styles.root}>
       {/* Background putih dengan sentuhan gradient lembut */}
       <LinearGradient
         colors={['#ffffff', '#eef3fa']}
         style={StyleSheet.absoluteFill}
       />
-      {/* Partikel interaktif */}
-      <ParticleBackground ref={particles} />
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
       <Text style={styles.header}>Pengajuan</Text>
