@@ -31,7 +31,7 @@ import {
   getEmployee,
 } from '../../src/data/demo';
 import { getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { getCompanySettings, getMyEmployee, getMyLeaveBalance, saveClockOut } from '../../src/lib/db';
+import { getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, saveClockOut, type RecentActivity } from '../../src/lib/db';
 import { calcDuration } from '../../src/lib/duration';
 import { recordClockOut, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
@@ -112,6 +112,9 @@ export default function HomeScreen() {
   const [quotaRows, setQuotaRows] = useState<
     { label: string; remaining: string }[]
   >([]);
+
+  // Aktivitas terakhir dari database; [] = seksi disembunyikan.
+  const [activities, setActivities] = useState<RecentActivity[]>([]);
 
   useEffect(() => {
     getActiveRole().then(setRole);
@@ -210,6 +213,22 @@ export default function HomeScreen() {
     loop.start();
     return () => loop.stop();
   }, [pulse]);
+
+  // Muat aktivitas terakhir dari database (sembunyikan bila kosong).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const session = await getSession();
+      if (!alive) return;
+      if (session?.demo === false) {
+        const acts = await getRecentActivities();
+        if (alive) setActivities(acts);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const me = getEmployee(ROLE_EMPLOYEE[role]);
   const pendingCount = PIC_REQUESTS.filter((r) => r.status === 'menunggu').length;
@@ -471,33 +490,56 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ) : null}
 
-        {/* AKTIVITAS TERAKHIR */}
-        <Plate style={styles.sectionPlate}>
-          <View style={styles.sectionInner}>
-            <SectionTitle>Aktivitas Terakhir</SectionTitle>
-            <View style={styles.activityRow}>
-              <MedallionIcon glyph="check" size={38} variant="ink" />
-              <View style={styles.activityText}>
-                <Text style={styles.activityTitle}>Clock in • 08.02</Text>
-                <Text style={styles.activitySub}>Senin, 12 Okt 2026 • Tepat waktu</Text>
-              </View>
-              <StampChip color={colors.green} backgroundColor={colors.greenBg}>
-                Hadir
-              </StampChip>
+        {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
+        {activities.length > 0 ? (
+          <Plate style={styles.sectionPlate}>
+            <View style={styles.sectionInner}>
+              <SectionTitle>Aktivitas Terakhir</SectionTitle>
+              {activities.map((a, i) => (
+                <React.Fragment key={a.id}>
+                  {i > 0 ? <View style={styles.activityDivider} /> : null}
+                  <View style={styles.activityRow}>
+                    <MedallionIcon
+                      glyph={
+                        a.kind === 'clockin' || a.kind === 'clockout'
+                          ? 'check'
+                          : 'file_text'
+                      }
+                      size={38}
+                      variant="ink"
+                    />
+                    <View style={styles.activityText}>
+                      <Text style={styles.activityTitle}>{a.title}</Text>
+                      <Text style={styles.activitySub}>{a.subtitle}</Text>
+                    </View>
+                    <StampChip
+                      color={
+                        a.badge === 'Terlambat' || a.badge === 'Ditolak'
+                          ? colors.red
+                          : a.badge === 'Menunggu'
+                            ? colors.orange
+                            : a.kind === 'cuti' || a.kind === 'ijin' || a.kind === 'sakit'
+                              ? colors.blue
+                              : colors.green
+                      }
+                      backgroundColor={
+                        a.badge === 'Terlambat' || a.badge === 'Ditolak'
+                          ? colors.redBg
+                          : a.badge === 'Menunggu'
+                            ? colors.orangeBg
+                            : a.kind === 'cuti' || a.kind === 'ijin' || a.kind === 'sakit'
+                              ? colors.blueBg
+                              : colors.greenBg
+                      }
+                    >
+                      {a.badge}
+                    </StampChip>
+                  </View>
+                </React.Fragment>
+              ))}
             </View>
-            <View style={styles.activityDivider} />
-            <View style={styles.activityRow}>
-              <MedallionIcon glyph="file_text" size={38} variant="ink" />
-              <View style={styles.activityText}>
-                <Text style={styles.activityTitle}>Pengajuan cuti disetujui</Text>
-                <Text style={styles.activitySub}>3 Okt 2026 • oleh Dimas Prasetyo</Text>
-              </View>
-              <StampChip color={colors.blue} backgroundColor={colors.blueBg}>
-                Cuti
-              </StampChip>
-            </View>
-          </View>
-        </Plate>
+          </Plate>
+        ) : null}
       </ScrollView>
     </View>
   );

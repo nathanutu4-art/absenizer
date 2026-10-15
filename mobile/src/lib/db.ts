@@ -861,3 +861,71 @@ export async function getAwayEmployees(): Promise<AwayEmployee[] | null> {
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Aktivitas terakhir
+// ---------------------------------------------------------------------------
+
+export interface RecentActivity {
+  id: string;
+  /** 'clockin' | 'clockout' | 'cuti' | 'ijin' | 'sakit' */
+  kind: 'clockin' | 'clockout' | 'cuti' | 'ijin' | 'sakit';
+  title: string;
+  subtitle: string;
+  /** 'Hadir' | 'Terlambat' | 'Cuti' | 'Ijin' | 'Sakit' | 'Menunggu' | ... */
+  badge: string;
+}
+
+/**
+ * Aktivitas terakhir milikku: clock-in/out terakhir + pengajuan terakhir.
+ * [] bila tak ada data → pemanggil menyembunyikan seksi.
+ */
+export async function getRecentActivities(): Promise<RecentActivity[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const [attendance, requests] = await Promise.all([
+      getMyAttendance(),
+      getMyLeaveRequests(),
+    ]);
+    const out: RecentActivity[] = [];
+    // Kehadiran terakhir
+    const last = attendance[0];
+    if (last) {
+      const late = last.status === 'Terlambat';
+      out.push({
+        id: `att-${last.id}`,
+        kind: last.clockOut !== '-' ? 'clockout' : 'clockin',
+        title:
+          last.clockOut !== '-'
+            ? `Clock out • ${last.clockOut}`
+            : `Clock in • ${last.clockIn}`,
+        subtitle: `${last.dateLabel}, ${last.dayNum} ${last.monthYear} • ${
+          late ? 'Terlambat' : 'Tepat waktu'
+        }`,
+        badge: last.status,
+      });
+    }
+    // Pengajuan terakhir
+    const req = requests[0];
+    if (req) {
+      const typeLabel =
+        req.type === 'cuti' ? 'Cuti' : req.type === 'ijin' ? 'Ijin' : 'Sakit';
+      const statusLabel =
+        req.status === 'disetujui'
+          ? 'Disetujui'
+          : req.status === 'ditolak'
+            ? 'Ditolak'
+            : 'Menunggu';
+      out.push({
+        id: `req-${req.id}`,
+        kind: req.type,
+        title: `Pengajuan ${typeLabel.toLowerCase()} ${statusLabel.toLowerCase()}`,
+        subtitle: `${req.dateRange} • ${req.submittedAt}`,
+        badge: statusLabel,
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
