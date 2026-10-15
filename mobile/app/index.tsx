@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
   },
   sheetBody: {
     padding: spacing.lg,
+    paddingBottom: spacing.xl * 2,
   },
   kicker: { marginBottom: spacing.sm },
   headline: {
