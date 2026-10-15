@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
+import { LiquidGlassCard } from '../../src/components/LiquidGlassCard';
 import { Skeleton } from '../../src/components/Skeleton';
 import { BG_ABSTRACT } from '../../src/data/bgAbstract';
 import { BlurView } from 'expo-blur';
@@ -418,7 +419,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <Plate glass glow style={styles.hoursPlate}>
+        <LiquidGlassCard tint="light" intensity={40} style={styles.hoursPlate} pressable={false}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />
@@ -434,7 +435,7 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-        </Plate>
+        </LiquidGlassCard>
 
         {/* SHORTCUT */}
         <View style={styles.shortcutGrid}>
@@ -445,19 +446,19 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcutTouch}
             >
-              <Plate glass style={styles.shortcutPlate}>
+              <LiquidGlassCard tint="light" intensity={40} style={styles.shortcutPlate} pressable={false}>
                 <View style={styles.shortcutInner}>
                   <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
                   <Text style={styles.shortcutLabel}>{s.label}</Text>
                 </View>
-              </Plate>
+              </LiquidGlassCard>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <Plate glass style={styles.sectionPlate}>
+          <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlate} pressable={false}>
             <View style={styles.sectionInner}>
               <SectionTitle>Sisa Kuota</SectionTitle>
               {quotaRows.length === 0 ? (
@@ -477,20 +478,20 @@ export default function HomeScreen() {
                 <Text style={styles.linkText}>Lihat semua kuota →</Text>
               </TouchableOpacity>
             </View>
-          </Plate>
+          </LiquidGlassCard>
         ) : null}
         {role === 'pic' ? (
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/approvals')}
             style={styles.sectionTouch}
           >
-            <Plate glass style={styles.sectionPlateTight}>
+            <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlateTight} pressable={false}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Menunggu Persetujuan</SectionTitle>
                 <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
                 <Text style={styles.linkText}>Tinjau sekarang →</Text>
               </View>
-            </Plate>
+            </LiquidGlassCard>
           </TouchableOpacity>
         ) : null}
         {role === 'hr' ? (
@@ -498,19 +499,19 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/takeover')}
             style={styles.sectionTouch}
           >
-            <Plate glass style={styles.sectionPlateTight}>
+            <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlateTight} pressable={false}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Bisa Diambil Alih</SectionTitle>
                 <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
                 <Text style={styles.linkText}>Tinjau sekarang →</Text>
               </View>
-            </Plate>
+            </LiquidGlassCard>
           </TouchableOpacity>
         ) : null}
 
         {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
         {activities.length > 0 ? (
-          <Plate glass style={styles.sectionPlate}>
+          <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlate} pressable={false}>
             <View style={styles.sectionInner}>
               <SectionTitle>Aktivitas Terakhir</SectionTitle>
               {activities.map((a, i) => (
@@ -556,7 +557,7 @@ export default function HomeScreen() {
                 </React.Fragment>
               ))}
             </View>
-          </Plate>
+          </LiquidGlassCard>
         ) : null}
       </ScrollView>
     </View>
