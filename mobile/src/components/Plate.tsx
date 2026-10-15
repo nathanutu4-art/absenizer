@@ -9,22 +9,25 @@ interface Props {
   shadowColor?: string;
   /** Jarak offset bayangan (default 3). */
   shadowOffset?: number;
+  /** True = render sebagai kartu kaca (tanpa warna cream). */
+  glass?: boolean;
 }
 
 /**
  * Kartu plat cetak gaya ukiran: border tinta 1.5px, radius 4px,
  * bayangan keras offset tanpa blur.
  * Mode liquid-glass: kartu kaca tanpa bayangan (border terang, radius 18).
+ * Prop glass: kartu kaca individual tanpa mengubah theme global.
  */
-export function Plate({ children, style, shadowColor, shadowOffset = plateShadow }: Props) {
-  if (isGlassMode()) {
+export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false }: Props) {
+  if (isGlassMode() || glass) {
     // Dibaca saat render agar mengikuti setGlassMode().
     return (
       <View
         style={[
           {
-            backgroundColor: colors.surface,
-            borderColor: 'rgba(255,255,255,0.28)',
+            backgroundColor: 'rgba(255,255,255,0.10)',
+            borderColor: 'rgba(255,255,255,0.30)',
             borderRadius: GLASS_RADIUS,
             borderWidth: 1,
           },

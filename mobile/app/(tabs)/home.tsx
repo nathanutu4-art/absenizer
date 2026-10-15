@@ -307,10 +307,10 @@ export default function HomeScreen() {
             resizeMode="repeat"
             style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
           />
-          {/* Layer putih transparan 0.1 di atas biru hero */}
+          {/* Layer putih transparan 0.2 di atas biru hero */}
           <View
             pointerEvents="none"
-            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.1)' }]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
           />
           <SafeAreaView edges={['top']}>
             <View style={styles.heroTop}>
@@ -344,7 +344,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Kartu status */}
-            <Plate style={[styles.statusPlate, glassPlateStyle]}>
+            <Plate glass style={styles.statusPlate}>
               <View style={styles.statusInner}>
                 <StampChip
                   backgroundColor={clock.phase === 'in' ? colors.paper2 : colors.greenBg}
@@ -417,7 +417,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <Plate style={[styles.hoursPlate, glassPlateStyle]}>
+        <Plate glass style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="ink" />
@@ -444,7 +444,7 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcutTouch}
             >
-              <Plate style={[styles.shortcutPlate, glassPlateStyle]}>
+              <Plate glass style={styles.shortcutPlate}>
                 <View style={styles.shortcutInner}>
                   <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
                   <Text style={styles.shortcutLabel}>{s.label}</Text>
@@ -456,7 +456,7 @@ export default function HomeScreen() {
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <Plate style={[styles.sectionPlate, glassPlateStyle]}>
+          <Plate glass style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Sisa Kuota</SectionTitle>
               {quotaRows.length === 0 ? (
@@ -483,7 +483,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/approvals')}
             style={styles.sectionTouch}
           >
-            <Plate style={[styles.sectionPlateTight, glassPlateStyle]}>
+            <Plate glass style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Menunggu Persetujuan</SectionTitle>
                 <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
@@ -497,7 +497,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/takeover')}
             style={styles.sectionTouch}
           >
-            <Plate style={[styles.sectionPlateTight, glassPlateStyle]}>
+            <Plate glass style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Bisa Diambil Alih</SectionTitle>
                 <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
@@ -509,7 +509,7 @@ export default function HomeScreen() {
 
         {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
         {activities.length > 0 ? (
-          <Plate style={[styles.sectionPlate, glassPlateStyle]}>
+          <Plate glass style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Aktivitas Terakhir</SectionTitle>
               {activities.map((a, i) => (
@@ -563,14 +563,6 @@ export default function HomeScreen() {
 }
 
 const CLOCK_DIAMETER = 224;
-
-/** Style glass untuk kotak krem di dashboard (tanpa mengubah theme global). */
-const glassPlateStyle = {
-  backgroundColor: 'rgba(255,255,255,0.12)',
-  borderColor: 'rgba(255,255,255,0.35)',
-  borderRadius: 18,
-  borderWidth: 1,
-} as const;
 
 const styles = StyleSheet.create({
   root: { backgroundColor: colors.bg, flex: 1 },
