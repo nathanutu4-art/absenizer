@@ -303,13 +303,7 @@ export default function HomeScreen() {
           ];
 
   return (
-    <View style={styles.root}>
-      {/* Background gambar dashboard */}
-      <Image
-        source={{ uri: 'https://fzvphovffdhewpcjqjje.supabase.co/storage/v1/object/public/avatars/bg-dashboard.jpg' }}
-        resizeMode="cover"
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
         <View style={styles.hero}>
@@ -671,7 +665,7 @@ const styles = StyleSheet.create({
   },
   clockPlate: {
     alignItems: 'center',
-    backgroundColor: '#0156b3',
+    backgroundColor: 'rgba(30,40,80,0.4)',
     borderColor: 'rgba(140,180,255,0.5)',
     borderRadius: CLOCK_DIAMETER / 2,
     borderWidth: 2,
