@@ -14,6 +14,7 @@ import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { LiquidGlassCard } from '../../src/components/LiquidGlassCard';
+import { SketchClock } from '../../src/components/SketchClock';
 import { Skeleton } from '../../src/components/Skeleton';
 import { BG_ABSTRACT } from '../../src/data/bgAbstract';
 import { BlurView } from 'expo-blur';
@@ -404,7 +405,7 @@ export default function HomeScreen() {
               />
               {/* Ring glow luar */}
               <View style={styles.clockGlowRing} />
-              <MedallionIcon glyph="clock" size={88} variant="cream" style={styles.clockMedal} />
+              <SketchClock size={120} style={styles.clockMedal} />
               <View style={styles.clockTextWrap}>
                 <Text style={styles.clockLabel}>{clockLabel}</Text>
                 <Text style={styles.clockTime}>{wib} WIB</Text>
@@ -707,9 +708,9 @@ const styles = StyleSheet.create({
     width: 200,
   },
   clockMedal: {
-    left: (CLOCK_DIAMETER - 88) / 2,
+    left: (CLOCK_DIAMETER - 120) / 2,
     position: 'absolute',
-    top: (CLOCK_DIAMETER - 88) / 2 - 8,
+    top: (CLOCK_DIAMETER - 120) / 2 - 8,
   },
   clockTextWrap: {
     alignItems: 'center',
