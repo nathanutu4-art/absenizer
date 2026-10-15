@@ -40,7 +40,7 @@ export function Plate({ children, style, shadowColor, shadowOffset = plateShadow
           intensity={35}
           tint="dark"
           style={{
-            backgroundColor: 'rgba(255,255,255,0.08)',
+            backgroundColor: 'rgba(40,60,140,0.18)',
           }}
         >
           {children}

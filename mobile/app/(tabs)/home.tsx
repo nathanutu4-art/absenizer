@@ -283,19 +283,19 @@ export default function HomeScreen() {
     role === 'karyawan'
       ? [
           { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests', variant: 'wadaApricot' },
-          { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaOlive' },
-          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history', variant: 'wadaIndigo' },
+          { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
+          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history', variant: 'wadaApricot' },
           { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
         ]
       : role === 'pic'
         ? [
             { label: 'Persetujuan', icon: 'check_circle', route: '/(tabs)/approvals', variant: 'wadaApricot' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaOlive' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
             { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
           ]
         : [
             { label: 'Ambil Alih', icon: 'repeat', route: '/(tabs)/takeover', variant: 'wadaOlive' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaOlive' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
             { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
           ];
 
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
   clockMedal: {
     left: (CLOCK_DIAMETER - 88) / 2,
     position: 'absolute',
-    top: (CLOCK_DIAMETER - 88) / 2 - 14,
+    top: (CLOCK_DIAMETER - 88) / 2,
   },
   clockTextWrap: {
     alignItems: 'center',

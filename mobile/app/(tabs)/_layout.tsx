@@ -112,8 +112,13 @@ export default function TabsLayout() {
           fontFamily: fontFamily('600'),
           fontSize: 9,
           letterSpacing: 1,
-          marginTop: 2,
+          marginTop: 7,
+          textAlign: 'center',
           textTransform: 'uppercase',
+        },
+        tabBarItemStyle: {
+          alignItems: 'center',
+          justifyContent: 'center',
         },
         tabBarStyle: {
           backgroundColor: 'rgba(20,30,70,0.65)',
