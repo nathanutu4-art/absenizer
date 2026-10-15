@@ -29,9 +29,9 @@ export function Plate({ children, style, shadowColor, shadowOffset = plateShadow
     const cardContent = (
       <BlurView
         intensity={glow ? 90 : 35}
-        tint={glow ? 'light' : 'dark'}
+        tint="dark"
         style={{
-          backgroundColor: glow ? 'rgba(255,255,255,0.4)' : 'rgba(40,60,140,0.18)',
+          backgroundColor: glow ? 'rgba(40,60,140,0.4)' : 'rgba(40,60,140,0.18)',
           borderRadius: GLASS_RADIUS,
         }}
       >
