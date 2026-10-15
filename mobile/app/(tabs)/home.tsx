@@ -652,13 +652,13 @@ const styles = StyleSheet.create({
   },
   pulseRing: {
     borderColor: '#f68c50',
-    borderRadius: 120,
+    borderRadius: CLOCK_DIAMETER / 2,
     borderWidth: 2,
-    height: 240,
-    left: -8,
+    height: CLOCK_DIAMETER,
+    left: 0,
     position: 'absolute',
-    top: -8,
-    width: 240,
+    top: 0,
+    width: CLOCK_DIAMETER,
   },
   clockShadow: {
     display: 'none',
