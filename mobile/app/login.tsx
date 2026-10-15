@@ -11,14 +11,12 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
 import { AppIcon } from '../src/components/AppIcon';
 import { MedallionIcon } from '../src/components/MedallionIcon';
 import { Plate } from '../src/components/Plate';
 import { PlateButton } from '../src/components/PlateButton';
 import { StampChip } from '../src/components/StampChip';
 import { APP_VERSION, COMPANY_NAME } from '../src/data/demo';
-import { BG_ABSTRACT } from '../src/data/bgAbstract';
 import { ILLUSTRATION_LOGIN } from '../src/data/illustrations-login';
 import { supabase } from '../src/lib/supabase';
 import { isSupabaseConfigured, resolveMyRole } from '../src/lib/db';
@@ -124,23 +122,6 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Background abstrak indigo */}
-      <Image
-        source={{ uri: BG_ABSTRACT }}
-        resizeMode="cover"
-        style={StyleSheet.absoluteFill}
-      />
-      <BlurView
-        intensity={80}
-        tint="dark"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(20,25,60,0.45)' }]}
-      />
-      <BlurView
-        intensity={50}
-        tint="light"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
-      />
-
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
         <ScrollView
           contentContainerStyle={styles.scroll}
@@ -155,16 +136,12 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          {/* Ilustrasi kaca */}
-          <Plate glass style={styles.frame}>
-            <View style={styles.frameInner}>
-              <Image
-                resizeMode="cover"
-                source={{ uri: ILLUSTRATION_LOGIN }}
-                style={styles.art}
-              />
-            </View>
-          </Plate>
+          {/* Ilustrasi tanpa border */}
+          <Image
+            resizeMode="cover"
+            source={{ uri: ILLUSTRATION_LOGIN }}
+            style={styles.art}
+          />
 
           {/* Form kaca */}
           <Plate glass style={styles.form}>
@@ -270,7 +247,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: 'transparent', flex: 1 },
+  root: { backgroundColor: '#f8f1df', flex: 1 },
   safe: { flex: 1 },
   scroll: { padding: spacing.lg, paddingBottom: 40 },
   heroBody: {
@@ -278,28 +255,25 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   title: {
-    color: '#ffffff',
+    color: '#051230',
     fontFamily: serifFamily('800'),
     fontSize: 24,
     marginTop: spacing.md,
     textAlign: 'center',
-    textShadowColor: 'rgba(77,127,255,0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.85)',
+    color: '#555555',
     fontFamily: fontFamily('400'),
     fontSize: 14,
     marginTop: 6,
     textAlign: 'center',
   },
-  frame: { marginTop: spacing.lg, width: '100%' },
-  frameInner: { padding: 8 },
   art: {
+    alignSelf: 'center',
     borderRadius: 12,
     height: 150,
-    width: '100%',
+    marginTop: spacing.lg,
+    width: '90%',
   },
   form: { marginTop: spacing.lg, width: '100%' },
   formInner: { padding: spacing.lg },
