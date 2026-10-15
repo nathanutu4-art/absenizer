@@ -392,11 +392,6 @@ export default function HomeScreen() {
                 clock.phase === 'done' && styles.clockDimmed,
               ]}
             >
-              <BlurView
-                intensity={45}
-                tint="dark"
-                style={StyleSheet.absoluteFill}
-              />
               <SketchClock size={160} style={styles.clockMedal} />
               <View style={styles.clockTextWrap}>
                 <Text style={styles.clockLabel}>{clockLabel}</Text>
@@ -664,18 +659,11 @@ const styles = StyleSheet.create({
   clockPlate: {
     alignItems: 'center',
     backgroundColor: 'transparent',
-    borderColor: 'rgba(140,180,255,0.5)',
     borderRadius: CLOCK_DIAMETER / 2,
-    borderWidth: 2,
     height: CLOCK_DIAMETER,
     justifyContent: 'center',
     overflow: 'hidden',
     width: CLOCK_DIAMETER,
-    shadowColor: '#4d7fff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 30,
-    elevation: 10,
   },
   clockPlateOut: { borderColor: 'rgba(246,140,80,0.7)' },
   clockDimmed: { opacity: 0.55 },
