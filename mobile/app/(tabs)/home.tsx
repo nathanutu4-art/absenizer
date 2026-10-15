@@ -343,7 +343,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Kartu status */}
-            <Plate glass style={styles.statusPlate}>
+            <LiquidGlassCard tint="light" intensity={40} style={styles.statusPlate} pressable={false} overlayColor="rgba(5,18,48,0.2)">
               <View style={styles.statusInner}>
                 <View style={styles.statusHeader}>
                   <StampChip
@@ -373,7 +373,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-            </Plate>
+            </LiquidGlassCard>
           </SafeAreaView>
         </View>
 
@@ -421,23 +421,23 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <LiquidGlassCard tint="light" intensity={40} style={styles.hoursPlate} pressable={false} overlayColor="rgba(5,18,48,0.2)">
+        <Plate glass style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
-              <MedallionIcon glyph="clock" size={40} variant="wadaIndigo" />
+              <MedallionIcon glyph="clock" size={40} variant="cream" />
               <Text style={styles.hoursText}>
                 {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
               </Text>
             </View>
             <View style={styles.hoursDivider} />
             <View style={styles.hoursRow}>
-              <MedallionIcon glyph="map_pin" size={40} variant="wadaIndigo" />
+              <MedallionIcon glyph="map_pin" size={40} variant="cream" />
               <Text style={styles.hoursText}>
                 WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
               </Text>
             </View>
           </View>
-        </LiquidGlassCard>
+        </Plate>
 
         {/* SHORTCUT */}
         <View style={styles.shortcutGrid}>
