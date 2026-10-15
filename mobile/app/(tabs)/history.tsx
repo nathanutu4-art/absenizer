@@ -94,7 +94,7 @@ export default function HistoryScreen() {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.wadaIndigo }]}>
+    <View style={[styles.root, { backgroundColor: '#0151b0' }]}>
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
       {/* Tajuk arsip */}
