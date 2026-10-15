@@ -67,7 +67,7 @@ export default function OpeningScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: '#ffffff', flex: 1 },
+  root: { backgroundColor: '#051230', flex: 1 },
   safe: { flex: 1 },
   brandRow: {
     alignItems: 'center',
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     width: 44,
   },
   brandText: {
-    color: '#051230',
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 22,
     marginLeft: 10,
@@ -95,13 +95,13 @@ const styles = StyleSheet.create({
   frame: { width: '100%' },
   frameInner: { padding: 8 },
   art: {
-    borderColor: 'rgba(140,180,255,0.3)',
     borderRadius: 12,
-    borderWidth: 1,
     height: 240,
     width: '100%',
   },
   sheet: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     marginBottom: 0,
     marginHorizontal: 0,
     marginTop: 'auto',
