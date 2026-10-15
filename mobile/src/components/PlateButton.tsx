@@ -43,7 +43,7 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
       children
     );
   // Mode liquid-glass: tombol kaca tanpa bayangan keras.
-  // Efek halo border neon orange saat disentuh.
+  // Saat ditekan: background jadi solid orange + halo border neon orange.
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   const handlePressIn = () => {
@@ -74,7 +74,10 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
         style={[
           styles.button,
           {
-            backgroundColor: bg,
+            backgroundColor: glowAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [bg, '#f68c50'],
+            }),
             borderColor: 'rgba(255,255,255,0.35)',
             borderRadius: GLASS_RADIUS,
             borderWidth: 1,

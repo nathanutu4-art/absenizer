@@ -99,13 +99,13 @@ export function LiquidGlassCard({
         style,
       ]}
     >
-      {/* 1. Halo glow — menyebar 3px ke luar card */}
+      {/* 1. Halo glow — menyebar 3px ke luar card, solid tanpa transparency */}
       <LinearGradient
         colors={[
-          'rgba(77,127,255,0.9)', // indigo kiri-atas
-          'rgba(77,127,255,0.3)',
-          'rgba(246,140,80,0.3)',
-          'rgba(246,140,80,0.9)', // orange kanan-bawah
+          '#4d7fff', // indigo kiri-atas
+          '#6d8fff',
+          '#f0905f',
+          '#f68c50', // orange kanan-bawah
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -121,13 +121,13 @@ export function LiquidGlassCard({
         onPressOut={handlePressOut}
         style={{ borderRadius }}
       >
-        {/* 2. Border 1px — indigo kiri-atas → orange kanan-bawah */}
+        {/* 2. Border 1px — indigo kiri-atas → orange kanan-bawah, solid */}
         <LinearGradient
           colors={[
+            '#4d7fff',
             '#7dabff',
-            'rgba(125,171,255,0.75)',
-            'rgba(246,140,80,0.75)',
             '#ff9a5c',
+            '#f68c50',
           ]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}

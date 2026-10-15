@@ -330,7 +330,6 @@ export default function HomeScreen() {
                   ) : (
                     <Text style={styles.greetingName}>{meName ?? me.name}</Text>
                   )}
-                  <Text style={styles.dateLine}>{todayLine()}</Text>
                 </View>
               </View>
               <TouchableOpacity
@@ -419,8 +418,12 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <LiquidGlassCard tint="light" intensity={40} style={styles.hoursPlate} pressable={false} overlayColor="rgba(5,18,48,0.28)">
+        <LiquidGlassCard tint="light" intensity={40} style={styles.hoursPlate} pressable={false} overlayColor="rgba(5,18,48,0.2)">
           <View style={styles.hoursInner}>
+            <View style={styles.hoursHeader}>
+              <Text style={styles.hoursTitle}>Jam Kerja</Text>
+              <Text style={styles.hoursDate}>{todayLine()}</Text>
+            </View>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="wadaIndigo" />
               <Text style={styles.hoursText}>
@@ -602,7 +605,7 @@ const styles = StyleSheet.create({
   greetingName: {
     color: '#ffffff',
     fontFamily: serifFamily('800'),
-    fontSize: 20,
+    fontSize: 26,
     marginTop: 2,
   },
   nameSkeleton: { marginTop: 4 },
@@ -728,6 +731,23 @@ const styles = StyleSheet.create({
   },
   hoursPlate: { marginHorizontal: spacing.lg, marginTop: spacing.lg },
   hoursInner: { padding: spacing.md },
+  hoursHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  hoursTitle: {
+    color: '#ffffff',
+    fontFamily: serifFamily('800'),
+    fontSize: 15,
+  },
+  hoursDate: {
+    color: 'rgba(255,255,255,0.8)',
+    fontFamily: 'serif',
+    fontSize: 12,
+    fontStyle: 'italic',
+  },
   hoursRow: { alignItems: 'center', flexDirection: 'row' },
   hoursText: {
     color: 'rgba(255,255,255,0.85)',
