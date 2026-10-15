@@ -313,11 +313,11 @@ export default function HomeScreen() {
         tint="dark"
         style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(20,25,60,0.45)' }]}
       />
-      {/* Layer putih diffuse 30% */}
+      {/* Layer putih diffuse 20% */}
       <BlurView
         intensity={50}
         tint="light"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.3)' }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
