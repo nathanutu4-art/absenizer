@@ -43,38 +43,23 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
       children
     );
   // Mode liquid-glass: tombol kaca tanpa bayangan keras.
-  // Animasi loading bar putih kiri-ke-kanan + glow saat disentuh.
-  const fillAnim = useRef(new Animated.Value(0)).current;
+  // Efek halo border neon orange saat disentuh.
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   const handlePressIn = () => {
-    Animated.parallel([
-      Animated.timing(fillAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: false,
-      }),
-      Animated.timing(glowAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: false,
-      }),
-    ]).start();
+    Animated.timing(glowAnim, {
+      toValue: 1,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
   };
 
   const handlePressOut = () => {
-    Animated.parallel([
-      Animated.timing(fillAnim, {
-        toValue: 0,
-        duration: 80,
-        useNativeDriver: false,
-      }),
-      Animated.timing(glowAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: false,
-      }),
-    ]).start();
+    Animated.timing(glowAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
   };
 
   if (glass) {
@@ -99,39 +84,26 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
           style,
         ]}
       >
+        {/* Halo border neon orange saat ditekan */}
         <Animated.View
           pointerEvents="none"
           style={[
             StyleSheet.absoluteFill,
             {
-              backgroundColor: 'rgba(255,255,255,0.35)',
-              width: fillAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0%', '100%'],
-              }),
-            },
-          ]}
-        />
-        {/* Glow layer */}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              borderColor: '#ffffff',
+              borderColor: '#f68c50',
               borderRadius: GLASS_RADIUS,
               borderWidth: 2,
               opacity: glowAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, 0.8],
+                outputRange: [0, 1],
               }),
-              shadowColor: '#ffffff',
+              shadowColor: '#f68c50',
               shadowOffset: { width: 0, height: 0 },
               shadowOpacity: glowAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, 0.9],
+                outputRange: [0, 1],
               }),
-              shadowRadius: 20,
+              shadowRadius: 24,
             },
           ]}
         />
