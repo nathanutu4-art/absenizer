@@ -1,6 +1,6 @@
 import { Tabs, usePathname } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import { AppIcon } from '../../src/components/AppIcon';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import type { IconName } from '../../src/data/icons';
@@ -17,13 +17,34 @@ import { colors, fontFamily, isGlassMode } from '../../src/theme';
  * - HR: Beranda, Ambil Alih (badge = jumlah eskalasi), Tim, Profil
  */
 function tabIcon(name: IconName) {
-  return ({ focused }: { focused: boolean }) =>
-    focused ? (
-      <MedallionIcon glyph={name} size={40} variant="wadaApricot" />
-    ) : (
-      <AppIcon color={colors.ink3} name={name} size={24} />
-    );
+  return ({ focused }: { focused: boolean }) => (
+    <View style={[styles.iconGlass, focused && styles.iconGlassActive]}>
+      {focused ? (
+        <MedallionIcon glyph={name} size={36} variant="ink" />
+      ) : (
+        <AppIcon color="#000000" name={name} size={24} />
+      )}
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  /** Wrapper kaca untuk setiap ikon tab. */
+  iconGlass: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderColor: 'rgba(255,255,255,0.45)',
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  iconGlassActive: {
+    backgroundColor: 'rgba(255,255,255,0.45)',
+    borderColor: 'rgba(255,255,255,0.7)',
+  },
+});
 
 const badgeStyle = {
   backgroundColor: colors.red,
