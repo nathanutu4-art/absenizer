@@ -13,11 +13,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { AppIcon } from '../src/components/AppIcon';
-import { MedallionIcon } from '../src/components/MedallionIcon';
 import { Plate } from '../src/components/Plate';
 import { PlateButton } from '../src/components/PlateButton';
 import { StampChip } from '../src/components/StampChip';
-import { APP_VERSION, COMPANY_NAME } from '../src/data/demo';
 import { supabase } from '../src/lib/supabase';
 import { isSupabaseConfigured, resolveMyRole } from '../src/lib/db';
 import { SESSION_KEY, type DemoRole } from '../src/lib/session';
@@ -139,7 +137,6 @@ export default function LoginScreen() {
         >
           {/* Header */}
           <View style={styles.heroBody}>
-            <MedallionIcon glyph="shield" size={60} variant="cream" />
             <Text style={styles.title}>Selamat Datang di Absenizer</Text>
             <Text style={styles.subtitle}>
               Masuk dengan email perusahaan Anda.
@@ -249,7 +246,7 @@ export default function LoginScreen() {
           </Plate>
 
           <Text style={styles.footer}>
-            {COMPANY_NAME} • Versi {APP_VERSION}
+            © 2026 Prasta Corp. All rights reserved.
           </Text>
         </ScrollView>
       </SafeAreaView>
