@@ -1,6 +1,6 @@
 import { Tabs, usePathname } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { AppIcon } from '../../src/components/AppIcon';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import type { IconName } from '../../src/data/icons';
@@ -98,6 +98,13 @@ export default function TabsLayout() {
           alignItems: 'center',
           justifyContent: 'center',
         },
+        tabBarButton: (props: any) => (
+          <TouchableOpacity
+            {...props}
+            activeOpacity={1}
+            style={[props.style, { backgroundColor: 'transparent' }]}
+          />
+        ),
         tabBarStyle: {
           backgroundColor: 'rgba(20,30,70,0.65)',
           borderColor: 'rgba(140,180,255,0.35)',
