@@ -29,18 +29,15 @@ interface Props {
 
 /**
  * ParticleBackground — partikel melayang yang bereaksi terhadap sentuhan.
- * - Render 60fps via requestAnimationFrame + setNativeProps (tanpa re-render).
- * - Partikel: drift lembut + friksi; impulse dari swipe mendorong partikel
- *   di sekitar titik sentuh.
- * - Kompatibel Expo Go (tanpa Skia / reanimated).
+ * Posisi di-set via left/top (bukan transform) agar pasti ter-render.
+ * Animasi 60fps via requestAnimationFrame + setNativeProps (tanpa re-render).
  */
 export const ParticleBackground = forwardRef<ParticleHandle, Props>(function ParticleBackground(
-  { count = 28 },
+  { count = 40 },
   ref,
 ) {
   const views = useRef<Array<View | null>>([]);
   const parts = useRef<Particle[]>([]);
-  const raf = useRef<number>(0);
 
   // Inisialisasi partikel sekali.
   if (parts.current.length === 0) {
@@ -64,11 +61,9 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
         const dy = p.y - y;
         const dist = Math.hypot(dx, dy);
         if (dist < radius) {
-          // Falloff: makin dekat makin kuat.
           const f = (1 - dist / radius) * 0.35;
           p.vx += vx * f;
           p.vy += vy * f;
-          // Batasi kecepatan maksimum.
           const sp = Math.hypot(p.vx, p.vy);
           const max = 6;
           if (sp > max) {
@@ -82,20 +77,18 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
 
   useEffect(() => {
     let t = 0;
+    let raf = 0;
     const tick = () => {
       t += 1;
       const arr = parts.current;
       for (let i = 0; i < arr.length; i++) {
         const p = arr[i];
-        // Drift lembut (gerakan melayang sinusoidal).
         p.vx += Math.sin(t / 90 + p.phase) * 0.008;
         p.vy += Math.cos(t / 110 + p.phase) * 0.008;
-        // Friksi.
         p.vx *= 0.985;
         p.vy *= 0.985;
         p.x += p.vx;
         p.y += p.vy;
-        // Bungkus tepi layar.
         if (p.x < -10) p.x = SW + 10;
         if (p.x > SW + 10) p.x = -10;
         if (p.y < -10) p.y = SH + 10;
@@ -103,37 +96,33 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
 
         const v = views.current[i];
         if (v) {
-          v.setNativeProps({
-            style: {
-              transform: [{ translateX: p.x }, { translateY: p.y }],
-            },
-          });
+          v.setNativeProps({ style: { left: p.x, top: p.y } });
         }
       }
-      raf.current = requestAnimationFrame(tick);
+      raf = requestAnimationFrame(tick);
     };
-    raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   return (
     <View style={styles.layer} pointerEvents="none">
       {parts.current.map((p, i) => (
         <View
-          key={i}
+          key={`p-${i}`}
           ref={(v) => {
             views.current[i] = v;
           }}
-          style={[
-            styles.dot,
-            {
-              width: p.size,
-              height: p.size,
-              borderRadius: p.size / 2,
-              opacity: p.opacity,
-              transform: [{ translateX: p.x }, { translateY: p.y }],
-            },
-          ]}
+          style={{
+            position: 'absolute',
+            left: p.x,
+            top: p.y,
+            width: p.size,
+            height: p.size,
+            borderRadius: p.size / 2,
+            backgroundColor: '#ffffff',
+            opacity: p.opacity,
+          }}
         />
       ))}
     </View>
@@ -142,12 +131,10 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
 
 const styles = StyleSheet.create({
   layer: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  dot: {
-    backgroundColor: '#ffffff',
     position: 'absolute',
     left: 0,
+    right: 0,
     top: 0,
+    bottom: 0,
   },
 });
