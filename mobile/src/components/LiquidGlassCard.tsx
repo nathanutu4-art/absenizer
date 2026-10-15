@@ -34,8 +34,8 @@ type LiquidGlassCardProps = {
  * Aman di Expo Go (tanpa native module tambahan).
  *
  * Lapisan (dari bawah ke atas):
- *  1. Drop shadow lembut (wrapper)
- *  2. Border gradient specular (putih terang di kiri-atas → transparan di kanan-bawah)
+ *  1. Halo glow (gradient indigo kiri-atas → orange kanan-bawah, menyebar ke luar)
+ *  2. Border gradient glowing 2px (indigo terang kiri-atas → orange terang kanan-bawah)
  *  3. BlurView frosted (intensity 40)
  *  4. Sheen diagonal (kilau cahaya melengkung)
  *  5. Konten
@@ -94,33 +94,50 @@ export function LiquidGlassCard({
     <Animated.View
       style={[
         styles.shadow,
-        { borderRadius },
+        { borderRadius: borderRadius + GLOW_SPREAD },
         { transform: [{ scale }] },
         style,
       ]}
     >
-      <CardWrapper
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={{ borderRadius }}
-      >
-        {/* 2. Specular rim — border gradient 1.5px */}
-        <LinearGradient
-          colors={[
-            'rgba(255,255,255,0.5)', // kiri-atas: terang
-            'rgba(255,255,255,0.28)',
-            'rgba(255,255,255,0.05)', // kanan-bawah: hampir transparan
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[styles.rim, { borderRadius, padding: 1.5 }]}
+      {/* 1. Halo glow — gradient menyebar ke luar card */}
+      <LinearGradient
+        colors={[
+          'rgba(77,127,255,0.65)', // indigo kiri-atas
+          'rgba(77,127,255,0.15)',
+          'rgba(246,140,80,0.15)',
+          'rgba(246,140,80,0.65)', // orange kanan-bawah
+        ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[
+          StyleSheet.absoluteFill,
+          { borderRadius: borderRadius + GLOW_SPREAD },
+        ]}
+      />
+      <View style={{ padding: GLOW_SPREAD }}>
+        <CardWrapper
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={{ borderRadius }}
         >
+          {/* 2. Border glowing 2px — indigo kiri-atas → orange kanan-bawah */}
+          <LinearGradient
+            colors={[
+              '#6d9bff', // indigo terang kiri-atas
+              'rgba(109,155,255,0.55)',
+              'rgba(246,140,80,0.55)',
+              '#f68c50', // orange terang kanan-bawah
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.rim, { borderRadius, padding: 2 }]}
+          >
           {/* 3. Frosted backdrop */}
           <BlurView
             intensity={intensity}
             tint={tint}
-            style={[styles.blur, { borderRadius: borderRadius - 1.5 }]}
+            style={[styles.blur, { borderRadius: borderRadius - 2 }]}
           >
             {/* 3b. Overlay warna (mis. tint indigo) */}
             {overlayColor !== 'transparent' ? (
@@ -151,17 +168,21 @@ export function LiquidGlassCard({
           </BlurView>
         </LinearGradient>
       </CardWrapper>
+      </View>
     </Animated.View>
   );
 }
 
+/** Seberapa jauh halo glow menyebar ke luar card */
+const GLOW_SPREAD = 10;
+
 const styles = StyleSheet.create({
   shadow: {
-    // Depth & shadow — bayangan lembut menyebar
+    // Depth — bayangan lembut menyebar (halo gradient di atas menangani glow warna)
     shadowColor: '#051230',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.18,
-    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 20,
     elevation: 8,
   },
   rim: {
