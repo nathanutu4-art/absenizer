@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
+  Dimensions,
   Image,
   ScrollView,
   StyleSheet,
@@ -13,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
+import { LiquidGlassCard } from '../../src/components/LiquidGlassCard';
 import { Skeleton } from '../../src/components/Skeleton';
 import { BG_ABSTRACT } from '../../src/data/bgAbstract';
 import { BlurView } from 'expo-blur';
@@ -418,7 +420,11 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <Plate glass glow style={styles.hoursPlate}>
+        <LiquidGlassCard
+          width={Dimensions.get('window').width - 32}
+          height={110}
+          style={styles.hoursPlate}
+        >
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />
@@ -434,7 +440,7 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-        </Plate>
+        </LiquidGlassCard>
 
         {/* SHORTCUT */}
         <View style={styles.shortcutGrid}>
