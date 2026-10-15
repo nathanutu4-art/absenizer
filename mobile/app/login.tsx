@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { AppIcon } from '../src/components/AppIcon';
-import { Plate } from '../src/components/Plate';
 import { PlateButton } from '../src/components/PlateButton';
 import { StampChip } from '../src/components/StampChip';
 import { supabase } from '../src/lib/supabase';
@@ -151,18 +150,18 @@ export default function LoginScreen() {
             style={styles.video}
           />
 
-          {/* Form kaca */}
-          <Plate glass style={styles.form}>
+          {/* Form putih */}
+          <View style={[styles.form, styles.whiteForm]}>
             <View style={styles.formInner}>
               <Text style={styles.label}>Email perusahaan</Text>
               <View style={styles.inputRow}>
-                <AppIcon color="rgba(255,255,255,0.7)" name="mail" size={20} style={styles.inputIcon} />
+                <AppIcon color="#8a94a8" name="mail" size={20} style={styles.inputIcon} />
                 <TextInput
                   autoCapitalize="none"
                   keyboardType="email-address"
                   onChangeText={setEmail}
                   placeholder="username"
-                  placeholderTextColor="rgba(255,255,255,0.4)"
+                  placeholderTextColor="#9aa3b5"
                   style={styles.input}
                   value={email}
                 />
@@ -170,11 +169,11 @@ export default function LoginScreen() {
 
               <Text style={styles.label}>Kata sandi</Text>
               <View style={styles.inputRow}>
-                <AppIcon color="rgba(255,255,255,0.7)" name="lock" size={20} style={styles.inputIcon} />
+                <AppIcon color="#8a94a8" name="lock" size={20} style={styles.inputIcon} />
                 <TextInput
                   onChangeText={setPassword}
                   placeholder="••••••••"
-                  placeholderTextColor="rgba(255,255,255,0.4)"
+                  placeholderTextColor="#9aa3b5"
                   secureTextEntry
                   style={styles.input}
                   value={password}
@@ -209,8 +208,8 @@ export default function LoginScreen() {
                       style={styles.roleChip}
                     >
                       <StampChip
-                        backgroundColor={active ? 'rgba(246,140,80,0.45)' : 'transparent'}
-                        color="#ffffff"
+                        backgroundColor={active ? 'rgba(246,140,80,0.45)' : '#eef1f6'}
+                        color={active ? '#ffffff' : colors.ink2}
                       >
                         {opt.label}
                       </StampChip>
@@ -222,7 +221,6 @@ export default function LoginScreen() {
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
               <PlateButton
-                glass
                 disabled={loading}
                 onPress={handleLogin}
                 style={styles.loginBtn}
@@ -243,7 +241,7 @@ export default function LoginScreen() {
                 Belum punya akun? Hubungi Admin HR — akun dibuatkan oleh HR.
               </Text>
             </View>
-          </Plate>
+          </View>
 
           <Text style={styles.footer}>
             © 2026 Prasta Corp. All rights reserved.
@@ -291,9 +289,13 @@ const styles = StyleSheet.create({
     width: '90%',
   },
   form: { marginTop: spacing.lg, width: '100%' },
+  whiteForm: {
+    backgroundColor: '#ffffff',
+    borderRadius: 18,
+  },
   formInner: { padding: spacing.lg },
   label: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: fontFamily('700'),
     fontSize: 12.5,
     marginBottom: 6,
@@ -301,8 +303,8 @@ const styles = StyleSheet.create({
   },
   inputRow: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderColor: 'rgba(140,180,255,0.25)',
+    backgroundColor: '#f2f5fa',
+    borderColor: '#d5dce8',
     borderRadius: 12,
     borderWidth: 1,
     flexDirection: 'row',
@@ -310,7 +312,7 @@ const styles = StyleSheet.create({
   },
   inputIcon: { marginRight: 8 },
   input: {
-    color: '#ffffff',
+    color: colors.ink,
     flex: 1,
     fontFamily: fontFamily('400'),
     fontSize: 14,
@@ -325,7 +327,7 @@ const styles = StyleSheet.create({
   rememberRow: { alignItems: 'center', flexDirection: 'row' },
   checkbox: {
     alignItems: 'center',
-    borderColor: 'rgba(255,255,255,0.5)',
+    borderColor: '#b9c2d4',
     borderRadius: 6,
     borderWidth: 1.5,
     height: 20,
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
   },
   checkboxOn: { backgroundColor: 'rgba(246,140,80,0.6)' },
   rememberText: {
-    color: 'rgba(255,255,255,0.85)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginLeft: 8,
@@ -357,7 +359,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   hint: {
-    color: 'rgba(255,255,255,0.6)',
+    color: colors.ink3,
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: spacing.md,
