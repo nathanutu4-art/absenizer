@@ -16,14 +16,16 @@ interface Props {
   variant?: 'primary' | 'paper' | 'danger';
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  /** Paksa gaya kaca (seperti prop glass di Plate). */
+  glass?: boolean;
 }
 
 /**
  * Tombol cap gaya ukiran: uppercase, letter-spacing, radius 3px,
  * border tinta 1.5px, bayangan keras 4px.
  */
-export function PlateButton({ children, onPress, variant = 'primary', style, disabled }: Props) {
-  const glass = isGlassMode();
+export function PlateButton({ children, onPress, variant = 'primary', style, disabled, glass: glassProp = false }: Props) {
+  const glass = isGlassMode() || glassProp;
   const bg =
     glass && variant === 'primary'
       ? 'rgba(255,255,255,0.22)'

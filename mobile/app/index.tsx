@@ -52,6 +52,7 @@ export default function OpeningScreen() {
               cuti — semua dalam satu aplikasi.
             </Text>
             <PlateButton
+              glass
               onPress={() => router.push('/login')}
               style={styles.cta}
               variant="primary"
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   sheet: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    marginTop: spacing.lg,
+    marginBottom: 0,
+    marginHorizontal: 0,
+    marginTop: 'auto',
   },
   sheetBody: {
     padding: spacing.lg,
