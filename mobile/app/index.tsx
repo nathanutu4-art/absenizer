@@ -129,7 +129,8 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.5)',
     fontFamily: fontFamily('400'),
     fontSize: 11,
-    marginTop: spacing.lg,
+    marginTop: 'auto',
+    paddingTop: spacing.lg,
     textAlign: 'center',
   },
 });
