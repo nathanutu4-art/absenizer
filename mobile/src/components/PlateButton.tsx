@@ -49,7 +49,7 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
   const handlePressIn = () => {
     Animated.timing(fillAnim, {
       toValue: 1,
-      duration: 600,
+      duration: 250,
       useNativeDriver: false,
     }).start();
   };
@@ -57,7 +57,7 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
   const handlePressOut = () => {
     Animated.timing(fillAnim, {
       toValue: 0,
-      duration: 300,
+      duration: 150,
       useNativeDriver: false,
     }).start();
   };
