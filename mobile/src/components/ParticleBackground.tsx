@@ -50,8 +50,8 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
         y: Math.random() * SH,
         vx: (Math.random() - 0.5) * 0.3,
         vy: (Math.random() - 0.5) * 0.3,
-        size: 2 + Math.random() * 3.5,
-        opacity: 0.15 + Math.random() * 0.3,
+        size: 3 + Math.random() * 4,
+        opacity: 0.35 + Math.random() * 0.4,
         phase: Math.random() * Math.PI * 2,
       });
     }
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   dot: {
-    backgroundColor: '#cfe4ff',
+    backgroundColor: '#ffffff',
     position: 'absolute',
     left: 0,
     top: 0,

@@ -333,7 +333,7 @@ export default function HomeScreen() {
         style={StyleSheet.absoluteFill}
       />
       {/* Partikel interaktif */}
-      <ParticleBackground ref={particles} />
+      <ParticleBackground ref={particles} count={40} />
       <ScrollView
         contentContainerStyle={styles.scroll}
         onScroll={(e) => {
