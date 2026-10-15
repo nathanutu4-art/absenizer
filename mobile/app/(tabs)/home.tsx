@@ -282,21 +282,21 @@ export default function HomeScreen() {
   const shortcuts: { label: string; icon: IconName; route: string; variant: MedallionVariant }[] =
     role === 'karyawan'
       ? [
-          { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests', variant: 'cream' },
-          { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'cream' },
-          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history', variant: 'cream' },
-          { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'cream' },
+          { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests', variant: 'wadaApricot' },
+          { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
+          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history', variant: 'wadaApricot' },
+          { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
         ]
       : role === 'pic'
         ? [
             { label: 'Persetujuan', icon: 'check_circle', route: '/(tabs)/approvals', variant: 'wadaApricot' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'cream' },
-            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'cream' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
           ]
         : [
             { label: 'Ambil Alih', icon: 'repeat', route: '/(tabs)/takeover', variant: 'wadaOlive' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'cream' },
-            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'cream' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
           ];
 
   return (
@@ -307,11 +307,11 @@ export default function HomeScreen() {
         resizeMode="cover"
         style={StyleSheet.absoluteFill}
       />
-      {/* Layer blur di depan background */}
+      {/* Layer blur + diffuse di depan background */}
       <BlurView
-        intensity={40}
+        intensity={80}
         tint="dark"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(15,20,50,0.25)' }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(20,25,60,0.45)' }]}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
   clockMedal: {
     left: (CLOCK_DIAMETER - 88) / 2,
     position: 'absolute',
-    top: (CLOCK_DIAMETER - 88) / 2,
+    top: (CLOCK_DIAMETER - 88) / 2 - 8,
   },
   clockTextWrap: {
     alignItems: 'center',
