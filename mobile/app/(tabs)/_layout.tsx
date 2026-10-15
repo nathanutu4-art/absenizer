@@ -38,7 +38,7 @@ const badgeStyle = {
 export default function TabsLayout() {
   const [role, setRole] = useState<DemoRole | null>(null);
   const pathname = usePathname();
-  // Animasi pergantian tab: fade-in + geser naik halus (~200ms).
+  // Animasi pergantian tab: slide-in dari kiri + fade (~200ms).
   const fade = useRef(new Animated.Value(1)).current;
   const slide = useRef(new Animated.Value(0)).current;
 
@@ -48,7 +48,7 @@ export default function TabsLayout() {
 
   useEffect(() => {
     fade.setValue(0);
-    slide.setValue(10);
+    slide.setValue(-40);
     Animated.parallel([
       Animated.timing(fade, {
         toValue: 1,
@@ -75,7 +75,7 @@ export default function TabsLayout() {
 
   return (
     <Animated.View
-      style={{ flex: 1, opacity: fade, transform: [{ translateY: slide }] }}
+      style={{ flex: 1, opacity: fade, transform: [{ translateX: slide }] }}
     >
     <Tabs
       screenOptions={{
