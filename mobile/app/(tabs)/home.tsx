@@ -782,7 +782,7 @@ const styles = StyleSheet.create({
   quotaValue: { color: 'rgba(255,255,255,0.8)', fontFamily: fontFamily('400'), fontSize: 13 },
   quotaSkeleton: { marginVertical: 6 },
   linkText: {
-    color: colors.indigo,
+    color: colors.wadaApricot,
     fontFamily: fontFamily('700'),
     fontSize: 13,
     marginTop: spacing.sm,
