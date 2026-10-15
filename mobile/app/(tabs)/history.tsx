@@ -1,6 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { AttendanceDetailModal } from '../../src/components/AttendanceDetailModal';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
@@ -43,6 +45,10 @@ export default function HistoryScreen() {
   const [loading, setLoading] = useState(true);
   // Baris yang dibuka di popup detail; null = popup tertutup.
   const [selectedRow, setSelectedRow] = useState<HistoryRow | null>(null);
+  // Partikel background interaktif (seperti dashboard).
+  const particles = useRef<ParticleHandle | null>(null);
+  const lastTouch = useRef<{ x: number; y: number } | null>(null);
+  const lastScrollY = useRef(0);
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -94,9 +100,47 @@ export default function HistoryScreen() {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: '#0151b0' }]}>
-      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scroll}>
+    <View
+      style={styles.root}
+      onTouchMove={(e) => {
+        const t = e.nativeEvent.touches[0];
+        if (!t) return;
+        const last = lastTouch.current;
+        if (last) {
+          // Kecepatan swipe → dorong partikel di sekitar jari.
+          const vx = (t.pageX - last.x) * 0.6;
+          const vy = (t.pageY - last.y) * 0.6;
+          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
+        }
+        lastTouch.current = { x: t.pageX, y: t.pageY };
+      }}
+      onTouchEnd={() => {
+        lastTouch.current = null;
+      }}
+    >
+      {/* Background: putih dengan sentuhan gradient lembut */}
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Partikel interaktif */}
+      <ParticleBackground ref={particles} count={40} />
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        onScroll={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const vy = (y - lastScrollY.current) * 0.8;
+          lastScrollY.current = y;
+          // Scroll mendorong partikel berlawanan arah (efek parallax).
+          if (Math.abs(vy) > 0.5) {
+            particles.current?.impulse(
+              200, y + 400, 0, -vy, 500,
+            );
+          }
+        }}
+        scrollEventThrottle={16}
+      >
+      <SafeAreaView edges={['top']}>
       {/* Tajuk arsip */}
       <View style={styles.headerRow}>
         <MedallionIcon glyph="clock" size={58} variant="wadaIndigo" />
@@ -210,8 +254,8 @@ export default function HistoryScreen() {
         row={selectedRow}
         onClose={() => setSelectedRow(null)}
       />
-      </ScrollView>
       </SafeAreaView>
+      </ScrollView>
     </View>
   );
 }
@@ -227,9 +271,8 @@ function toneColor(tone: string): string {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  safe: { flex: 1 },
-  scroll: { padding: spacing.md, paddingBottom: spacing.xl },
+  root: { backgroundColor: '#ffffff', flex: 1 },
+  scroll: { padding: spacing.md, paddingBottom: 130 },
   headerRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -237,19 +280,19 @@ const styles = StyleSheet.create({
   },
   headerText: { flex: 1, marginLeft: 12 },
   header: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 22,
   },
   month: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink2,
     fontFamily: serifFamily('800'),
     fontSize: 14,
     marginTop: 2,
   },
   doubleRule: { marginTop: spacing.md },
-  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3 },
-  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
   summary: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -258,12 +301,12 @@ const styles = StyleSheet.create({
   cell: { flex: 1 },
   cellInner: { alignItems: 'center', paddingVertical: 12 },
   cellValue: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 20,
   },
   cellLabel: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 10.5,
     marginTop: 2,
@@ -271,7 +314,7 @@ const styles = StyleSheet.create({
   cellBar: { borderRadius: 2, height: 3, marginTop: 8, width: 26 },
   list: { marginTop: spacing.md },
   emptyText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: colors.ink3,
     fontFamily: fontFamily('500'),
     fontSize: 13.5,
     paddingVertical: spacing.lg,
@@ -284,11 +327,11 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   dateBlock: { alignItems: 'center', width: 44 },
-  dayNum: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 22 },
-  dateLabel: { color: 'rgba(255,255,255,0.7)', fontFamily: fontFamily('500'), fontSize: 11 },
+  dayNum: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 22 },
+  dateLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 11 },
   divider: {
     alignSelf: 'stretch',
-    borderColor: 'rgba(255,255,255,0.25)',
+    borderColor: colors.line,
     borderLeftWidth: 1,
     borderStyle: 'dashed',
     marginHorizontal: 12,
@@ -299,9 +342,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  itemTime: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
+  itemTime: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
   durationText: {
-    color: 'rgba(255,255,255,0.7)',
+    color: colors.ink3,
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: 4,
