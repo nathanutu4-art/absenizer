@@ -22,14 +22,20 @@ interface Props {
 export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false }: Props) {
   if (isGlassMode() || glass) {
     // Dibaca saat render agar mengikuti setGlassMode().
+    // Glass yang tegas: terlihat di atas background terang maupun gelap.
     return (
       <View
         style={[
           {
-            backgroundColor: 'rgba(255,255,255,0.10)',
-            borderColor: 'rgba(255,255,255,0.30)',
+            backgroundColor: 'rgba(255,255,255,0.35)',
+            borderColor: 'rgba(255,255,255,0.65)',
             borderRadius: GLASS_RADIUS,
-            borderWidth: 1,
+            borderWidth: 1.5,
+            shadowColor: '#051230',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 12,
+            elevation: 4,
           },
           style,
         ]}
