@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -9,6 +9,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { Avatar } from '../../src/components/Avatar';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
@@ -99,6 +101,9 @@ function photoFor(e: Employee): string {
 /** Info Karyawan — tidak masuk, ulang tahun terdekat, direktori. */
 export default function TeamScreen() {
   const [query, setQuery] = useState('');
+  // Partikel background interaktif (seperti dashboard).
+  const particles = useRef<ParticleHandle | null>(null);
+  const lastTouch = useRef<{ x: number; y: number } | null>(null);
   // Direktori dimuat dari Supabase bila tersedia; tampilkan demo saat memuat.
   const [directorySrc, setDirectorySrc] = useState<Employee[]>(EMPLOYEES);
   const [dirLoading, setDirLoading] = useState(true);
@@ -157,7 +162,31 @@ export default function TeamScreen() {
   );
 
   return (
-    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
+    <View
+      style={styles.root}
+      onTouchMove={(e) => {
+        const t = e.nativeEvent.touches[0];
+        if (!t) return;
+        const last = lastTouch.current;
+        if (last) {
+          // Kecepatan swipe → dorong partikel di sekitar jari.
+          const vx = (t.pageX - last.x) * 0.6;
+          const vy = (t.pageY - last.y) * 0.6;
+          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
+        }
+        lastTouch.current = { x: t.pageX, y: t.pageY };
+      }}
+      onTouchEnd={() => {
+        lastTouch.current = null;
+      }}
+    >
+      {/* Background: putih dengan sentuhan gradient lembut */}
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Partikel interaktif */}
+      <ParticleBackground ref={particles} count={40} />
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
       <Text style={styles.header}>Info Karyawan</Text>
@@ -238,7 +267,7 @@ export default function TeamScreen() {
         <TextInput
           onChangeText={setQuery}
           placeholder="Cari nama karyawan…"
-          placeholderTextColor="rgba(255,255,255,0.5)"
+          placeholderTextColor="#9aa3b5"
           style={styles.searchInput}
           value={query}
         />
@@ -327,21 +356,21 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: { backgroundColor: '#ffffff', flex: 1 },
   safe: { flex: 1 },
   scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   header: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 22,
     marginTop: spacing.sm,
   },
   doubleRule: { marginTop: spacing.sm },
-  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3 },
-  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleThin: { backgroundColor: colors.line, height: 1, marginTop: 3 },
   sectionHead: { marginBottom: spacing.sm, marginTop: spacing.lg },
   sectionTitle: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 15,
     marginBottom: 6,
@@ -354,7 +383,7 @@ const styles = StyleSheet.create({
     padding: 3,
   },
   awayName: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 11,
     marginTop: 6,
@@ -366,14 +395,14 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
   legendDot: {
-    borderColor: 'rgba(255,255,255,0.4)',
+    borderColor: '#d5dce8',
     borderRadius: 6,
     borderWidth: 1.5,
     height: 12,
     width: 12,
   },
   legendLabel: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginLeft: 6,
@@ -386,32 +415,32 @@ const styles = StyleSheet.create({
   birthCard: { width: '31%' },
   birthInner: { alignItems: 'center', padding: spacing.sm },
   birthName: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: fontFamily('700'),
     fontSize: 12,
     marginTop: 6,
   },
-  birthDate: { color: 'rgba(255,255,255,0.75)', fontFamily: fontFamily('500'), fontSize: 11 },
+  birthDate: { color: colors.ink2, fontFamily: fontFamily('500'), fontSize: 11 },
   agePill: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderColor: 'rgba(255,255,255,0.4)',
+    backgroundColor: '#eef1f6',
+    borderColor: '#d5dce8',
     borderRadius: 2,
     borderWidth: 1.5,
     marginTop: 6,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
-  ageText: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 11 },
+  ageText: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 11 },
   countdown: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 10.5,
     marginTop: 4,
   },
   searchRow: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderColor: 'rgba(255,255,255,0.4)',
+    backgroundColor: '#f2f5fa',
+    borderColor: '#d5dce8',
     borderRadius: 3,
     borderWidth: 1.5,
     flexDirection: 'row',
@@ -421,7 +450,7 @@ const styles = StyleSheet.create({
   },
   searchMedal: { marginRight: 8 },
   searchInput: {
-    color: '#ffffff',
+    color: colors.ink,
     flex: 1,
     fontFamily: fontFamily('400'),
     fontSize: 14,
@@ -436,9 +465,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   dirText: { flex: 1, marginLeft: 12 },
-  dirName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
+  dirName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
   dirPos: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
