@@ -55,6 +55,7 @@ export default function OpeningScreen() {
             >
               Masuk
             </PlateButton>
+            <View style={styles.spacerUp} />
             <Text style={styles.footer}>© 2026 Prasta Corp. All rights reserved.</Text>
           </View>
         </Plate>
@@ -125,6 +126,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   cta: { marginTop: spacing.xl * 1.5 },
+  spacerUp: { height: 90 },
   footer: {
     color: 'rgba(255,255,255,0.5)',
     fontFamily: fontFamily('400'),
