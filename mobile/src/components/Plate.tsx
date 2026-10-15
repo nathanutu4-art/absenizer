@@ -42,10 +42,10 @@ export function Plate({ children, style, shadowColor, shadowOffset = plateShadow
         ]}
       >
         <BlurView
-          intensity={50}
+          intensity={35}
           tint="dark"
           style={{
-            backgroundColor: 'rgba(30,40,80,0.35)',
+            backgroundColor: 'rgba(40,50,100,0.25)',
           }}
         >
           {children}

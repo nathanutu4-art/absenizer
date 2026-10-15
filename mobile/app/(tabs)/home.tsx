@@ -309,9 +309,9 @@ export default function HomeScreen() {
       />
       {/* Layer gelap blur di depan background (dark glassmorphism) */}
       <BlurView
-        intensity={60}
+        intensity={40}
         tint="dark"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(10,15,40,0.55)' }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(15,20,50,0.35)' }]}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
@@ -352,7 +352,7 @@ export default function HomeScreen() {
               <View style={styles.statusInner}>
                 <StampChip
                   backgroundColor={clock.phase === 'in' ? colors.paper2 : colors.greenBg}
-                  color={clock.phase === 'in' ? colors.ink2 : colors.green}
+                  color={clock.phase === 'in' ? '#ffffff' : colors.green}
                 >
                   {statusChip}
                 </StampChip>
@@ -399,12 +399,14 @@ export default function HomeScreen() {
                 clock.phase === 'done' && styles.clockDimmed,
               ]}
             >
-              <Image
-                source={{ uri: SUNBURST_APRICOT }}
-                resizeMode="contain"
-                style={styles.sunburst}
+              <BlurView
+                intensity={45}
+                tint="dark"
+                style={StyleSheet.absoluteFill}
               />
-              <MedallionIcon glyph="clock" size={112} variant="ink" style={styles.clockMedal} />
+              {/* Ring glow luar */}
+              <View style={styles.clockGlowRing} />
+              <MedallionIcon glyph="clock" size={88} variant="cream" style={styles.clockMedal} />
               <View style={styles.clockTextWrap}>
                 <Text style={styles.clockLabel}>{clockLabel}</Text>
                 <Text style={styles.clockTime}>{wib} WIB</Text>
@@ -631,7 +633,7 @@ const styles = StyleSheet.create({
   timeCol: { alignItems: 'center', flex: 1 },
   timeValue: { color: '#ffffff', fontFamily: fontFamily('800'), fontSize: 18 },
   timeLabel: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 11,
     marginTop: 2,
@@ -655,26 +657,37 @@ const styles = StyleSheet.create({
     width: 240,
   },
   clockShadow: {
-    backgroundColor: colors.etch,
-    borderRadius: CLOCK_DIAMETER / 2,
-    height: CLOCK_DIAMETER,
-    left: 3,
-    position: 'absolute',
-    top: 3,
-    width: CLOCK_DIAMETER,
+    display: 'none',
   },
   clockPlate: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.etch,
+    backgroundColor: 'rgba(30,40,80,0.4)',
+    borderColor: 'rgba(140,180,255,0.5)',
     borderRadius: CLOCK_DIAMETER / 2,
-    borderWidth: 1.5,
+    borderWidth: 2,
     height: CLOCK_DIAMETER,
     justifyContent: 'center',
     overflow: 'hidden',
     width: CLOCK_DIAMETER,
+    shadowColor: '#4d7fff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 30,
+    elevation: 10,
   },
-  clockPlateOut: { backgroundColor: colors.orangeBg },
+  clockGlowRing: {
+    borderColor: 'rgba(246,140,80,0.6)',
+    borderRadius: (CLOCK_DIAMETER - 24) / 2,
+    borderWidth: 2,
+    height: CLOCK_DIAMETER - 24,
+    position: 'absolute',
+    width: CLOCK_DIAMETER - 24,
+    shadowColor: '#f68c50',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 16,
+  },
+  clockPlateOut: { borderColor: 'rgba(246,140,80,0.7)' },
   clockDimmed: { opacity: 0.55 },
   sunburst: {
     height: 200,
@@ -762,16 +775,16 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   doubleRule: { marginTop: 6 },
-  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleThick: { backgroundColor: 'rgba(255,255,255,0.5)', height: 3 },
   ruleGap: { height: 3 },
-  ruleThin: { backgroundColor: colors.ink, height: 1 },
+  ruleThin: { backgroundColor: 'rgba(255,255,255,0.3)', height: 1 },
   quotaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
   },
-  quotaLabel: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
-  quotaValue: { color: colors.ink2, fontFamily: fontFamily('400'), fontSize: 13 },
+  quotaLabel: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
+  quotaValue: { color: 'rgba(255,255,255,0.8)', fontFamily: fontFamily('400'), fontSize: 13 },
   quotaSkeleton: { marginVertical: 6 },
   linkText: {
     color: colors.indigo,
@@ -788,10 +801,10 @@ const styles = StyleSheet.create({
   activityText: { flex: 1, marginLeft: 12, marginRight: 8 },
   activityTitle: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
   activitySub: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.65)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
   },
-  activityDivider: { backgroundColor: colors.line, height: 1, marginLeft: 50 },
+  activityDivider: { backgroundColor: 'rgba(255,255,255,0.15)', height: 1, marginLeft: 50 },
 });
