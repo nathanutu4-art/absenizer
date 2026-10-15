@@ -34,6 +34,7 @@ export function SketchClock({ size = 120, style }: Props) {
   const center = size / 2;
   const minuteLen = size * 0.32;
   const hourLen = size * 0.22;
+  const dotSize = Math.max(8, size * 0.07);
 
   return (
     <View style={[{ width: size, height: size }, style]}>
@@ -66,11 +67,11 @@ export function SketchClock({ size = 120, style }: Props) {
         style={[
           styles.dot,
           {
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            left: center - 5,
-            top: center - 5,
+            width: dotSize,
+            height: dotSize,
+            borderRadius: dotSize / 2,
+            left: center - dotSize / 2,
+            top: center - dotSize / 2,
           },
         ]}
       />
