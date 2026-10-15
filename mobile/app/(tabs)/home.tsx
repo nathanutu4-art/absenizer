@@ -102,7 +102,6 @@ export default function HomeScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
   const clock = useClockState();
   const wib = useWibClock();
-  const pulse = useRef(new Animated.Value(0)).current;
   // Animasi pop-up lingkaran clock saat muncul (scale 0 -> 1).
   const popIn = useRef(new Animated.Value(0)).current;
   // Nama & foto pengguna yang login (dari DB bila tersedia).
@@ -199,25 +198,6 @@ export default function HomeScreen() {
       ? mePhoto
       : DUMMY_AVATAR;
 
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, {
-          toValue: 1,
-          duration: 1600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulse, {
-          toValue: 0,
-          duration: 1600,
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [pulse]);
-
   // Muat aktivitas terakhir dari database (sembunyikan bila kosong).
   useEffect(() => {
     let alive = true;
@@ -249,15 +229,6 @@ export default function HomeScreen() {
   const escalatedCount = PIC_REQUESTS.filter(
     (r) => r.status === 'menunggu' && r.escalated,
   ).length;
-
-  const ringScale = pulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.18],
-  });
-  const ringOpacity = pulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.45, 0],
-  });
 
   function handleClockPress() {
     if (clock.phase === 'in') {
@@ -388,12 +359,6 @@ export default function HomeScreen() {
         {/* MEDALI CLOCK */}
         <Animated.View style={[styles.clockWrap, { transform: [{ scale: popIn }] }]}>
           <View style={styles.clockCenter}>
-            <Animated.View
-              style={[
-                styles.pulseRing,
-                { opacity: clock.phase === 'done' ? 0 : ringOpacity, transform: [{ scale: ringScale }] },
-              ]}
-            />
             <View style={styles.clockShadow} />
             <TouchableOpacity
               accessibilityRole="button"
