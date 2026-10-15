@@ -345,12 +345,15 @@ export default function HomeScreen() {
             {/* Kartu status */}
             <Plate glass style={styles.statusPlate}>
               <View style={styles.statusInner}>
-                <StampChip
-                  backgroundColor={clock.phase === 'in' ? colors.paper2 : colors.greenBg}
-                  color={clock.phase === 'in' ? '#000000' : colors.green}
-                >
-                  {statusChip}
-                </StampChip>
+                <View style={styles.statusHeader}>
+                  <StampChip
+                    backgroundColor={clock.phase === 'in' ? colors.paper2 : colors.greenBg}
+                    color={clock.phase === 'in' ? '#000000' : colors.green}
+                  >
+                    {statusChip}
+                  </StampChip>
+                  <Text style={styles.statusDate}>{todayLine()}</Text>
+                </View>
                 <View style={styles.timeCols}>
                   <View style={styles.timeCol}>
                     <Text style={styles.timeValue}>{clock.inTime ?? '--.--'}</Text>
@@ -420,10 +423,6 @@ export default function HomeScreen() {
         {/* JAM KERJA */}
         <LiquidGlassCard tint="light" intensity={40} style={styles.hoursPlate} pressable={false} overlayColor="rgba(5,18,48,0.2)">
           <View style={styles.hoursInner}>
-            <View style={styles.hoursHeader}>
-              <Text style={styles.hoursTitle}>Jam Kerja</Text>
-              <Text style={styles.hoursDate}>{todayLine()}</Text>
-            </View>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="wadaIndigo" />
               <Text style={styles.hoursText}>
@@ -628,6 +627,17 @@ const styles = StyleSheet.create({
   },
   statusPlate: { marginHorizontal: spacing.lg, marginTop: spacing.md },
   statusInner: { padding: spacing.md },
+  statusHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statusDate: {
+    color: 'rgba(255,255,255,0.8)',
+    fontFamily: 'serif',
+    fontSize: 12,
+    fontStyle: 'italic',
+  },
   timeCols: { flexDirection: 'row', marginTop: spacing.md },
   timeCol: { alignItems: 'center', flex: 1 },
   timeValue: { color: '#ffffff', fontFamily: fontFamily('800'), fontSize: 18 },
@@ -731,23 +741,6 @@ const styles = StyleSheet.create({
   },
   hoursPlate: { marginHorizontal: spacing.lg, marginTop: spacing.lg },
   hoursInner: { padding: spacing.md },
-  hoursHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
-  hoursTitle: {
-    color: '#ffffff',
-    fontFamily: serifFamily('800'),
-    fontSize: 15,
-  },
-  hoursDate: {
-    color: 'rgba(255,255,255,0.8)',
-    fontFamily: 'serif',
-    fontSize: 12,
-    fontStyle: 'italic',
-  },
   hoursRow: { alignItems: 'center', flexDirection: 'row' },
   hoursText: {
     color: 'rgba(255,255,255,0.85)',
