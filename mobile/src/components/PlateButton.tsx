@@ -43,23 +43,38 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
       children
     );
   // Mode liquid-glass: tombol kaca tanpa bayangan keras.
-  // Animasi loading bar putih kiri-ke-kanan saat disentuh.
+  // Animasi loading bar putih kiri-ke-kanan + glow saat disentuh.
   const fillAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
 
   const handlePressIn = () => {
-    Animated.timing(fillAnim, {
-      toValue: 1,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
+    Animated.parallel([
+      Animated.timing(fillAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: false,
+      }),
+      Animated.timing(glowAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: false,
+      }),
+    ]).start();
   };
 
   const handlePressOut = () => {
-    Animated.timing(fillAnim, {
-      toValue: 0,
-      duration: 80,
-      useNativeDriver: false,
-    }).start();
+    Animated.parallel([
+      Animated.timing(fillAnim, {
+        toValue: 0,
+        duration: 80,
+        useNativeDriver: false,
+      }),
+      Animated.timing(glowAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }),
+    ]).start();
   };
 
   if (glass) {
@@ -94,6 +109,29 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
                 inputRange: [0, 1],
                 outputRange: ['0%', '100%'],
               }),
+            },
+          ]}
+        />
+        {/* Glow layer */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              borderColor: '#ffffff',
+              borderRadius: GLASS_RADIUS,
+              borderWidth: 2,
+              opacity: glowAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.8],
+              }),
+              shadowColor: '#ffffff',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: glowAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.9],
+              }),
+              shadowRadius: 20,
             },
           ]}
         />
