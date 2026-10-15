@@ -101,6 +101,8 @@ export default function HomeScreen() {
   const clock = useClockState();
   const wib = useWibClock();
   const pulse = useRef(new Animated.Value(0)).current;
+  // Animasi pop-up lingkaran clock saat muncul (scale 0 -> 1).
+  const popIn = useRef(new Animated.Value(0)).current;
   // Nama & foto pengguna yang login (dari DB bila tersedia).
   const [meName, setMeName] = useState<string | null>(null);
   const [mePhoto, setMePhoto] = useState<string | null>(null);
@@ -229,6 +231,16 @@ export default function HomeScreen() {
       alive = false;
     };
   }, []);
+
+  // Pop-up lingkaran clock saat layar muncul.
+  useEffect(() => {
+    Animated.spring(popIn, {
+      toValue: 1,
+      friction: 6,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+  }, [popIn]);
 
   const me = getEmployee(ROLE_EMPLOYEE[role]);
   const pendingCount = PIC_REQUESTS.filter((r) => r.status === 'menunggu').length;
@@ -359,7 +371,7 @@ export default function HomeScreen() {
         </GradientView>
 
         {/* MEDALI CLOCK */}
-        <View style={styles.clockWrap}>
+        <Animated.View style={[styles.clockWrap, { transform: [{ scale: popIn }] }]}>
           <View style={styles.clockCenter}>
             <Animated.View
               style={[
@@ -397,7 +409,7 @@ export default function HomeScreen() {
                 ? 'Ketuk untuk menyelesaikan absensi'
                 : 'Terima kasih, absensi hari ini lengkap'}
           </Text>
-        </View>
+        </Animated.View>
 
         {/* JAM KERJA */}
         <Plate style={styles.hoursPlate}>
