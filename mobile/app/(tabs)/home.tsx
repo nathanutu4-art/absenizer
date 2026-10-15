@@ -446,19 +446,19 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcutTouch}
             >
-              <LiquidGlassCard tint="light" intensity={40} style={styles.shortcutPlate} pressable={false}>
+              <Plate glass style={styles.shortcutPlate}>
                 <View style={styles.shortcutInner}>
                   <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
                   <Text style={styles.shortcutLabel}>{s.label}</Text>
                 </View>
-              </LiquidGlassCard>
+              </Plate>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlate} pressable={false}>
+          <Plate glass style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Sisa Kuota</SectionTitle>
               {quotaRows.length === 0 ? (
@@ -478,20 +478,20 @@ export default function HomeScreen() {
                 <Text style={styles.linkText}>Lihat semua kuota →</Text>
               </TouchableOpacity>
             </View>
-          </LiquidGlassCard>
+          </Plate>
         ) : null}
         {role === 'pic' ? (
           <TouchableOpacity
             onPress={() => router.push('/(tabs)/approvals')}
             style={styles.sectionTouch}
           >
-            <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlateTight} pressable={false}>
+            <Plate glass style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Menunggu Persetujuan</SectionTitle>
                 <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
                 <Text style={styles.linkText}>Tinjau sekarang →</Text>
               </View>
-            </LiquidGlassCard>
+            </Plate>
           </TouchableOpacity>
         ) : null}
         {role === 'hr' ? (
@@ -499,19 +499,19 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/takeover')}
             style={styles.sectionTouch}
           >
-            <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlateTight} pressable={false}>
+            <Plate glass style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Bisa Diambil Alih</SectionTitle>
                 <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
                 <Text style={styles.linkText}>Tinjau sekarang →</Text>
               </View>
-            </LiquidGlassCard>
+            </Plate>
           </TouchableOpacity>
         ) : null}
 
         {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
         {activities.length > 0 ? (
-          <LiquidGlassCard tint="light" intensity={40} style={styles.sectionPlate} pressable={false}>
+          <Plate glass style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Aktivitas Terakhir</SectionTitle>
               {activities.map((a, i) => (
@@ -557,7 +557,7 @@ export default function HomeScreen() {
                 </React.Fragment>
               ))}
             </View>
-          </LiquidGlassCard>
+          </Plate>
         ) : null}
       </ScrollView>
     </View>
