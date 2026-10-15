@@ -1,0 +1,1 @@
+{"build":{"development":{"distribution":"internal","env":{"NODE_OPTIONS":"--max-old-space-size=4096"}},"preview":{"distribution":"internal","env":{"NODE_OPTIONS":"--max-old-space-size=4096"}},"production":{"env":{"NODE_OPTIONS":"--max-old-space-size=4096"}}},"cli":{"version":">= 5.0.0"},"submit":{"production":{}}}
