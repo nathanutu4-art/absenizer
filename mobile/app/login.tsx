@@ -11,15 +11,15 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlurView } from 'expo-blur';
 import { AppIcon } from '../src/components/AppIcon';
-import { GradientView } from '../src/components/GradientView';
 import { MedallionIcon } from '../src/components/MedallionIcon';
 import { Plate } from '../src/components/Plate';
 import { PlateButton } from '../src/components/PlateButton';
 import { StampChip } from '../src/components/StampChip';
 import { APP_VERSION, COMPANY_NAME } from '../src/data/demo';
+import { BG_ABSTRACT } from '../src/data/bgAbstract';
 import { ILLUSTRATION_LOGIN } from '../src/data/illustrations-login';
-import { HATCH_TILE } from '../src/data/medallions';
 import { supabase } from '../src/lib/supabase';
 import { isSupabaseConfigured, resolveMyRole } from '../src/lib/db';
 import { SESSION_KEY, type DemoRole } from '../src/lib/session';
@@ -33,9 +33,8 @@ const ROLE_OPTIONS: { value: DemoRole; label: string }[] = [
 ];
 
 /**
- * Login — BR-31: email perusahaan + kata sandi. Akun dibuatkan Admin HR.
- * Hero ukiran + ilustrasi meja kantor berbingkai ganda, formulir di
- * atas plat kertas. Logika auth & mode demo tidak berubah.
+ * Login — glass liquid UI seperti dashboard: background abstrak indigo
+ * blur, kartu kaca, teks putih. Logika auth & mode demo tidak berubah.
  */
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -45,10 +44,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Simpan sesi Supabase ke SecureStore, resolve peran dari DB bila
-   * tersedia, lalu masuk ke beranda. Dipakai login form & tombol demo.
-   */
   async function persistSession(
     userId: string,
     email: string | undefined,
@@ -106,10 +101,6 @@ export default function LoginScreen() {
     }
   }
 
-  /**
-   * Tombol demo: login Supabase sungguhan memakai akun prasta@gosit.us,
-   * bukan sesi demo lokal.
-   */
   async function handleDemoLogin() {
     setError(null);
     setLoading(true);
@@ -133,53 +124,60 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Hero ukiran */}
-      <GradientView kind="hero" style={styles.hero}>
-        <Image
-          resizeMode="repeat"
-          source={{ uri: HATCH_TILE }}
-          style={[StyleSheet.absoluteFill, styles.hatch]}
-        />
-        <SafeAreaView edges={['top']} style={styles.safe}>
+      {/* Background abstrak indigo */}
+      <Image
+        source={{ uri: BG_ABSTRACT }}
+        resizeMode="cover"
+        style={StyleSheet.absoluteFill}
+      />
+      <BlurView
+        intensity={80}
+        tint="dark"
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(20,25,60,0.45)' }]}
+      />
+      <BlurView
+        intensity={50}
+        tint="light"
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
+      />
+
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
           <View style={styles.heroBody}>
-            <MedallionIcon glyph="shield" size={60} variant="wadaIndigo" />
+            <MedallionIcon glyph="shield" size={60} variant="cream" />
             <Text style={styles.title}>Selamat Datang di Absenizer</Text>
             <Text style={styles.subtitle}>
               Masuk dengan email perusahaan Anda.
             </Text>
-            <Plate style={styles.frame}>
-              <View style={styles.frameInner}>
-                <Image
-                  resizeMode="cover"
-                  source={{ uri: ILLUSTRATION_LOGIN }}
-                  style={styles.art}
-                />
-              </View>
-            </Plate>
           </View>
-        </SafeAreaView>
-      </GradientView>
 
-      {/* Formulir di atas kertas */}
-      <View style={styles.sheet}>
-        <View style={styles.ruleThick} />
-        <View style={styles.ruleThin} />
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-          style={styles.scrollView}
-        >
-          <Plate style={styles.form}>
+          {/* Ilustrasi kaca */}
+          <Plate glass style={styles.frame}>
+            <View style={styles.frameInner}>
+              <Image
+                resizeMode="cover"
+                source={{ uri: ILLUSTRATION_LOGIN }}
+                style={styles.art}
+              />
+            </View>
+          </Plate>
+
+          {/* Form kaca */}
+          <Plate glass style={styles.form}>
             <View style={styles.formInner}>
               <Text style={styles.label}>Email perusahaan</Text>
               <View style={styles.inputRow}>
-                <MedallionIcon glyph="mail" size={32} style={styles.inputIcon} variant="wadaIndigo" />
+                <AppIcon color="rgba(255,255,255,0.7)" name="mail" size={20} style={styles.inputIcon} />
                 <TextInput
                   autoCapitalize="none"
                   keyboardType="email-address"
                   onChangeText={setEmail}
                   placeholder="username"
-                  placeholderTextColor={colors.ink3}
+                  placeholderTextColor="rgba(255,255,255,0.4)"
                   style={styles.input}
                   value={email}
                 />
@@ -187,11 +185,11 @@ export default function LoginScreen() {
 
               <Text style={styles.label}>Kata sandi</Text>
               <View style={styles.inputRow}>
-                <MedallionIcon glyph="lock" size={32} style={styles.inputIcon} variant="wadaIndigo" />
+                <AppIcon color="rgba(255,255,255,0.7)" name="lock" size={20} style={styles.inputIcon} />
                 <TextInput
                   onChangeText={setPassword}
                   placeholder="••••••••"
-                  placeholderTextColor={colors.ink3}
+                  placeholderTextColor="rgba(255,255,255,0.4)"
                   secureTextEntry
                   style={styles.input}
                   value={password}
@@ -226,8 +224,8 @@ export default function LoginScreen() {
                       style={styles.roleChip}
                     >
                       <StampChip
-                        backgroundColor={active ? colors.ink : 'transparent'}
-                        color={active ? colors.surface : colors.ink2}
+                        backgroundColor={active ? 'rgba(246,140,80,0.45)' : 'transparent'}
+                        color="#ffffff"
                       >
                         {opt.label}
                       </StampChip>
@@ -239,6 +237,7 @@ export default function LoginScreen() {
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
               <PlateButton
+                glass
                 disabled={loading}
                 onPress={handleLogin}
                 style={styles.loginBtn}
@@ -265,19 +264,17 @@ export default function LoginScreen() {
             {COMPANY_NAME} • Versi {APP_VERSION}
           </Text>
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: colors.indigoDark, flex: 1 },
-  hero: { flexShrink: 0 },
-  hatch: { opacity: 0.07 },
-  safe: { flexShrink: 0 },
+  root: { backgroundColor: 'transparent', flex: 1 },
+  safe: { flex: 1 },
+  scroll: { padding: spacing.lg, paddingBottom: 40 },
   heroBody: {
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
   },
   title: {
@@ -286,6 +283,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginTop: spacing.md,
     textAlign: 'center',
+    textShadowColor: 'rgba(77,127,255,0.5)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   subtitle: {
     color: 'rgba(255,255,255,0.85)',
@@ -294,24 +294,17 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
   },
-  frame: { marginTop: spacing.md, width: '100%' },
-  frameInner: { backgroundColor: colors.paper2, padding: 8 },
+  frame: { marginTop: spacing.lg, width: '100%' },
+  frameInner: { padding: 8 },
   art: {
-    borderColor: colors.ink,
-    borderRadius: 2,
-    borderWidth: 2,
+    borderRadius: 12,
     height: 150,
     width: '100%',
   },
-  sheet: { backgroundColor: colors.bg, flex: 1 },
-  ruleThick: { backgroundColor: colors.ink, height: 3 },
-  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
-  scrollView: { flex: 1 },
-  scroll: { padding: spacing.lg },
-  form: { width: '100%' },
+  form: { marginTop: spacing.lg, width: '100%' },
   formInner: { padding: spacing.lg },
   label: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('700'),
     fontSize: 12.5,
     marginBottom: 6,
@@ -319,16 +312,16 @@ const styles = StyleSheet.create({
   },
   inputRow: {
     alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.etch,
-    borderRadius: 3,
-    borderWidth: 1.5,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(140,180,255,0.25)',
+    borderRadius: 12,
+    borderWidth: 1,
     flexDirection: 'row',
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
   },
   inputIcon: { marginRight: 8 },
   input: {
-    color: colors.ink,
+    color: '#ffffff',
     flex: 1,
     fontFamily: fontFamily('400'),
     fontSize: 14,
@@ -343,25 +336,25 @@ const styles = StyleSheet.create({
   rememberRow: { alignItems: 'center', flexDirection: 'row' },
   checkbox: {
     alignItems: 'center',
-    borderColor: colors.ink,
-    borderRadius: 2,
+    borderColor: 'rgba(255,255,255,0.5)',
+    borderRadius: 6,
     borderWidth: 1.5,
     height: 20,
     justifyContent: 'center',
     width: 20,
   },
-  checkboxOn: { backgroundColor: colors.ink },
+  checkboxOn: { backgroundColor: 'rgba(246,140,80,0.6)' },
   rememberText: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginLeft: 8,
   },
-  forgot: { color: colors.indigo, fontFamily: fontFamily('600'), fontSize: 13 },
+  forgot: { color: '#f68c50', fontFamily: fontFamily('600'), fontSize: 13 },
   roleRow: { flexDirection: 'row', marginTop: 2 },
   roleChip: { marginRight: spacing.sm },
   error: {
-    color: colors.red,
+    color: '#ff8a8a',
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: spacing.sm,
@@ -369,20 +362,20 @@ const styles = StyleSheet.create({
   loginBtn: { marginTop: spacing.lg },
   demoLinkWrap: { alignItems: 'center', marginTop: spacing.md },
   demoLink: {
-    color: colors.indigo,
+    color: '#f68c50',
     fontFamily: fontFamily('600'),
     fontSize: 14,
     textDecorationLine: 'underline',
   },
   hint: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.6)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: spacing.md,
     textAlign: 'center',
   },
   footer: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.5)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: spacing.lg,
