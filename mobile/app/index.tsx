@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginTop: 10,
   },
-  cta: { marginTop: spacing.xl * 1.5 },
-  spacerUp: { height: 80 },
+  cta: { marginTop: spacing.xl * 2.2 },
+  spacerUp: { height: 58 },
   footer: {
     color: 'rgba(255,255,255,0.5)',
     fontFamily: fontFamily('400'),
