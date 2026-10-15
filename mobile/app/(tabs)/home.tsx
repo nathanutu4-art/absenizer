@@ -419,17 +419,17 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <LiquidGlassCard tint="light" intensity={40} style={styles.hoursPlate} pressable={false}>
+        <LiquidGlassCard tint="light" intensity={40} style={styles.hoursPlate} pressable={false} overlayColor="rgba(5,18,48,0.28)">
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
-              <MedallionIcon glyph="clock" size={40} variant="cream" />
+              <MedallionIcon glyph="clock" size={40} variant="wadaIndigo" />
               <Text style={styles.hoursText}>
                 {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
               </Text>
             </View>
             <View style={styles.hoursDivider} />
             <View style={styles.hoursRow}>
-              <MedallionIcon glyph="map_pin" size={40} variant="cream" />
+              <MedallionIcon glyph="map_pin" size={40} variant="wadaIndigo" />
               <Text style={styles.hoursText}>
                 WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
               </Text>

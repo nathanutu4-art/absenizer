@@ -22,6 +22,8 @@ type LiquidGlassCardProps = {
   pressable?: boolean;
   /** onPress handler — jika ada, card jadi bisa ditekan */
   onPress?: () => void;
+  /** warna overlay transparan di atas blur (mis. tint indigo), default transparan */
+  overlayColor?: string;
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
 };
@@ -45,6 +47,7 @@ export function LiquidGlassCard({
   borderRadius = 24,
   pressable = true,
   onPress,
+  overlayColor = 'transparent',
   style,
   contentStyle,
 }: LiquidGlassCardProps) {
@@ -119,6 +122,13 @@ export function LiquidGlassCard({
             tint={tint}
             style={[styles.blur, { borderRadius: borderRadius - 1.5 }]}
           >
+            {/* 3b. Overlay warna (mis. tint indigo) */}
+            {overlayColor !== 'transparent' ? (
+              <View
+                style={[StyleSheet.absoluteFill, { backgroundColor: overlayColor }]}
+                pointerEvents="none"
+              />
+            ) : null}
             {/* 4. Liquid sheen diagonal */}
             <Animated.View
               style={[StyleSheet.absoluteFill, { opacity: sheenOpacity }]}
