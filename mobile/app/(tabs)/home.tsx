@@ -302,24 +302,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Background abstrak indigo */}
-      <Image
-        source={{ uri: BG_ABSTRACT }}
-        resizeMode="cover"
-        style={StyleSheet.absoluteFill}
-      />
-      {/* Layer blur + diffuse di depan background */}
-      <BlurView
-        intensity={80}
-        tint="dark"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(20,25,60,0.45)' }]}
-      />
-      {/* Layer putih diffuse 20% */}
-      <BlurView
-        intensity={50}
-        tint="light"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
-      />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
         <View style={styles.hero}>
@@ -578,7 +560,7 @@ export default function HomeScreen() {
 const CLOCK_DIAMETER = 224;
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: 'transparent', flex: 1 },
+  root: { backgroundColor: '#0154b3', flex: 1 },
   scroll: { paddingBottom: 130 },
   hero: {
     paddingBottom: spacing.lg,
