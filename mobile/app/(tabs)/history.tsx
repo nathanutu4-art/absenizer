@@ -182,9 +182,9 @@ export default function HistoryScreen() {
                   </Text>
                   {row.flags.length > 0 ? (
                     <View style={styles.flagRow}>
-                      {row.flags.map((f) => (
+                      {row.flags.map((f, fi) => (
                         <StampChip
-                          key={f}
+                          key={`${f}-${fi}`}
                           color={STAMP_COLORS.orange.color}
                           backgroundColor={STAMP_COLORS.orange.bg}
                           style={styles.flagChip}
