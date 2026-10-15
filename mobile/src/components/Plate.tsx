@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { GLASS_RADIUS, colors, isGlassMode, plateShadow, radius } from '../theme';
 
 interface Props {
@@ -25,6 +26,46 @@ interface Props {
  */
 export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false, glow = false }: Props) {
   if (isGlassMode() || glass) {
+    const cardContent = (
+      <BlurView
+        intensity={glow ? 60 : 35}
+        tint={glow ? 'light' : 'dark'}
+        style={{
+          backgroundColor: glow ? 'rgba(255,255,255,0.12)' : 'rgba(40,60,140,0.18)',
+          borderRadius: GLASS_RADIUS,
+        }}
+      >
+        {children}
+      </BlurView>
+    );
+
+    // Glow: border gradien biru-oranye di tiap sudut + blur putih transparan.
+    if (glow) {
+      return (
+        <LinearGradient
+          colors={['#4d7fff', '#f68c50', '#4d7fff', '#f68c50']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[
+            {
+              borderRadius: GLASS_RADIUS + 2,
+              padding: 2,
+              shadowColor: '#7fb3ff',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.7,
+              shadowRadius: 18,
+              elevation: 8,
+            },
+            style,
+          ]}
+        >
+          <View style={{ borderRadius: GLASS_RADIUS, overflow: 'hidden' }}>
+            {cardContent}
+          </View>
+        </LinearGradient>
+      );
+    }
+
     // Dibaca saat render agar mengikuti setGlassMode().
     // Mengikuti style glass icon tab: subtle, transparan.
     return (
@@ -33,26 +74,13 @@ export function Plate({ children, style, shadowColor, shadowOffset = plateShadow
           {
             borderRadius: GLASS_RADIUS,
             overflow: 'hidden',
-            borderColor: glow ? 'rgba(180,220,255,0.6)' : 'rgba(140,180,255,0.25)',
-            borderWidth: glow ? 1.5 : 1,
-            shadowColor: glow ? '#7fb3ff' : 'transparent',
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: glow ? 0.6 : 0,
-            shadowRadius: glow ? 16 : 0,
-            elevation: glow ? 8 : 0,
+            borderColor: 'rgba(140,180,255,0.25)',
+            borderWidth: 1,
           },
           style,
         ]}
       >
-        <BlurView
-          intensity={glow ? 60 : 35}
-          tint="dark"
-          style={{
-            backgroundColor: glow ? 'rgba(40,60,140,0.28)' : 'rgba(40,60,140,0.18)',
-          }}
-        >
-          {children}
-        </BlurView>
+        {cardContent}
       </View>
     );
   }
