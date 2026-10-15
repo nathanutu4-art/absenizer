@@ -418,7 +418,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <Plate glass style={styles.hoursPlate}>
+        <Plate glass glow style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />

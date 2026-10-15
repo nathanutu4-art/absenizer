@@ -12,6 +12,8 @@ interface Props {
   shadowOffset?: number;
   /** True = render sebagai kartu kaca (tanpa warna cream). */
   glass?: boolean;
+  /** True = kartu kaca dengan border glowing (seperti referensi UI). */
+  glow?: boolean;
 }
 
 /**
@@ -19,8 +21,9 @@ interface Props {
  * bayangan keras offset tanpa blur.
  * Mode liquid-glass: kartu kaca tanpa bayangan (border terang, radius 18).
  * Prop glass: kartu kaca individual tanpa mengubah theme global.
+ * Prop glow: blur lebih kuat + border glowing.
  */
-export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false }: Props) {
+export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false, glow = false }: Props) {
   if (isGlassMode() || glass) {
     // Dibaca saat render agar mengikuti setGlassMode().
     // Mengikuti style glass icon tab: subtle, transparan.
@@ -30,17 +33,22 @@ export function Plate({ children, style, shadowColor, shadowOffset = plateShadow
           {
             borderRadius: GLASS_RADIUS,
             overflow: 'hidden',
-            borderColor: 'rgba(140,180,255,0.25)',
-            borderWidth: 1,
+            borderColor: glow ? 'rgba(180,220,255,0.6)' : 'rgba(140,180,255,0.25)',
+            borderWidth: glow ? 1.5 : 1,
+            shadowColor: glow ? '#7fb3ff' : 'transparent',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: glow ? 0.6 : 0,
+            shadowRadius: glow ? 16 : 0,
+            elevation: glow ? 8 : 0,
           },
           style,
         ]}
       >
         <BlurView
-          intensity={35}
+          intensity={glow ? 60 : 35}
           tint="dark"
           style={{
-            backgroundColor: 'rgba(40,60,140,0.18)',
+            backgroundColor: glow ? 'rgba(40,60,140,0.28)' : 'rgba(40,60,140,0.18)',
           }}
         >
           {children}
