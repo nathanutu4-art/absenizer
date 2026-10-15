@@ -44,6 +44,5 @@
   "version": "0.1.0",
   "overrides": {
     "react-dom": "19.2.3"
-  },
-  "packageManager": "npm@10.9.2"
+  }
 }
