@@ -186,7 +186,7 @@ export default function TeamScreen() {
         style={StyleSheet.absoluteFill}
       />
       {/* Partikel interaktif */}
-      <ParticleBackground ref={particles} count={40} />
+      <ParticleBackground ref={particles} />
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
       <Text style={styles.header}>Info Karyawan</Text>

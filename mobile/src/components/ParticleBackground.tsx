@@ -4,7 +4,7 @@ import React, {
   useImperativeHandle,
   useRef,
 } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, View } from 'react-native';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 
@@ -29,15 +29,19 @@ interface Props {
 
 /**
  * ParticleBackground — partikel melayang yang bereaksi terhadap sentuhan.
- * Posisi di-set via left/top (bukan transform) agar pasti ter-render.
- * Animasi 60fps via requestAnimationFrame + setNativeProps (tanpa re-render).
+ * Optimasi performa:
+ * - 30fps (bukan 60fps) — cukup untuk drift lembut.
+ * - Loop tidur saat semua partikel nyaris diam; bangun saat impulse().
+ * - Transform GPU via setNativeProps (tanpa layout, tanpa re-render).
  */
 export const ParticleBackground = forwardRef<ParticleHandle, Props>(function ParticleBackground(
-  { count = 40 },
+  { count = 24 },
   ref,
 ) {
   const views = useRef<Array<View | null>>([]);
   const parts = useRef<Particle[]>([]);
+  const running = useRef(false);
+  const raf = useRef(0);
 
   // Inisialisasi partikel sekali.
   if (parts.current.length === 0) {
@@ -54,8 +58,50 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
     }
   }
 
+  const step = () => {
+    const arr = parts.current;
+    let maxSpeed = 0;
+    for (let i = 0; i < arr.length; i++) {
+      const p = arr[i];
+      p.vx *= 0.97;
+      p.vy *= 0.97;
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < -10) p.x = SW + 10;
+      if (p.x > SW + 10) p.x = -10;
+      if (p.y < -10) p.y = SH + 10;
+      if (p.y > SH + 10) p.y = -10;
+
+      const sp = Math.abs(p.vx) + Math.abs(p.vy);
+      if (sp > maxSpeed) maxSpeed = sp;
+
+      const v = views.current[i];
+      if (v) {
+        v.setNativeProps({
+          transform: [{ translateX: p.x }, { translateY: p.y }],
+        });
+      }
+    }
+    // Tidur bila semua partikel nyaris diam (hemat baterai/CPU).
+    if (maxSpeed < 0.02) {
+      running.current = false;
+      return;
+    }
+    raf.current = setTimeout(() => {
+      requestAnimationFrame(step);
+    }, 33) as unknown as number; // ~30fps
+  };
+
+  const wake = () => {
+    if (!running.current) {
+      running.current = true;
+      requestAnimationFrame(step);
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     impulse(x, y, vx, vy, radius = 160) {
+      let moved = false;
       for (const p of parts.current) {
         const dx = p.x - x;
         const dy = p.y - y;
@@ -70,45 +116,28 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
             p.vx = (p.vx / sp) * max;
             p.vy = (p.vy / sp) * max;
           }
+          moved = true;
         }
       }
+      if (moved) wake();
     },
   }));
 
+  // Mulai dengan gerakan awal lembut, lalu tidur otomatis.
   useEffect(() => {
-    let t = 0;
-    let raf = 0;
-    const tick = () => {
-      t += 1;
-      const arr = parts.current;
-      for (let i = 0; i < arr.length; i++) {
-        const p = arr[i];
-        p.vx += Math.sin(t / 90 + p.phase) * 0.008;
-        p.vy += Math.cos(t / 110 + p.phase) * 0.008;
-        p.vx *= 0.985;
-        p.vy *= 0.985;
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < -10) p.x = SW + 10;
-        if (p.x > SW + 10) p.x = -10;
-        if (p.y < -10) p.y = SH + 10;
-        if (p.y > SH + 10) p.y = -10;
-
-        const v = views.current[i];
-        if (v) {
-          v.setNativeProps({
-            transform: [{ translateX: p.x }, { translateY: p.y }],
-          });
-        }
-      }
-      raf = requestAnimationFrame(tick);
+    wake();
+    return () => {
+      running.current = false;
+      clearTimeout(raf.current);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <View style={styles.layer} pointerEvents="none">
+    <View
+      pointerEvents="none"
+      style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+    >
       {parts.current.map((p, i) => (
         <View
           key={`p-${i}`}
@@ -130,14 +159,4 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
       ))}
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  layer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
 });
