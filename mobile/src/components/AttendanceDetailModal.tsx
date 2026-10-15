@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import { Plate } from './Plate';
 import { Skeleton } from './Skeleton';
 import { StampChip } from './StampChip';
@@ -145,6 +146,45 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                       label="Clock Out"
                       value={locationText(row.clockOutLat, row.clockOutLng)}
                     />
+                    {row.clockInLat != null && row.clockInLng != null ? (
+                      <MapView
+                        style={styles.map}
+                        initialRegion={{
+                          latitude: row.clockInLat,
+                          longitude: row.clockInLng,
+                          latitudeDelta: 0.01,
+                          longitudeDelta: 0.01,
+                        }}
+                        scrollEnabled={false}
+                        zoomEnabled={false}
+                      >
+                        <Marker
+                          coordinate={{
+                            latitude: row.clockInLat,
+                            longitude: row.clockInLng,
+                          }}
+                          title="Clock In"
+                          pinColor={colors.green}
+                        />
+                        {row.clockOutLat != null &&
+                        row.clockOutLng != null ? (
+                          <Marker
+                            coordinate={{
+                              latitude: row.clockOutLat,
+                              longitude: row.clockOutLng,
+                            }}
+                            title="Clock Out"
+                            pinColor={colors.orange}
+                          />
+                        ) : null}
+                      </MapView>
+                    ) : (
+                      <View style={styles.photoEmpty}>
+                        <Text style={styles.photoEmptyText}>
+                          Lokasi tidak tercatat
+                        </Text>
+                      </View>
+                    )}
 
                     {/* Foto selfie */}
                     <Text style={styles.sectionLabel}>Foto Selfie</Text>
@@ -170,7 +210,13 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                         </View>
                         <View style={styles.photoBox}>
                           <Text style={styles.photoLabel}>Pulang</Text>
-                          {selfieOutUrl ? (
+                          {row.clockOut === '-' ? (
+                            <View style={styles.photoEmpty}>
+                              <Text style={styles.photoEmptyText}>
+                                Belum clock out
+                              </Text>
+                            </View>
+                          ) : selfieOutUrl ? (
                             <Image
                               resizeMode="cover"
                               source={{ uri: selfieOutUrl }}
@@ -293,5 +339,12 @@ const styles = StyleSheet.create({
     color: colors.ink3,
     fontFamily: fontFamily('500'),
     fontSize: 12,
+  },
+  map: {
+    borderColor: colors.etch,
+    borderWidth: 1.5,
+    height: 180,
+    marginTop: spacing.sm,
+    width: '100%',
   },
 });
