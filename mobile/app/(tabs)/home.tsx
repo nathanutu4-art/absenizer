@@ -14,6 +14,7 @@ import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { Skeleton } from '../../src/components/Skeleton';
+import { BG_ENGRAVING } from '../../src/data/bgEngraving';
 import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import type { IconName } from '../../src/data/icons';
@@ -299,6 +300,16 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.root}>
+      {/* Background tekstur ukiran + layer putih 0.1 */}
+      <Image
+        source={{ uri: BG_ENGRAVING }}
+        resizeMode="cover"
+        style={StyleSheet.absoluteFill}
+      />
+      <View
+        pointerEvents="none"
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.1)' }]}
+      />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO */}
         <GradientView kind="hero" style={styles.hero}>
@@ -565,7 +576,7 @@ export default function HomeScreen() {
 const CLOCK_DIAMETER = 224;
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: colors.bg, flex: 1 },
+  root: { backgroundColor: 'transparent', flex: 1 },
   scroll: { paddingBottom: spacing.xl },
   hero: {
     paddingBottom: spacing.lg,
