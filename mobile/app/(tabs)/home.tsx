@@ -561,7 +561,7 @@ export default function HomeScreen() {
   );
 }
 
-const CLOCK_DIAMETER = 224;
+const CLOCK_DIAMETER = 180;
 
 const styles = StyleSheet.create({
   root: { backgroundColor: '#0154b3', flex: 1 },
