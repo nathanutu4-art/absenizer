@@ -31,7 +31,7 @@ export function Plate({ children, style, shadowColor, shadowOffset = plateShadow
         intensity={glow ? 90 : 35}
         tint={glow ? 'light' : 'dark'}
         style={{
-          backgroundColor: glow ? 'rgba(255,255,255,0.03)' : 'rgba(40,60,140,0.18)',
+          backgroundColor: glow ? 'rgba(255,255,255,0.01)' : 'rgba(40,60,140,0.18)',
           borderRadius: GLASS_RADIUS,
         }}
       >
