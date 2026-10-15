@@ -39,11 +39,6 @@ export default function OpeningScreen() {
         {/* Konten dalam kartu kaca */}
         <Plate glass style={styles.sheet}>
           <View style={styles.sheetBody}>
-            <View style={styles.dots}>
-              <View style={[styles.dot, styles.dotActive]} />
-              <View style={styles.dot} />
-              <View style={styles.dot} />
-            </View>
             <StampChip
               backgroundColor="rgba(246,140,80,0.25)"
               color="#ffffff"
@@ -113,22 +108,9 @@ const styles = StyleSheet.create({
   sheetBody: {
     padding: spacing.lg,
   },
-  dots: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginBottom: spacing.md,
-  },
-  dot: {
-    backgroundColor: '#cccccc',
-    borderRadius: 4,
-    height: 8,
-    marginRight: 8,
-    width: 8,
-  },
-  dotActive: { backgroundColor: '#051230', width: 24 },
   kicker: { marginBottom: spacing.sm },
   headline: {
-    color: '#051230',
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 30,
     lineHeight: 37,
@@ -137,7 +119,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   sub: {
-    color: '#333333',
+    color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('400'),
     fontSize: 14,
     lineHeight: 21,
