@@ -55,6 +55,7 @@ export default function OpeningScreen() {
             >
               Masuk
             </PlateButton>
+            <Text style={styles.footer}>© 2026 Prasta Corp. All rights reserved.</Text>
           </View>
         </Plate>
       </SafeAreaView>
@@ -124,4 +125,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   cta: { marginTop: spacing.xl * 1.5 },
+  footer: {
+    color: 'rgba(255,255,255,0.5)',
+    fontFamily: fontFamily('400'),
+    fontSize: 11,
+    marginTop: spacing.lg,
+    textAlign: 'center',
+  },
 });
