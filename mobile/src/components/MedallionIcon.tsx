@@ -64,7 +64,7 @@ const GLYPH_COLORS: Record<MedallionVariant, string> = {
   ink: colors.etch,
   cream: colors.surface,
   wadaIndigo: colors.etch,
-  wadaApricot: colors.etch,
+  wadaApricot: '#ffffff',
   wadaOlive: colors.etch,
 };
 
