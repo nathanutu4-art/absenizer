@@ -302,6 +302,12 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.root}>
+      {/* Background gambar dashboard */}
+      <Image
+        source={{ uri: 'https://fzvphovffdhewpcjqjje.supabase.co/storage/v1/object/public/avatars/bg-dashboard.jpg' }}
+        resizeMode="cover"
+        style={StyleSheet.absoluteFill}
+      />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
         <View style={styles.hero}>
