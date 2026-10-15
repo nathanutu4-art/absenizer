@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../../src/components/Avatar';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { Skeleton } from '../../src/components/Skeleton';
 import { StampChip } from '../../src/components/StampChip';
 import { EMPLOYEES, type Employee } from '../../src/data/demo';
@@ -157,7 +157,9 @@ export default function TeamScreen() {
   );
 
   return (
-    <ScreenContainer>
+    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.scroll}>
       <Text style={styles.header}>Info Karyawan</Text>
       <View style={styles.doubleRule}>
         <View style={styles.ruleThick} />
@@ -202,7 +204,7 @@ export default function TeamScreen() {
       <SectionTitle label="Ulang Tahun Bulan Ini" />
       <View style={styles.birthGrid}>
         {birthdays.map((b) => (
-          <Plate key={b.employee.id} style={styles.birthCard}>
+          <Plate glass key={b.employee.id} style={styles.birthCard}>
             <View style={styles.birthInner}>
               <Avatar
                 gradientId={b.employee.gradientId}
@@ -236,14 +238,14 @@ export default function TeamScreen() {
         <TextInput
           onChangeText={setQuery}
           placeholder="Cari nama karyawan…"
-          placeholderTextColor={colors.ink3}
+          placeholderTextColor="rgba(255,255,255,0.5)"
           style={styles.searchInput}
           value={query}
         />
       </View>
       {dirLoading ? (
         <>
-          <Plate style={styles.dirWrap}>
+          <Plate glass style={styles.dirWrap}>
             <View style={styles.dirRow}>
               <Skeleton width={46} height={46} borderRadius={2} />
               <View style={styles.dirSkeletonText}>
@@ -252,7 +254,7 @@ export default function TeamScreen() {
               </View>
             </View>
           </Plate>
-          <Plate style={styles.dirWrap}>
+          <Plate glass style={styles.dirWrap}>
             <View style={styles.dirRow}>
               <Skeleton width={46} height={46} borderRadius={2} />
               <View style={styles.dirSkeletonText}>
@@ -261,7 +263,7 @@ export default function TeamScreen() {
               </View>
             </View>
           </Plate>
-          <Plate style={styles.dirWrap}>
+          <Plate glass style={styles.dirWrap}>
             <View style={styles.dirRow}>
               <Skeleton width={46} height={46} borderRadius={2} />
               <View style={styles.dirSkeletonText}>
@@ -275,7 +277,7 @@ export default function TeamScreen() {
       directory.map((e) => {
         const stamp = STAMP_COLORS[STATUS_TONE[e.status]];
         return (
-          <Plate key={e.id} style={styles.dirWrap}>
+          <Plate glass key={e.id} style={styles.dirWrap}>
             <TouchableOpacity
               onPress={() => router.push(`/employee/${e.id}`)}
               style={styles.dirRow}
@@ -299,7 +301,9 @@ export default function TeamScreen() {
         );
       })
       )}
-    </ScreenContainer>
+      </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -323,18 +327,21 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
+  safe: { flex: 1 },
+  scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   header: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 22,
     marginTop: spacing.sm,
   },
   doubleRule: { marginTop: spacing.sm },
-  ruleThick: { backgroundColor: colors.ink, height: 3 },
-  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3 },
+  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
   sectionHead: { marginBottom: spacing.sm, marginTop: spacing.lg },
   sectionTitle: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 15,
     marginBottom: 6,
@@ -347,7 +354,7 @@ const styles = StyleSheet.create({
     padding: 3,
   },
   awayName: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 11,
     marginTop: 6,
@@ -359,14 +366,14 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
   legendDot: {
-    borderColor: colors.etch,
+    borderColor: 'rgba(255,255,255,0.4)',
     borderRadius: 6,
     borderWidth: 1.5,
     height: 12,
     width: 12,
   },
   legendLabel: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginLeft: 6,
@@ -379,32 +386,32 @@ const styles = StyleSheet.create({
   birthCard: { width: '31%' },
   birthInner: { alignItems: 'center', padding: spacing.sm },
   birthName: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('700'),
     fontSize: 12,
     marginTop: 6,
   },
-  birthDate: { color: colors.ink2, fontFamily: fontFamily('500'), fontSize: 11 },
+  birthDate: { color: 'rgba(255,255,255,0.75)', fontFamily: fontFamily('500'), fontSize: 11 },
   agePill: {
-    backgroundColor: colors.paper2,
-    borderColor: colors.etch,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.4)',
     borderRadius: 2,
     borderWidth: 1.5,
     marginTop: 6,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
-  ageText: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 11 },
+  ageText: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 11 },
   countdown: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 10.5,
     marginTop: 4,
   },
   searchRow: {
     alignItems: 'center',
-    backgroundColor: colors.plate,
-    borderColor: colors.etch,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.4)',
     borderRadius: 3,
     borderWidth: 1.5,
     flexDirection: 'row',
@@ -414,7 +421,7 @@ const styles = StyleSheet.create({
   },
   searchMedal: { marginRight: 8 },
   searchInput: {
-    color: colors.ink,
+    color: '#ffffff',
     flex: 1,
     fontFamily: fontFamily('400'),
     fontSize: 14,
@@ -429,9 +436,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   dirText: { flex: 1, marginLeft: 12 },
-  dirName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  dirName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   dirPos: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
