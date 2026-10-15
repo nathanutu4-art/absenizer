@@ -2,11 +2,9 @@ import { router } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
 import { Plate } from '../src/components/Plate';
 import { PlateButton } from '../src/components/PlateButton';
 import { StampChip } from '../src/components/StampChip';
-import { BG_ABSTRACT } from '../src/data/bgAbstract';
 import { ILLUSTRATION_OPENING } from '../src/data/illustrations-opening';
 import { LOGO_MARK } from '../src/data/logo-mark';
 import { colors, fontFamily, serifFamily, spacing } from '../src/theme';
@@ -18,25 +16,6 @@ import { colors, fontFamily, serifFamily, spacing } from '../src/theme';
 export default function OpeningScreen() {
   return (
     <View style={styles.root}>
-      {/* Background abstrak indigo */}
-      <Image
-        source={{ uri: BG_ABSTRACT }}
-        resizeMode="cover"
-        style={StyleSheet.absoluteFill}
-      />
-      {/* Layer blur + diffuse */}
-      <BlurView
-        intensity={80}
-        tint="dark"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(20,25,60,0.45)' }]}
-      />
-      {/* Layer putih diffuse 20% */}
-      <BlurView
-        intensity={50}
-        tint="light"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
-      />
-
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
         {/* Brand */}
         <View style={styles.brandRow}>
@@ -92,7 +71,7 @@ export default function OpeningScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: 'transparent', flex: 1 },
+  root: { backgroundColor: '#ffffff', flex: 1 },
   safe: { flex: 1 },
   brandRow: {
     alignItems: 'center',
@@ -106,13 +85,10 @@ const styles = StyleSheet.create({
     width: 44,
   },
   brandText: {
-    color: '#ffffff',
+    color: '#051230',
     fontFamily: serifFamily('800'),
     fontSize: 22,
     marginLeft: 10,
-    textShadowColor: 'rgba(77,127,255,0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
   },
   artWrap: {
     alignItems: 'center',
@@ -143,16 +119,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   dot: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: '#cccccc',
     borderRadius: 4,
     height: 8,
     marginRight: 8,
     width: 8,
   },
-  dotActive: { backgroundColor: '#ffffff', width: 24 },
+  dotActive: { backgroundColor: '#051230', width: 24 },
   kicker: { marginBottom: spacing.sm },
   headline: {
-    color: '#ffffff',
+    color: '#051230',
     fontFamily: serifFamily('800'),
     fontSize: 30,
     lineHeight: 37,
@@ -161,7 +137,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   sub: {
-    color: 'rgba(255,255,255,0.8)',
+    color: '#333333',
     fontFamily: fontFamily('400'),
     fontSize: 14,
     lineHeight: 21,
