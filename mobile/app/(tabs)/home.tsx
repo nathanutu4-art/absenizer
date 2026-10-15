@@ -342,7 +342,7 @@ export default function HomeScreen() {
                 onPress={() => showToast('Belum ada notifikasi baru.')}
                 style={styles.bell}
               >
-                <MedallionIcon glyph="bell" size={44} variant="ink" />
+                <MedallionIcon glyph="bell" size={44} variant="cream" />
                 <View style={styles.bellDot} />
               </TouchableOpacity>
             </View>
@@ -352,7 +352,7 @@ export default function HomeScreen() {
               <View style={styles.statusInner}>
                 <StampChip
                   backgroundColor={clock.phase === 'in' ? colors.paper2 : colors.greenBg}
-                  color={clock.phase === 'in' ? '#ffffff' : colors.green}
+                  color={clock.phase === 'in' ? '#000000' : colors.green}
                 >
                   {statusChip}
                 </StampChip>
@@ -426,14 +426,14 @@ export default function HomeScreen() {
         <Plate glass style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
-              <MedallionIcon glyph="clock" size={40} variant="ink" />
+              <MedallionIcon glyph="clock" size={40} variant="cream" />
               <Text style={styles.hoursText}>
                 {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
               </Text>
             </View>
             <View style={styles.hoursDivider} />
             <View style={styles.hoursRow}>
-              <MedallionIcon glyph="map_pin" size={40} variant="ink" />
+              <MedallionIcon glyph="map_pin" size={40} variant="cream" />
               <Text style={styles.hoursText}>
                 WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
               </Text>
@@ -572,7 +572,7 @@ const CLOCK_DIAMETER = 224;
 
 const styles = StyleSheet.create({
   root: { backgroundColor: 'transparent', flex: 1 },
-  scroll: { paddingBottom: spacing.xl },
+  scroll: { paddingBottom: 130 },
   hero: {
     paddingBottom: spacing.lg,
   },
@@ -698,9 +698,9 @@ const styles = StyleSheet.create({
     width: 200,
   },
   clockMedal: {
-    left: (CLOCK_DIAMETER - 112) / 2,
+    left: (CLOCK_DIAMETER - 88) / 2,
     position: 'absolute',
-    top: (CLOCK_DIAMETER - 112) / 2,
+    top: (CLOCK_DIAMETER - 88) / 2 - 14,
   },
   clockTextWrap: {
     alignItems: 'center',
@@ -734,13 +734,13 @@ const styles = StyleSheet.create({
   hoursInner: { padding: spacing.md },
   hoursRow: { alignItems: 'center', flexDirection: 'row' },
   hoursText: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.85)',
     flex: 1,
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginLeft: 12,
   },
-  hoursDivider: { backgroundColor: colors.line, height: 1, marginVertical: spacing.sm },
+  hoursDivider: { backgroundColor: 'rgba(255,255,255,0.15)', height: 1, marginVertical: spacing.sm },
   shortcutGrid: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   shortcutLabel: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('600'),
     fontSize: 12,
     marginTop: 6,

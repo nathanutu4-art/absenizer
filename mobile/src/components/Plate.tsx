@@ -23,20 +23,15 @@ interface Props {
 export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false }: Props) {
   if (isGlassMode() || glass) {
     // Dibaca saat render agar mengikuti setGlassMode().
-    // Dark glassmorphism: BlurView + tint gelap + border neon halus.
+    // Mengikuti style glass icon tab: subtle, transparan.
     return (
       <View
         style={[
           {
             borderRadius: GLASS_RADIUS,
             overflow: 'hidden',
-            borderColor: 'rgba(140,180,255,0.35)',
-            borderWidth: 1.5,
-            shadowColor: '#4d7fff',
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.25,
-            shadowRadius: 16,
-            elevation: 6,
+            borderColor: 'rgba(140,180,255,0.25)',
+            borderWidth: 1,
           },
           style,
         ]}
@@ -45,7 +40,7 @@ export function Plate({ children, style, shadowColor, shadowOffset = plateShadow
           intensity={35}
           tint="dark"
           style={{
-            backgroundColor: 'rgba(40,50,100,0.25)',
+            backgroundColor: 'rgba(255,255,255,0.08)',
           }}
         >
           {children}
