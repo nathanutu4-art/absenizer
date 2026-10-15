@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { LiquidGlassCard } from '../../src/components/LiquidGlassCard';
@@ -202,6 +203,11 @@ export default function HomeScreen() {
 
   const pulse = useRef(new Animated.Value(0)).current;
 
+  // Partikel background interaktif.
+  const particles = useRef<ParticleHandle | null>(null);
+  const lastTouch = useRef<{ x: number; y: number } | null>(null);
+  const lastScrollY = useRef(0);
+
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
@@ -303,13 +309,46 @@ export default function HomeScreen() {
           ];
 
   return (
-    <View style={styles.root}>
+    <View
+      style={styles.root}
+      onTouchMove={(e) => {
+        const t = e.nativeEvent.touches[0];
+        if (!t) return;
+        const last = lastTouch.current;
+        if (last) {
+          // Kecepatan swipe → dorong partikel di sekitar jari.
+          const vx = (t.pageX - last.x) * 0.6;
+          const vy = (t.pageY - last.y) * 0.6;
+          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
+        }
+        lastTouch.current = { x: t.pageX, y: t.pageY };
+      }}
+      onTouchEnd={() => {
+        lastTouch.current = null;
+      }}
+    >
       {/* Background gradient: indigo gelap → biru */}
       <LinearGradient
         colors={['#051230', '#0156b3']}
         style={StyleSheet.absoluteFill}
       />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      {/* Partikel interaktif */}
+      <ParticleBackground ref={particles} />
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        onScroll={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const vy = (y - lastScrollY.current) * 0.8;
+          lastScrollY.current = y;
+          // Scroll mendorong partikel berlawanan arah (efek parallax).
+          if (Math.abs(vy) > 0.5) {
+            particles.current?.impulse(
+              200, y + 400, 0, -vy, 500,
+            );
+          }
+        }}
+        scrollEventThrottle={16}
+      >
         {/* HERO — transparan, teks terang */}
         <View style={styles.hero}>
           <SafeAreaView edges={['top']}>
