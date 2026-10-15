@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { GradientView } from '../../src/components/GradientView';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { LiquidGlassCard } from '../../src/components/LiquidGlassCard';
@@ -303,7 +303,12 @@ export default function HomeScreen() {
           ];
 
   return (
-    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
+    <View style={styles.root}>
+      {/* Background gradient: indigo gelap → biru */}
+      <LinearGradient
+        colors={['#051230', '#0156b3']}
+        style={StyleSheet.absoluteFill}
+      />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
         <View style={styles.hero}>
@@ -374,6 +379,12 @@ export default function HomeScreen() {
 
         {/* MEDALI CLOCK */}
         <Animated.View style={[styles.clockWrap, { transform: [{ scale: popIn }] }]}>
+          {/* Glow radial di belakang jam */}
+          <View style={styles.clockGlow} pointerEvents="none">
+            <View style={[styles.glowCircle, { width: 340, height: 340, borderRadius: 170, opacity: 0.10 }]} />
+            <View style={[styles.glowCircle, { width: 260, height: 260, borderRadius: 130, opacity: 0.13 }]} />
+            <View style={[styles.glowCircle, { width: 180, height: 180, borderRadius: 90, opacity: 0.16 }]} />
+          </View>
           <View style={styles.clockCenter}>
             <Animated.View
               style={[
@@ -637,6 +648,19 @@ const styles = StyleSheet.create({
   },
   timeDivider: { backgroundColor: colors.line, width: 1 },
   clockWrap: { alignItems: 'center', paddingTop: spacing.lg },
+  clockGlow: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: spacing.lg - 80,
+    left: 0,
+    right: 0,
+    height: 340,
+  },
+  glowCircle: {
+    backgroundColor: '#9dc4ff',
+    position: 'absolute',
+  },
   clockCenter: {
     alignItems: 'center',
     height: CLOCK_DIAMETER,
