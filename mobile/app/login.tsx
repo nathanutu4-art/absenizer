@@ -11,13 +11,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { VideoView, useVideoPlayer } from 'expo-video';
 import { AppIcon } from '../src/components/AppIcon';
 import { MedallionIcon } from '../src/components/MedallionIcon';
 import { Plate } from '../src/components/Plate';
 import { PlateButton } from '../src/components/PlateButton';
 import { StampChip } from '../src/components/StampChip';
 import { APP_VERSION, COMPANY_NAME } from '../src/data/demo';
-import { ILLUSTRATION_LOGIN } from '../src/data/illustrations-login';
 import { supabase } from '../src/lib/supabase';
 import { isSupabaseConfigured, resolveMyRole } from '../src/lib/db';
 import { SESSION_KEY, type DemoRole } from '../src/lib/session';
@@ -41,6 +41,16 @@ export default function LoginScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Video loop animasi
+  const player = useVideoPlayer(
+    'https://fzvphovffdhewpcjqjje.supabase.co/storage/v1/object/public/avatars/login-loop.mp4',
+    (p: any) => {
+      p.loop = true;
+      p.muted = true;
+      p.play();
+    }
+  );
 
   async function persistSession(
     userId: string,
@@ -136,11 +146,12 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          {/* Ilustrasi tanpa border */}
-          <Image
-            resizeMode="cover"
-            source={{ uri: ILLUSTRATION_LOGIN }}
-            style={styles.art}
+          {/* Video loop tanpa border */}
+          <VideoView
+            player={player}
+            contentFit="cover"
+            nativeControls={false}
+            style={styles.video}
           />
 
           {/* Form kaca */}
@@ -247,7 +258,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: '#f8f1df', flex: 1 },
+  root: { backgroundColor: '#0255b3', flex: 1 },
   safe: { flex: 1 },
   scroll: { padding: spacing.lg, paddingBottom: 40 },
   heroBody: {
@@ -255,14 +266,14 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   title: {
-    color: '#051230',
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 24,
     marginTop: spacing.md,
     textAlign: 'center',
   },
   subtitle: {
-    color: '#555555',
+    color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('400'),
     fontSize: 14,
     marginTop: 6,
@@ -272,6 +283,13 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 12,
     height: 150,
+    marginTop: spacing.lg,
+    width: '90%',
+  },
+  video: {
+    alignSelf: 'center',
+    borderRadius: 12,
+    height: 200,
     marginTop: spacing.lg,
     width: '90%',
   },
