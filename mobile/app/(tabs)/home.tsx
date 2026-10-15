@@ -309,7 +309,7 @@ export default function HomeScreen() {
       />
       {/* Layer putih blur opacity 0.5 di depan background */}
       <BlurView
-        intensity={60}
+        intensity={100}
         tint="light"
         style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.5)' }]}
       />
