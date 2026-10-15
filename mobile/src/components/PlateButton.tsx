@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Animated,
   StyleSheet,
@@ -45,8 +45,10 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
   // Mode liquid-glass: tombol kaca tanpa bayangan keras.
   // Saat ditekan: background jadi solid orange + halo border neon orange.
   const glowAnim = useRef(new Animated.Value(0)).current;
+  const [pressed, setPressed] = useState(false);
 
   const handlePressIn = () => {
+    setPressed(true);
     Animated.timing(glowAnim, {
       toValue: 1,
       duration: 100,
@@ -55,6 +57,7 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
   };
 
   const handlePressOut = () => {
+    setPressed(false);
     Animated.timing(glowAnim, {
       toValue: 0,
       duration: 200,
@@ -74,10 +77,7 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
         style={[
           styles.button,
           {
-            backgroundColor: glowAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [bg, '#f68c50'],
-            }),
+            backgroundColor: pressed ? '#f68c50' : bg,
             borderColor: 'rgba(255,255,255,0.35)',
             borderRadius: GLASS_RADIUS,
             borderWidth: 1,
