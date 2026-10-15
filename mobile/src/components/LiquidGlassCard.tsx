@@ -102,10 +102,10 @@ export function LiquidGlassCard({
       {/* 1. Halo glow — gradient menyebar ke luar card */}
       <LinearGradient
         colors={[
-          'rgba(77,127,255,0.65)', // indigo kiri-atas
-          'rgba(77,127,255,0.15)',
-          'rgba(246,140,80,0.15)',
-          'rgba(246,140,80,0.65)', // orange kanan-bawah
+          'rgba(77,127,255,0.9)', // indigo kiri-atas
+          'rgba(77,127,255,0.3)',
+          'rgba(246,140,80,0.3)',
+          'rgba(246,140,80,0.9)', // orange kanan-bawah
         ]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -121,23 +121,23 @@ export function LiquidGlassCard({
           onPressOut={handlePressOut}
           style={{ borderRadius }}
         >
-          {/* 2. Border glowing 2px — indigo kiri-atas → orange kanan-bawah */}
+          {/* 2. Border glowing 3px — indigo kiri-atas → orange kanan-bawah */}
           <LinearGradient
             colors={[
-              '#6d9bff', // indigo terang kiri-atas
-              'rgba(109,155,255,0.55)',
-              'rgba(246,140,80,0.55)',
-              '#f68c50', // orange terang kanan-bawah
+              '#7dabff', // indigo terang kiri-atas
+              'rgba(125,171,255,0.75)',
+              'rgba(246,140,80,0.75)',
+              '#ff9a5c', // orange terang kanan-bawah
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.rim, { borderRadius, padding: 2 }]}
+            style={[styles.rim, { borderRadius, padding: 3 }]}
           >
           {/* 3. Frosted backdrop */}
           <BlurView
             intensity={intensity}
             tint={tint}
-            style={[styles.blur, { borderRadius: borderRadius - 2 }]}
+            style={[styles.blur, { borderRadius: borderRadius - 3 }]}
           >
             {/* 3b. Overlay warna (mis. tint indigo) */}
             {overlayColor !== 'transparent' ? (
