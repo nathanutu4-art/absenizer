@@ -23,17 +23,13 @@ export default function OpeningScreen() {
           <Text style={styles.brandText}>Absenizer</Text>
         </View>
 
-        {/* Ilustrasi dalam kartu kaca */}
+        {/* Ilustrasi tanpa border */}
         <View style={styles.artWrap}>
-          <Plate glass style={styles.frame}>
-            <View style={styles.frameInner}>
-              <Image
-                resizeMode="cover"
-                source={{ uri: ILLUSTRATION_OPENING }}
-                style={styles.art}
-              />
-            </View>
-          </Plate>
+          <Image
+            resizeMode="cover"
+            source={{ uri: ILLUSTRATION_OPENING }}
+            style={styles.art}
+          />
         </View>
 
         {/* Konten dalam kartu kaca */}
@@ -67,7 +63,7 @@ export default function OpeningScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: '#051230', flex: 1 },
+  root: { backgroundColor: '#0151b0', flex: 1 },
   safe: { flex: 1 },
   brandRow: {
     alignItems: 'center',
