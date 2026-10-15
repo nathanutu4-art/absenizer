@@ -107,6 +107,7 @@ export default function TabsLayout() {
           fontFamily: fontFamily('600'),
           fontSize: 9.5,
           letterSpacing: 1,
+          marginTop: 4,
           textTransform: 'uppercase',
         },
         tabBarStyle: {
