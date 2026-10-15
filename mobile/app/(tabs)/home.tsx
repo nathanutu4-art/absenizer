@@ -636,7 +636,7 @@ const styles = StyleSheet.create({
     width: CLOCK_DIAMETER,
   },
   pulseRing: {
-    borderColor: colors.indigo,
+    borderColor: '#f68c50',
     borderRadius: 120,
     borderWidth: 2,
     height: 240,
