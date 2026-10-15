@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { GLASS_RADIUS, colors, isGlassMode, plateShadow, radius } from '../theme';
 
 interface Props {
@@ -22,25 +23,28 @@ interface Props {
 export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false }: Props) {
   if (isGlassMode() || glass) {
     // Dibaca saat render agar mengikuti setGlassMode().
-    // Glass yang tegas: terlihat di atas background terang maupun gelap.
+    // Glassmorphism beneran: BlurView + tint putih + border highlight.
     return (
       <View
         style={[
           {
-            backgroundColor: 'rgba(255,255,255,0.35)',
-            borderColor: 'rgba(255,255,255,0.65)',
             borderRadius: GLASS_RADIUS,
+            overflow: 'hidden',
+            borderColor: 'rgba(255,255,255,0.5)',
             borderWidth: 1.5,
-            shadowColor: '#051230',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.12,
-            shadowRadius: 12,
-            elevation: 4,
           },
           style,
         ]}
       >
-        {children}
+        <BlurView
+          intensity={40}
+          tint="light"
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.25)',
+          }}
+        >
+          {children}
+        </BlurView>
       </View>
     );
   }
