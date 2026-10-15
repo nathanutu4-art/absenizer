@@ -127,9 +127,9 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                       >
                         {row.status}
                       </StampChip>
-                      {row.flags.map((f) => (
+                      {row.flags.map((f, fi) => (
                         <StampChip
-                          key={f}
+                          key={`${f}-${fi}`}
                           color={colors.orange}
                           backgroundColor={colors.orangeBg}
                           style={styles.flagChip}
