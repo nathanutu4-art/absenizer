@@ -15,6 +15,7 @@ import { MedallionIcon, type MedallionVariant } from '../../src/components/Medal
 import { Plate } from '../../src/components/Plate';
 import { Skeleton } from '../../src/components/Skeleton';
 import { BG_ENGRAVING } from '../../src/data/bgEngraving';
+import { BlurView } from 'expo-blur';
 import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import type { IconName } from '../../src/data/icons';
@@ -300,15 +301,17 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Background tekstur ukiran + layer putih 0.1 */}
+      {/* Background tekstur ukiran */}
       <Image
         source={{ uri: BG_ENGRAVING }}
         resizeMode="cover"
         style={StyleSheet.absoluteFill}
       />
-      <View
-        pointerEvents="none"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.1)' }]}
+      {/* Layer putih blur opacity 0.5 di depan background */}
+      <BlurView
+        intensity={30}
+        tint="light"
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.5)' }]}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO */}
