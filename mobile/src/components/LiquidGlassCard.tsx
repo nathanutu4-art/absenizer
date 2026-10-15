@@ -121,7 +121,7 @@ export function LiquidGlassCard({
           onPressOut={handlePressOut}
           style={{ borderRadius }}
         >
-          {/* 2. Border glowing 3px — indigo kiri-atas → orange kanan-bawah */}
+          {/* 2. Border glowing 2px — indigo kiri-atas → orange kanan-bawah */}
           <LinearGradient
             colors={[
               '#7dabff', // indigo terang kiri-atas
@@ -131,13 +131,13 @@ export function LiquidGlassCard({
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={[styles.rim, { borderRadius, padding: 3 }]}
+            style={[styles.rim, { borderRadius, padding: 2 }]}
           >
           {/* 3. Frosted backdrop */}
           <BlurView
             intensity={intensity}
             tint={tint}
-            style={[styles.blur, { borderRadius: borderRadius - 3 }]}
+            style={[styles.blur, { borderRadius: borderRadius - 2 }]}
           >
             {/* 3b. Overlay warna (mis. tint indigo) */}
             {overlayColor !== 'transparent' ? (
@@ -174,7 +174,7 @@ export function LiquidGlassCard({
 }
 
 /** Seberapa jauh halo glow menyebar ke luar card */
-const GLOW_SPREAD = 10;
+const GLOW_SPREAD = 2;
 
 const styles = StyleSheet.create({
   shadow: {
