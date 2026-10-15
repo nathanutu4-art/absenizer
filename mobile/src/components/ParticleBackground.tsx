@@ -120,7 +120,7 @@ export const ParticleBackground = forwardRef<ParticleHandle, Props>(function Par
             width: p.size,
             height: p.size,
             borderRadius: p.size / 2,
-            backgroundColor: '#ffffff',
+            backgroundColor: '#051230',
             opacity: p.opacity,
           }}
         />

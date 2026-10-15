@@ -327,9 +327,9 @@ export default function HomeScreen() {
         lastTouch.current = null;
       }}
     >
-      {/* Background gradient: indigo gelap → biru */}
+      {/* Background: putih dengan sentuhan gradient lembut */}
       <LinearGradient
-        colors={['#051230', '#0156b3']}
+        colors={['#ffffff', '#eef3fa']}
         style={StyleSheet.absoluteFill}
       />
       {/* Partikel interaktif */}
@@ -420,9 +420,9 @@ export default function HomeScreen() {
         <Animated.View style={[styles.clockWrap, { transform: [{ scale: popIn }] }]}>
           {/* Glow radial di belakang jam */}
           <View style={styles.clockGlow} pointerEvents="none">
-            <View style={[styles.glowCircle, { width: 340, height: 340, borderRadius: 170, opacity: 0.10 }]} />
-            <View style={[styles.glowCircle, { width: 260, height: 260, borderRadius: 130, opacity: 0.13 }]} />
-            <View style={[styles.glowCircle, { width: 180, height: 180, borderRadius: 90, opacity: 0.16 }]} />
+            <View style={[styles.glowCircle, { width: 340, height: 340, borderRadius: 170 }]} />
+            <View style={[styles.glowCircle, { width: 260, height: 260, borderRadius: 130, opacity: 0.08 }]} />
+            <View style={[styles.glowCircle, { width: 180, height: 180, borderRadius: 90, opacity: 0.10 }]} />
           </View>
           <View style={styles.clockCenter}>
             <Animated.View
@@ -607,7 +607,7 @@ export default function HomeScreen() {
 const CLOCK_DIAMETER = 180;
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: '#0154b3', flex: 1 },
+  root: { backgroundColor: '#ffffff', flex: 1 },
   scroll: { paddingBottom: 130 },
   hero: {
     paddingBottom: spacing.lg,
@@ -635,19 +635,19 @@ const styles = StyleSheet.create({
   greetingRow: { alignItems: 'center', flexDirection: 'row', flex: 1 },
   greetingText: { marginLeft: 12, flex: 1 },
   greetingSmall: {
-    color: 'rgba(255,255,255,0.85)',
+    color: colors.ink2,
     fontFamily: serifFamily('700'),
     fontSize: 12,
   },
   greetingName: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 26,
     marginTop: 2,
   },
   nameSkeleton: { marginTop: 4 },
   dateLine: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink2,
     fontFamily: 'serif',
     fontSize: 12,
     fontStyle: 'italic',
@@ -671,16 +671,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   statusDate: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink2,
     fontFamily: 'serif',
     fontSize: 12,
     fontStyle: 'italic',
   },
   timeCols: { flexDirection: 'row', marginTop: spacing.md },
   timeCol: { alignItems: 'center', flex: 1 },
-  timeValue: { color: '#ffffff', fontFamily: fontFamily('800'), fontSize: 18 },
+  timeValue: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 18 },
   timeLabel: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 11,
     marginTop: 2,
@@ -697,8 +697,9 @@ const styles = StyleSheet.create({
     height: 340,
   },
   glowCircle: {
-    backgroundColor: '#9dc4ff',
+    backgroundColor: '#051230',
     position: 'absolute',
+    opacity: 0.06,
   },
   clockCenter: {
     alignItems: 'center',
@@ -722,7 +723,7 @@ const styles = StyleSheet.create({
   clockPlate: {
     alignItems: 'center',
     backgroundColor: 'transparent',
-    borderColor: 'rgba(140,180,255,0.5)',
+    borderColor: 'rgba(5,18,48,0.15)',
     borderRadius: CLOCK_DIAMETER / 2,
     borderWidth: 2,
     height: CLOCK_DIAMETER,
@@ -753,7 +754,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   clockLabel: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 19,
     marginTop: 6,
@@ -762,13 +763,13 @@ const styles = StyleSheet.create({
     textShadowRadius: 12,
   },
   clockTime: {
-    color: 'rgba(255,255,255,0.85)',
+    color: colors.ink2,
     fontFamily: fontFamily('600'),
     fontSize: 13,
     marginTop: 2,
   },
   clockHint: {
-    color: 'rgba(255,255,255,0.7)',
+    color: colors.ink3,
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: spacing.md,
@@ -777,13 +778,13 @@ const styles = StyleSheet.create({
   hoursInner: { padding: spacing.md },
   hoursRow: { alignItems: 'center', flexDirection: 'row' },
   hoursText: {
-    color: 'rgba(255,255,255,0.85)',
+    color: colors.ink2,
     flex: 1,
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginLeft: 12,
   },
-  hoursDivider: { backgroundColor: 'rgba(255,255,255,0.15)', height: 1, marginVertical: spacing.sm },
+  hoursDivider: { backgroundColor: colors.line, height: 1, marginVertical: spacing.sm },
   shortcutGrid: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -798,7 +799,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   shortcutLabel: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: fontFamily('600'),
     fontSize: 12,
     marginTop: 6,
@@ -810,7 +811,7 @@ const styles = StyleSheet.create({
   sectionInner: { padding: spacing.lg },
   sectionHead: { marginBottom: spacing.sm },
   sectionTitle: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 16,
     textShadowColor: 'rgba(77,127,255,0.5)',
@@ -818,16 +819,16 @@ const styles = StyleSheet.create({
     textShadowRadius: 8,
   },
   doubleRule: { marginTop: 6 },
-  ruleThick: { backgroundColor: 'rgba(255,255,255,0.5)', height: 3 },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
   ruleGap: { height: 3 },
-  ruleThin: { backgroundColor: 'rgba(255,255,255,0.3)', height: 1 },
+  ruleThin: { backgroundColor: colors.line, height: 1 },
   quotaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
   },
-  quotaLabel: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
-  quotaValue: { color: 'rgba(255,255,255,0.8)', fontFamily: fontFamily('400'), fontSize: 13 },
+  quotaLabel: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
+  quotaValue: { color: colors.ink2, fontFamily: fontFamily('400'), fontSize: 13 },
   quotaSkeleton: { marginVertical: 6 },
   linkText: {
     color: colors.wadaApricot,
@@ -842,12 +843,12 @@ const styles = StyleSheet.create({
   },
   activityRow: { alignItems: 'center', flexDirection: 'row', paddingVertical: 8 },
   activityText: { flex: 1, marginLeft: 12, marginRight: 8 },
-  activityTitle: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
+  activityTitle: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
   activitySub: {
-    color: 'rgba(255,255,255,0.65)',
+    color: colors.ink3,
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
   },
-  activityDivider: { backgroundColor: 'rgba(255,255,255,0.15)', height: 1, marginLeft: 50 },
+  activityDivider: { backgroundColor: colors.line, height: 1, marginLeft: 50 },
 });
