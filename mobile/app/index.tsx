@@ -2,7 +2,6 @@ import { router } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Plate } from '../src/components/Plate';
 import { PlateButton } from '../src/components/PlateButton';
 import { StampChip } from '../src/components/StampChip';
 import { ILLUSTRATION_OPENING } from '../src/data/illustrations-opening';
@@ -32,8 +31,8 @@ export default function OpeningScreen() {
           />
         </View>
 
-        {/* Konten dalam kartu kaca */}
-        <Plate glass style={styles.sheet}>
+        {/* Konten dalam kartu putih */}
+        <View style={[styles.sheet, styles.whiteSheet]}>
           <View style={styles.sheetBody}>
             <StampChip
               backgroundColor="rgba(246,140,80,0.25)"
@@ -58,7 +57,7 @@ export default function OpeningScreen() {
             <View style={styles.spacerUp} />
             <Text style={styles.footer}>© 2026 Prasta Corp. All rights reserved.</Text>
           </View>
-        </Plate>
+        </View>
       </SafeAreaView>
     </View>
   );
@@ -104,22 +103,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginTop: 'auto',
   },
+  whiteSheet: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
   sheetBody: {
     padding: spacing.lg,
     paddingBottom: 30,
   },
   kicker: { marginBottom: spacing.sm },
   headline: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 30,
     lineHeight: 37,
-    textShadowColor: 'rgba(77,127,255,0.5)',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
   },
   sub: {
-    color: 'rgba(255,255,255,0.85)',
+    color: colors.ink2,
     fontFamily: fontFamily('400'),
     fontSize: 14,
     lineHeight: 21,
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
   cta: { marginTop: spacing.xl * 2.2 },
   spacerUp: { height: 58 },
   footer: {
-    color: 'rgba(255,255,255,0.5)',
+    color: colors.ink3,
     fontFamily: fontFamily('400'),
     fontSize: 11,
     marginTop: 'auto',
