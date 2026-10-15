@@ -42,13 +42,20 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
   const [selfieInUrl, setSelfieInUrl] = useState<string | null>(null);
   const [selfieOutUrl, setSelfieOutUrl] = useState<string | null>(null);
   const [photoLoading, setPhotoLoading] = useState(false);
+  // MapView di dalam Modal Android kadang render kosong bila dimount
+  // bersamaan dengan animasi modal. Tunda render peta sampai modal stabil.
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     let alive = true;
     setSelfieInUrl(null);
     setSelfieOutUrl(null);
+    setMapReady(false);
     if (!row) return;
     setPhotoLoading(true);
+    const t = setTimeout(() => {
+      if (alive) setMapReady(true);
+    }, 400);
     (async () => {
       const [inUrl, outUrl] = await Promise.all([
         getSelfieSignedUrl(row.clockInSelfiePath),
@@ -61,6 +68,7 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
     })();
     return () => {
       alive = false;
+      clearTimeout(t);
     };
   }, [row]);
 
@@ -147,37 +155,41 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                       value={locationText(row.clockOutLat, row.clockOutLng)}
                     />
                     {row.clockInLat != null && row.clockInLng != null ? (
-                      <MapView
-                        style={styles.map}
-                        initialRegion={{
-                          latitude: row.clockInLat,
-                          longitude: row.clockInLng,
-                          latitudeDelta: 0.01,
-                          longitudeDelta: 0.01,
-                        }}
-                        scrollEnabled={false}
-                        zoomEnabled={false}
-                      >
-                        <Marker
-                          coordinate={{
+                      mapReady ? (
+                        <MapView
+                          style={styles.map}
+                          initialRegion={{
                             latitude: row.clockInLat,
                             longitude: row.clockInLng,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
                           }}
-                          title="Clock In"
-                          pinColor={colors.green}
-                        />
-                        {row.clockOutLat != null &&
-                        row.clockOutLng != null ? (
+                          scrollEnabled={false}
+                          zoomEnabled={false}
+                        >
                           <Marker
                             coordinate={{
-                              latitude: row.clockOutLat,
-                              longitude: row.clockOutLng,
+                              latitude: row.clockInLat,
+                              longitude: row.clockInLng,
                             }}
-                            title="Clock Out"
-                            pinColor={colors.orange}
+                            title="Clock In"
+                            pinColor={colors.green}
                           />
-                        ) : null}
-                      </MapView>
+                          {row.clockOutLat != null &&
+                          row.clockOutLng != null ? (
+                            <Marker
+                              coordinate={{
+                                latitude: row.clockOutLat,
+                                longitude: row.clockOutLng,
+                              }}
+                              title="Clock Out"
+                              pinColor={colors.orange}
+                            />
+                          ) : null}
+                        </MapView>
+                      ) : (
+                        <Skeleton width="100%" height={180} borderRadius={2} />
+                      )
                     ) : (
                       <View style={styles.photoEmpty}>
                         <Text style={styles.photoEmptyText}>
