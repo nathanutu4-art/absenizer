@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
   },
   clockPlate: {
     alignItems: 'center',
-    backgroundColor: 'rgba(30,40,80,0.4)',
+    backgroundColor: '#0156b3',
     borderColor: 'rgba(140,180,255,0.5)',
     borderRadius: CLOCK_DIAMETER / 2,
     borderWidth: 2,
