@@ -20,29 +20,34 @@ function tabIcon(name: IconName) {
   return ({ focused }: { focused: boolean }) => (
     <View style={[styles.iconGlass, focused && styles.iconGlassActive]}>
       {focused ? (
-        <MedallionIcon glyph={name} size={36} variant="ink" />
+        <AppIcon color="#ffffff" name={name} size={26} />
       ) : (
-        <AppIcon color="#000000" name={name} size={24} />
+        <AppIcon color="rgba(255,255,255,0.65)" name={name} size={24} />
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  /** Wrapper kaca untuk setiap ikon tab. */
+  /** Wrapper kaca gelap untuk setiap ikon tab. */
   iconGlass: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderColor: 'rgba(255,255,255,0.45)',
-    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(140,180,255,0.25)',
+    borderRadius: 16,
     borderWidth: 1,
-    height: 48,
+    height: 44,
     justifyContent: 'center',
-    width: 48,
+    width: 44,
   },
   iconGlassActive: {
-    backgroundColor: 'rgba(255,255,255,0.45)',
-    borderColor: 'rgba(255,255,255,0.7)',
+    backgroundColor: 'rgba(120,170,255,0.25)',
+    borderColor: 'rgba(140,180,255,0.6)',
+    shadowColor: '#4d7fff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 4,
   },
 });
 
@@ -102,21 +107,30 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: '#ffffff',
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.65)',
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.55)',
         tabBarLabelStyle: {
           fontFamily: fontFamily('600'),
-          fontSize: 9.5,
+          fontSize: 9,
           letterSpacing: 1,
-          marginTop: 9,
+          marginTop: 2,
           textTransform: 'uppercase',
         },
         tabBarStyle: {
-          backgroundColor: glass ? 'rgba(20,16,40,0.55)' : '#0057ba',
-          borderTopColor: glass ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)',
-          borderTopWidth: glass ? 1 : 1.5,
-          height: 80,
-          paddingBottom: 8,
-          paddingTop: 12,
+          backgroundColor: 'rgba(20,30,70,0.65)',
+          borderColor: 'rgba(140,180,255,0.35)',
+          borderRadius: 28,
+          borderWidth: 1.5,
+          height: 76,
+          marginBottom: 16,
+          marginHorizontal: 16,
+          paddingBottom: 6,
+          paddingTop: 10,
+          position: 'absolute',
+          shadowColor: '#4d7fff',
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.3,
+          shadowRadius: 20,
+          elevation: 8,
         },
       }}
     >

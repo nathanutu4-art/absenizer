@@ -307,20 +307,15 @@ export default function HomeScreen() {
         resizeMode="cover"
         style={StyleSheet.absoluteFill}
       />
-      {/* Layer putih blur opacity 0.5 di depan background */}
+      {/* Layer gelap blur di depan background (dark glassmorphism) */}
       <BlurView
-        intensity={100}
-        tint="light"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.5)' }]}
+        intensity={60}
+        tint="dark"
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(10,15,40,0.55)' }]}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
-        {/* HERO */}
-        <GradientView kind="hero" style={styles.hero}>
-          <Image
-            source={{ uri: HATCH_TILE }}
-            resizeMode="repeat"
-            style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
-          />
+        {/* HERO — transparan, teks terang */}
+        <View style={styles.hero}>
           <SafeAreaView edges={['top']}>
             <View style={styles.heroTop}>
               <View style={styles.greetingRow}>
@@ -382,7 +377,7 @@ export default function HomeScreen() {
               </View>
             </Plate>
           </SafeAreaView>
-        </GradientView>
+        </View>
 
         {/* MEDALI CLOCK */}
         <Animated.View style={[styles.clockWrap, { transform: [{ scale: popIn }] }]}>
@@ -634,7 +629,7 @@ const styles = StyleSheet.create({
   statusInner: { padding: spacing.md },
   timeCols: { flexDirection: 'row', marginTop: spacing.md },
   timeCol: { alignItems: 'center', flex: 1 },
-  timeValue: { color: colors.ink, fontFamily: fontFamily('800'), fontSize: 18 },
+  timeValue: { color: '#ffffff', fontFamily: fontFamily('800'), fontSize: 18 },
   timeLabel: {
     color: colors.ink2,
     fontFamily: fontFamily('500'),
@@ -702,19 +697,22 @@ const styles = StyleSheet.create({
     right: 0,
   },
   clockLabel: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 19,
     marginTop: 6,
+    textShadowColor: 'rgba(77,127,255,0.6)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 12,
   },
   clockTime: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('600'),
     fontSize: 13,
     marginTop: 2,
   },
   clockHint: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.7)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: spacing.md,
@@ -756,9 +754,12 @@ const styles = StyleSheet.create({
   sectionInner: { padding: spacing.lg },
   sectionHead: { marginBottom: spacing.sm },
   sectionTitle: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 16,
+    textShadowColor: 'rgba(77,127,255,0.5)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   doubleRule: { marginTop: 6 },
   ruleThick: { backgroundColor: colors.ink, height: 3 },
@@ -785,7 +786,7 @@ const styles = StyleSheet.create({
   },
   activityRow: { alignItems: 'center', flexDirection: 'row', paddingVertical: 8 },
   activityText: { flex: 1, marginLeft: 12, marginRight: 8 },
-  activityTitle: { color: colors.ink, fontFamily: fontFamily('600'), fontSize: 13 },
+  activityTitle: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
   activitySub: {
     color: colors.ink3,
     fontFamily: fontFamily('400'),

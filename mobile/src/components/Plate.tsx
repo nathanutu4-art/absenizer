@@ -23,24 +23,29 @@ interface Props {
 export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false }: Props) {
   if (isGlassMode() || glass) {
     // Dibaca saat render agar mengikuti setGlassMode().
-    // Glassmorphism beneran: BlurView + tint putih + border highlight.
+    // Dark glassmorphism: BlurView + tint gelap + border neon halus.
     return (
       <View
         style={[
           {
             borderRadius: GLASS_RADIUS,
             overflow: 'hidden',
-            borderColor: 'rgba(255,255,255,0.5)',
+            borderColor: 'rgba(140,180,255,0.35)',
             borderWidth: 1.5,
+            shadowColor: '#4d7fff',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.25,
+            shadowRadius: 16,
+            elevation: 6,
           },
           style,
         ]}
       >
         <BlurView
-          intensity={40}
-          tint="light"
+          intensity={50}
+          tint="dark"
           style={{
-            backgroundColor: 'rgba(255,255,255,0.25)',
+            backgroundColor: 'rgba(30,40,80,0.35)',
           }}
         >
           {children}
