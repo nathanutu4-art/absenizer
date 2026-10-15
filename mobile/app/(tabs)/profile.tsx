@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
-import { GradientView } from '../../src/components/GradientView';
+import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
 import { StampChip } from '../../src/components/StampChip';
@@ -53,6 +54,11 @@ export default function ProfileScreen() {
   const [confirmPass, setConfirmPass] = useState('');
   const [pwBusy, setPwBusy] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  // Partikel background interaktif (seperti dashboard).
+  const particles = useRef<ParticleHandle | null>(null);
+  const lastTouch = useRef<{ x: number; y: number } | null>(null);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     let alive = true;
@@ -134,10 +140,46 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
+    <View
+      style={styles.root}
+      onTouchMove={(e) => {
+        const t = e.nativeEvent.touches[0];
+        if (!t) return;
+        const last = lastTouch.current;
+        if (last) {
+          // Kecepatan swipe → dorong partikel di sekitar jari.
+          const vx = (t.pageX - last.x) * 0.6;
+          const vy = (t.pageY - last.y) * 0.6;
+          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
+        }
+        lastTouch.current = { x: t.pageX, y: t.pageY };
+      }}
+      onTouchEnd={() => {
+        lastTouch.current = null;
+      }}
+    >
+      {/* Background: putih dengan sentuhan gradient lembut */}
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Partikel interaktif */}
+      <ParticleBackground ref={particles} count={40} />
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <GradientView kind="hero" style={styles.hero}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        onScroll={(e) => {
+          const y = e.nativeEvent.contentOffset.y;
+          const vy = (y - lastScrollY.current) * 0.8;
+          lastScrollY.current = y;
+          // Scroll mendorong partikel berlawanan arah (efek parallax).
+          if (Math.abs(vy) > 0.5) {
+            particles.current?.impulse(200, y + 400, 0, -vy, 500);
+          }
+        }}
+        scrollEventThrottle={16}
+      >
+        <View style={styles.hero}>
           <Image
             source={{ uri: HATCH_TILE }}
             resizeMode="repeat"
@@ -157,8 +199,8 @@ export default function ProfileScreen() {
                 <Text style={styles.position}>{me.position}</Text>
                 <Text style={styles.empNo}>{me.employeeNo}</Text>
                 <StampChip
-                  color="#ffffff"
-                  backgroundColor="rgba(255,255,255,0.14)"
+                  color={colors.wadaIndigo}
+                  backgroundColor="rgba(5,18,48,0.08)"
                   style={styles.statusChip}
                 >
                   AKTIF • WFO
@@ -166,7 +208,7 @@ export default function ProfileScreen() {
               </View>
             </View>
           </View>
-        </GradientView>
+        </View>
 
         <View style={styles.body}>
           {loading ? (
@@ -242,7 +284,7 @@ export default function ProfileScreen() {
                       setPwMsg(null);
                     }}
                     placeholder="Kata sandi baru (min. 6 karakter)"
-                    placeholderTextColor={'rgba(255,255,255,0.5)'}
+                    placeholderTextColor="#9aa3b5"
                     secureTextEntry
                     style={styles.pwInput}
                     value={newPass}
@@ -253,7 +295,7 @@ export default function ProfileScreen() {
                       setPwMsg(null);
                     }}
                     placeholder="Ulangi kata sandi baru"
-                    placeholderTextColor={'rgba(255,255,255,0.5)'}
+                    placeholderTextColor="#9aa3b5"
                     secureTextEntry
                     style={styles.pwInput}
                     value={confirmPass}
@@ -295,16 +337,14 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: { backgroundColor: '#ffffff', flex: 1 },
   safe: { flex: 1 },
   scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   hero: {
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
     paddingBottom: spacing.lg,
   },
   headerTitle: {
-    color: '#fff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 20,
     paddingBottom: spacing.sm,
@@ -331,15 +371,15 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
   },
   profileText: { flex: 1, marginLeft: spacing.md },
-  name: { color: '#fff', fontFamily: serifFamily('800'), fontSize: 22 },
+  name: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 22 },
   position: {
-    color: 'rgba(255,255,255,0.85)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: 2,
   },
   empNo: {
-    color: 'rgba(255,255,255,0.7)',
+    color: colors.ink3,
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: 2,
@@ -348,27 +388,27 @@ const styles = StyleSheet.create({
   body: { paddingTop: spacing.md },
   kvWrap: { marginBottom: spacing.sm },
   loadingText: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 14,
     marginVertical: spacing.md,
     textAlign: 'center',
   },
   kvRow: { paddingHorizontal: spacing.md, paddingVertical: 10 },
-  kvLabel: { color: 'rgba(255,255,255,0.7)', fontFamily: fontFamily('500'), fontSize: 12 },
+  kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12 },
   kvValue: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: fontFamily('600'),
     fontSize: 14,
     marginTop: 3,
   },
   picWrap: { marginTop: spacing.sm },
   pwInput: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderColor: 'rgba(255,255,255,0.35)',
+    backgroundColor: '#f2f5fa',
+    borderColor: '#d5dce8',
     borderRadius: 4,
     borderWidth: 1.5,
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: fontFamily('500'),
     fontSize: 14,
     marginTop: spacing.sm,
@@ -382,7 +422,7 @@ const styles = StyleSheet.create({
   },
   pwBtn: { marginTop: spacing.md },
   pwNote: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink2,
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: spacing.xs,
@@ -390,18 +430,18 @@ const styles = StyleSheet.create({
   picInner: { padding: spacing.lg },
   sectionHead: { marginBottom: spacing.sm },
   cardTitle: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 15,
     marginBottom: 6,
   },
-  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3 },
-  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: colors.ink, height: 3 },
+  ruleThin: { backgroundColor: colors.line, height: 1, marginTop: 3 },
   picRow: { alignItems: 'center', flexDirection: 'row' },
   picText: { flex: 1, marginLeft: 12 },
-  picName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
+  picName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
   picPos: {
-    color: 'rgba(255,255,255,0.8)',
+    color: colors.ink2,
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
