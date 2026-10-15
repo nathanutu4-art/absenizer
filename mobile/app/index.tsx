@@ -122,5 +122,5 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginTop: 10,
   },
-  cta: { marginTop: spacing.lg },
+  cta: { marginTop: spacing.xl * 1.5 },
 });
