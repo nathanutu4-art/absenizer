@@ -399,7 +399,7 @@ export default function HomeScreen() {
               />
               {/* Ring glow luar */}
               <View style={styles.clockGlowRing} />
-              <SketchClock size={250} style={styles.clockMedal} />
+              <SketchClock size={160} style={styles.clockMedal} />
               <View style={styles.clockTextWrap}>
                 <Text style={styles.clockLabel}>{clockLabel}</Text>
                 <Text style={styles.clockTime}>{wib} WIB</Text>
@@ -561,7 +561,7 @@ export default function HomeScreen() {
   );
 }
 
-const CLOCK_DIAMETER = 280;
+const CLOCK_DIAMETER = 224;
 
 const styles = StyleSheet.create({
   root: { backgroundColor: '#0154b3', flex: 1 },
@@ -702,9 +702,9 @@ const styles = StyleSheet.create({
     width: 200,
   },
   clockMedal: {
-    left: (CLOCK_DIAMETER - 250) / 2,
+    left: (CLOCK_DIAMETER - 160) / 2,
     position: 'absolute',
-    top: (CLOCK_DIAMETER - 250) / 2 - 8,
+    top: (CLOCK_DIAMETER - 160) / 2 - 8,
   },
   clockTextWrap: {
     alignItems: 'center',
