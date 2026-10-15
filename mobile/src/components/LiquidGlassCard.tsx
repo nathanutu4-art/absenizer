@@ -34,11 +34,10 @@ type LiquidGlassCardProps = {
  * Aman di Expo Go (tanpa native module tambahan).
  *
  * Lapisan (dari bawah ke atas):
- *  1. Halo glow (gradient indigo kiri-atas → orange kanan-bawah, menyebar ke luar)
- *  2. Border gradient glowing 2px (indigo terang kiri-atas → orange terang kanan-bawah)
- *  3. BlurView frosted (intensity 40)
- *  4. Sheen diagonal (kilau cahaya melengkung)
- *  5. Konten
+ *  1. Drop shadow lembut
+ *  2. BlurView frosted (intensity 40)
+ *  3. Sheen diagonal halus (kilau cahaya)
+ *  4. Konten
  */
 export function LiquidGlassCard({
   children,
@@ -94,68 +93,40 @@ export function LiquidGlassCard({
     <Animated.View
       style={[
         styles.shadow,
-        { borderRadius: borderRadius + GLOW_SPREAD },
+        { borderRadius },
         { transform: [{ scale }] },
         style,
       ]}
     >
-      {/* 1. Halo glow — gradient menyebar ke luar card */}
-      <LinearGradient
-        colors={[
-          'rgba(77,127,255,0.9)', // indigo kiri-atas
-          'rgba(77,127,255,0.3)',
-          'rgba(246,140,80,0.3)',
-          'rgba(246,140,80,0.9)', // orange kanan-bawah
-        ]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[
-          StyleSheet.absoluteFill,
-          { borderRadius: borderRadius + GLOW_SPREAD },
-        ]}
-      />
-      <View style={{ padding: GLOW_SPREAD }}>
-        <CardWrapper
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          style={{ borderRadius }}
+      <CardWrapper
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={{ borderRadius }}
+      >
+        {/* 2. Frosted backdrop */}
+        <BlurView
+          intensity={intensity}
+          tint={tint}
+          style={[styles.blur, { borderRadius }]}
         >
-          {/* 2. Border glowing 2px — indigo kiri-atas → orange kanan-bawah */}
-          <LinearGradient
-            colors={[
-              '#7dabff', // indigo terang kiri-atas
-              'rgba(125,171,255,0.75)',
-              'rgba(246,140,80,0.75)',
-              '#ff9a5c', // orange terang kanan-bawah
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.rim, { borderRadius, padding: 2 }]}
-          >
-          {/* 3. Frosted backdrop */}
-          <BlurView
-            intensity={intensity}
-            tint={tint}
-            style={[styles.blur, { borderRadius: borderRadius - 2 }]}
-          >
-            {/* 3b. Overlay warna (mis. tint indigo) */}
+            {/* 2b. Overlay warna (mis. tint indigo) */}
             {overlayColor !== 'transparent' ? (
               <View
                 style={[StyleSheet.absoluteFill, { backgroundColor: overlayColor }]}
                 pointerEvents="none"
               />
             ) : null}
-            {/* 4. Liquid sheen diagonal */}
+            {/* 3. Liquid sheen diagonal — halus */}
             <Animated.View
               style={[StyleSheet.absoluteFill, { opacity: sheenOpacity }]}
               pointerEvents="none"
             >
               <LinearGradient
                 colors={[
-                  'rgba(255,255,255,0.35)', // atas-kiri
-                  'rgba(255,255,255,0.12)',
-                  'rgba(255,255,255,0.03)', // bawah-kanan
+                  'rgba(255,255,255,0.15)', // atas-kiri
+                  'rgba(255,255,255,0.05)',
+                  'rgba(255,255,255,0.01)', // bawah-kanan
                 ]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -163,30 +134,22 @@ export function LiquidGlassCard({
               />
             </Animated.View>
 
-            {/* 5. Konten */}
+            {/* 4. Konten */}
             <View style={[styles.content, contentStyle]}>{children}</View>
           </BlurView>
-        </LinearGradient>
       </CardWrapper>
-      </View>
     </Animated.View>
   );
 }
 
-/** Seberapa jauh halo glow menyebar ke luar card */
-const GLOW_SPREAD = 2;
-
 const styles = StyleSheet.create({
   shadow: {
-    // Depth — bayangan lembut menyebar (halo gradient di atas menangani glow warna)
+    // Depth — bayangan lembut menyebar
     shadowColor: '#051230',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.22,
     shadowRadius: 20,
     elevation: 8,
-  },
-  rim: {
-    overflow: 'hidden',
   },
   blur: {
     overflow: 'hidden',
