@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ParticleBackground, type ParticleHandle } from '../../src/components/ParticleBackground';
 import { Avatar } from '../../src/components/Avatar';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
@@ -62,6 +64,9 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 /** Pengajuan — Buat Baru / Sisa Kuota / Pengajuanku. */
 export default function RequestsScreen() {
   const [segment, setSegment] = useState<Segment>('baru');
+  // Partikel background interaktif (seperti dashboard).
+  const particles = useRef<ParticleHandle | null>(null);
+  const lastTouch = useRef<{ x: number; y: number } | null>(null);
   // Daftar "Pengajuanku": data real bila tersedia, demo saat memuat/kosong.
   const [requests, setRequests] = useState<LeaveRequest[]>(MY_REQUESTS);
   const [me, setMe] = useState<Employee | null>(null);
@@ -83,7 +88,30 @@ export default function RequestsScreen() {
   }, [reloadRequests]);
 
   return (
-    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
+    <View
+      style={styles.root}
+      onTouchMove={(e) => {
+        const t = e.nativeEvent.touches[0];
+        if (!t) return;
+        const last = lastTouch.current;
+        if (last) {
+          const vx = (t.pageX - last.x) * 0.6;
+          const vy = (t.pageY - last.y) * 0.6;
+          particles.current?.impulse(t.pageX, t.pageY, vx, vy);
+        }
+        lastTouch.current = { x: t.pageX, y: t.pageY };
+      }}
+      onTouchEnd={() => {
+        lastTouch.current = null;
+      }}
+    >
+      {/* Background putih dengan sentuhan gradient lembut */}
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Partikel interaktif */}
+      <ParticleBackground ref={particles} count={40} />
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
       <Text style={styles.header}>Pengajuan</Text>
@@ -221,7 +249,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
               >
                 <View style={styles.typeInner}>
                   <MedallionIcon glyph={c.icon} size={48} variant={c.variant} />
-                  <Text style={[styles.typeLabel, { color: active ? c.fg : '#ffffff' }]}>
+                  <Text style={[styles.typeLabel, { color: active ? c.fg : colors.ink }]}>
                     {TYPE_LABEL[t]}
                   </Text>
                   {active ? (
@@ -511,11 +539,11 @@ export function RequestRow({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
+  root: { backgroundColor: '#ffffff', flex: 1 },
   safe: { flex: 1 },
   scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   header: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 22,
     marginTop: spacing.sm,
@@ -523,13 +551,13 @@ const styles = StyleSheet.create({
   segmentWrap: { marginTop: spacing.md, marginBottom: spacing.sm },
   secWrap: { marginBottom: spacing.sm, marginTop: spacing.lg },
   secTitle: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 15,
     letterSpacing: 0.4,
   },
-  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3, marginTop: 6 },
-  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: colors.line, height: 3, marginTop: 6 },
+  ruleThin: { backgroundColor: colors.line, height: 1, marginTop: 3 },
   platePad: { padding: spacing.md },
   tabRow: { flexDirection: 'row', gap: spacing.sm },
   tabTouch: { flex: 1 },
@@ -542,7 +570,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-0.6deg' }],
   },
   tabActive: { backgroundColor: colors.etch, borderColor: colors.etchDeep },
-  tabIdle: { backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.4)' },
+  tabIdle: { backgroundColor: 'transparent', borderColor: '#d5dce8' },
   tabText: {
     fontFamily: fontFamily('700'),
     fontSize: 11,
@@ -550,7 +578,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   tabTextActive: { color: colors.surface },
-  tabTextIdle: { color: 'rgba(255,255,255,0.75)' },
+  tabTextIdle: { color: colors.ink2 },
   typeRow: { flexDirection: 'row', gap: spacing.sm },
   typeTouch: { flex: 1 },
   typePlate: { flex: 1 },
@@ -569,12 +597,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  halfLabel: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
-  halfHint: { color: 'rgba(255,255,255,0.7)', fontFamily: fontFamily('400'), fontSize: 12, marginTop: 2 },
+  halfLabel: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  halfHint: { color: colors.ink3, fontFamily: fontFamily('400'), fontSize: 12, marginTop: 2 },
   dateRow: { flexDirection: 'row', gap: spacing.sm },
   dateCol: { flex: 1 },
   fieldLabel: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('600'),
     fontSize: 12,
     marginBottom: 6,
@@ -582,10 +610,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   input: {
-    backgroundColor: colors.surface,
-    borderColor: 'rgba(255,255,255,0.4)',
-    borderRadius: 3,
-    borderWidth: 1.5,
+    backgroundColor: '#f2f5fa',
+    borderColor: '#d5dce8',
+    borderRadius: 12,
+    borderWidth: 1,
     color: colors.ink,
     fontFamily: fontFamily('400'),
     fontSize: 14,
@@ -613,9 +641,9 @@ const styles = StyleSheet.create({
   quotaPlate: { marginTop: spacing.md },
   quotaTop: { alignItems: 'center', flexDirection: 'row', marginBottom: 12 },
   quotaText: { flex: 1, marginLeft: 12 },
-  quotaTitle: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 16 },
+  quotaTitle: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 16 },
   quotaSub: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
@@ -623,7 +651,7 @@ const styles = StyleSheet.create({
   quotaNum: { fontFamily: serifFamily('800'), fontSize: 24 },
   hatchTrack: {
     backgroundColor: colors.paper2,
-    borderColor: 'rgba(255,255,255,0.5)',
+    borderColor: '#d5dce8',
     borderRadius: 3,
     borderWidth: 1.5,
     height: 14,
@@ -634,25 +662,25 @@ const styles = StyleSheet.create({
   usagePlate: { marginBottom: spacing.lg },
   usageRow: {
     alignItems: 'center',
-    borderBottomColor: 'rgba(255,255,255,0.25)',
+    borderBottomColor: colors.line,
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
-  usageLabel: { color: '#ffffff', fontFamily: fontFamily('500'), fontSize: 13 },
+  usageLabel: { color: colors.ink, fontFamily: fontFamily('500'), fontSize: 13 },
   reqPlate: { marginTop: spacing.sm },
   reqInner: { alignItems: 'center', flexDirection: 'row' },
   reqText: { flex: 1, marginLeft: 12 },
-  reqTitle: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 13.5 },
+  reqTitle: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 13.5 },
   reqSub: {
-    color: 'rgba(255,255,255,0.75)',
+    color: colors.ink2,
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
   },
   reqDate: {
-    color: 'rgba(255,255,255,0.7)',
+    color: colors.ink3,
     fontFamily: fontFamily('400'),
     fontSize: 11,
     marginTop: 2,
