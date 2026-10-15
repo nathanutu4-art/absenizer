@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AttendanceDetailModal } from '../../src/components/AttendanceDetailModal';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { Skeleton } from '../../src/components/Skeleton';
 import { StampChip } from '../../src/components/StampChip';
 import { HISTORY_ROWS, type HistoryRow } from '../../src/data/demo';
@@ -11,6 +11,8 @@ import { getMyAttendance } from '../../src/lib/db';
 import { calcDuration } from '../../src/lib/duration';
 import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
+
+const BG_DASHBOARD = 'https://fzvphovffdhewpcjqjje.supabase.co/storage/v1/object/public/avatars/bg-dashboard.jpg';
 
 const STATUS_TONE: Record<HistoryRow['status'], 'green' | 'yellow' | 'blue' | 'red'> = {
   Hadir: 'green',
@@ -94,7 +96,15 @@ export default function HistoryScreen() {
   );
 
   return (
-    <ScreenContainer>
+    <View style={styles.root}>
+      {/* Background gambar dashboard */}
+      <Image
+        source={{ uri: BG_DASHBOARD }}
+        resizeMode="cover"
+        style={StyleSheet.absoluteFill}
+      />
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.scroll}>
       {/* Tajuk arsip */}
       <View style={styles.headerRow}>
         <MedallionIcon glyph="clock" size={58} variant="wadaIndigo" />
@@ -114,7 +124,7 @@ export default function HistoryScreen() {
       {/* Strip ringkasan */}
       <View style={styles.summary}>
         {summary.map((s) => (
-          <Plate key={s.label} style={styles.cell}>
+          <Plate glass key={s.label} style={styles.cell}>
             <View style={styles.cellInner}>
               <Text style={styles.cellValue}>{s.value}</Text>
               <Text style={styles.cellLabel}>{s.label}</Text>
@@ -134,7 +144,7 @@ export default function HistoryScreen() {
         {loading ? (
           <>
             {[0, 1, 2].map((i) => (
-              <Plate key={i} style={styles.itemWrap}>
+              <Plate glass key={i} style={styles.itemWrap}>
                 <View style={styles.item}>
                   <View style={styles.dateBlock}>
                     <Skeleton width={30} height={24} />
@@ -156,7 +166,7 @@ export default function HistoryScreen() {
           const stamp = STAMP_COLORS[STATUS_TONE[row.status]];
           const duration = calcDuration(row.clockIn, row.clockOut);
           return (
-            <Plate key={row.id} style={styles.itemWrap}>
+            <Plate glass key={row.id} style={styles.itemWrap}>
               <TouchableOpacity
                 accessibilityRole="button"
                 activeOpacity={0.85}
@@ -208,7 +218,9 @@ export default function HistoryScreen() {
         row={selectedRow}
         onClose={() => setSelectedRow(null)}
       />
-    </ScreenContainer>
+      </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -223,6 +235,9 @@ function toneColor(tone: string): string {
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
+  safe: { flex: 1 },
+  scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   headerRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -230,19 +245,19 @@ const styles = StyleSheet.create({
   },
   headerText: { flex: 1, marginLeft: 12 },
   header: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 22,
   },
   month: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.8)',
     fontFamily: serifFamily('800'),
     fontSize: 14,
     marginTop: 2,
   },
   doubleRule: { marginTop: spacing.md },
-  ruleThick: { backgroundColor: colors.ink, height: 3 },
-  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3 },
+  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
   summary: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -251,12 +266,12 @@ const styles = StyleSheet.create({
   cell: { flex: 1 },
   cellInner: { alignItems: 'center', paddingVertical: 12 },
   cellValue: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 20,
   },
   cellLabel: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 10.5,
     marginTop: 2,
@@ -264,7 +279,7 @@ const styles = StyleSheet.create({
   cellBar: { borderRadius: 2, height: 3, marginTop: 8, width: 26 },
   list: { marginTop: spacing.md },
   emptyText: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.7)',
     fontFamily: fontFamily('500'),
     fontSize: 13.5,
     paddingVertical: spacing.lg,
@@ -277,11 +292,11 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   dateBlock: { alignItems: 'center', width: 44 },
-  dayNum: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 22 },
-  dateLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 11 },
+  dayNum: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 22 },
+  dateLabel: { color: 'rgba(255,255,255,0.7)', fontFamily: fontFamily('500'), fontSize: 11 },
   divider: {
     alignSelf: 'stretch',
-    borderColor: colors.line,
+    borderColor: 'rgba(255,255,255,0.25)',
     borderLeftWidth: 1,
     borderStyle: 'dashed',
     marginHorizontal: 12,
@@ -292,9 +307,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  itemTime: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  itemTime: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   durationText: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.7)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: 4,
@@ -303,7 +318,7 @@ const styles = StyleSheet.create({
   flagRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
   flagChip: { marginRight: 6, marginTop: 4 },
   detailLink: {
-    color: colors.indigo,
+    color: colors.wadaApricot,
     fontFamily: fontFamily('600'),
     fontSize: 12,
     marginTop: 8,
