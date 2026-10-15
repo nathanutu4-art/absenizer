@@ -80,8 +80,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: glass ? '#ffffff' : colors.ink,
-        tabBarInactiveTintColor: glass ? 'rgba(255,255,255,0.55)' : colors.ink3,
+        tabBarActiveTintColor: '#ffffff',
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.65)',
         tabBarLabelStyle: {
           fontFamily: fontFamily('600'),
           fontSize: 9.5,
@@ -89,9 +89,9 @@ export default function TabsLayout() {
           textTransform: 'uppercase',
         },
         tabBarStyle: {
-          backgroundColor: glass ? 'rgba(20,16,40,0.55)' : colors.bg,
-          borderTopColor: glass ? 'rgba(255,255,255,0.15)' : colors.ink,
-          borderTopWidth: glass ? 1 : 3,
+          backgroundColor: glass ? 'rgba(20,16,40,0.55)' : '#0057ba',
+          borderTopColor: glass ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)',
+          borderTopWidth: glass ? 1 : 1.5,
           height: 74,
           paddingBottom: 10,
           paddingTop: 6,

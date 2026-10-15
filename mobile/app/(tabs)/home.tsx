@@ -309,7 +309,7 @@ export default function HomeScreen() {
       />
       {/* Layer putih blur opacity 0.5 di depan background */}
       <BlurView
-        intensity={30}
+        intensity={60}
         tint="light"
         style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.5)' }]}
       />
@@ -320,11 +320,6 @@ export default function HomeScreen() {
             source={{ uri: HATCH_TILE }}
             resizeMode="repeat"
             style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
-          />
-          {/* Layer putih transparan 0.2 di atas biru hero */}
-          <View
-            pointerEvents="none"
-            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.2)' }]}
           />
           <SafeAreaView edges={['top']}>
             <View style={styles.heroTop}>
