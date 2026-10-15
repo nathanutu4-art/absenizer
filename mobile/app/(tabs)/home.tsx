@@ -14,7 +14,7 @@ import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { Skeleton } from '../../src/components/Skeleton';
-import { BG_ENGRAVING } from '../../src/data/bgEngraving';
+import { BG_ABSTRACT } from '../../src/data/bgAbstract';
 import { BlurView } from 'expo-blur';
 import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
@@ -282,36 +282,36 @@ export default function HomeScreen() {
   const shortcuts: { label: string; icon: IconName; route: string; variant: MedallionVariant }[] =
     role === 'karyawan'
       ? [
-          { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests', variant: 'wadaApricot' },
-          { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
-          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history', variant: 'wadaApricot' },
-          { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
+          { label: 'Pengajuan', icon: 'file_text', route: '/(tabs)/requests', variant: 'cream' },
+          { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'cream' },
+          { label: 'Riwayat', icon: 'clock', route: '/(tabs)/history', variant: 'cream' },
+          { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'cream' },
         ]
       : role === 'pic'
         ? [
             { label: 'Persetujuan', icon: 'check_circle', route: '/(tabs)/approvals', variant: 'wadaApricot' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
-            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'cream' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'cream' },
           ]
         : [
             { label: 'Ambil Alih', icon: 'repeat', route: '/(tabs)/takeover', variant: 'wadaOlive' },
-            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'wadaApricot' },
-            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'wadaApricot' },
+            { label: 'Tim', icon: 'users', route: '/(tabs)/team', variant: 'cream' },
+            { label: 'Profil', icon: 'user', route: '/(tabs)/profile', variant: 'cream' },
           ];
 
   return (
     <View style={styles.root}>
-      {/* Background tekstur ukiran */}
+      {/* Background abstrak indigo */}
       <Image
-        source={{ uri: BG_ENGRAVING }}
+        source={{ uri: BG_ABSTRACT }}
         resizeMode="cover"
         style={StyleSheet.absoluteFill}
       />
-      {/* Layer gelap blur di depan background (dark glassmorphism) */}
+      {/* Layer blur di depan background */}
       <BlurView
         intensity={40}
         tint="dark"
-        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(15,20,50,0.35)' }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(15,20,50,0.25)' }]}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* HERO — transparan, teks terang */}
@@ -529,7 +529,7 @@ export default function HomeScreen() {
                           : 'file_text'
                       }
                       size={38}
-                      variant="ink"
+                      variant="cream"
                     />
                     <View style={styles.activityText}>
                       <Text style={styles.activityTitle}>{a.title}</Text>
