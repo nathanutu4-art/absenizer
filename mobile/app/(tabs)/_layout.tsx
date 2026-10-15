@@ -114,9 +114,9 @@ export default function TabsLayout() {
           backgroundColor: glass ? 'rgba(20,16,40,0.55)' : '#0057ba',
           borderTopColor: glass ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)',
           borderTopWidth: glass ? 1 : 1.5,
-          height: 74,
-          paddingBottom: 10,
-          paddingTop: 6,
+          height: 80,
+          paddingBottom: 8,
+          paddingTop: 12,
         },
       }}
     >
