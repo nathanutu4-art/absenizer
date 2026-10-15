@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Image,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -8,11 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../../src/components/Avatar';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import { HATCH_TILE } from '../../src/data/medallions';
@@ -82,7 +83,9 @@ export default function RequestsScreen() {
   }, [reloadRequests]);
 
   return (
-    <ScreenContainer>
+    <View style={[styles.root, { backgroundColor: '#0156b3' }]}>
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.scroll}>
       <Text style={styles.header}>Pengajuan</Text>
       <View style={styles.segmentWrap}>
         <StampTabs onChange={setSegment} value={segment} />
@@ -91,7 +94,9 @@ export default function RequestsScreen() {
       {segment === 'baru' ? <NewRequestForm onSubmitted={reloadRequests} /> : null}
       {segment === 'kuota' ? <QuotaTab /> : null}
       {segment === 'riwayat' ? <MyRequestsTab requests={requests} employee={me} /> : null}
-    </ScreenContainer>
+      </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -210,13 +215,13 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
               onPress={() => setType(t)}
               style={styles.typeTouch}
             >
-              <Plate
+              <Plate glass
                 shadowColor={active ? c.fg : undefined}
                 style={styles.typePlate}
               >
                 <View style={styles.typeInner}>
                   <MedallionIcon glyph={c.icon} size={48} variant={c.variant} />
-                  <Text style={[styles.typeLabel, { color: active ? c.fg : colors.ink }]}>
+                  <Text style={[styles.typeLabel, { color: active ? c.fg : '#ffffff' }]}>
                     {TYPE_LABEL[t]}
                   </Text>
                   {active ? (
@@ -230,7 +235,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
       </View>
 
       {type === 'ijin' ? (
-        <Plate style={styles.halfPlate}>
+        <Plate glass style={styles.halfPlate}>
           <View style={styles.platePad}>
             <View style={styles.halfInner}>
             <View>
@@ -285,7 +290,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
             Surat Dokter <Text style={styles.required}>*wajib</Text>
           </SectionTitle>
           <TouchableOpacity onPress={() => setFile('surat-dokter.pdf')}>
-            <Plate>
+            <Plate glass>
               <View style={styles.uploadInner}>
                 <MedallionIcon glyph="paperclip" size={40} />
                 <Text style={styles.uploadText}>
@@ -297,7 +302,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
         </View>
       ) : null}
 
-      <Plate style={styles.infoPlate}>
+      <Plate glass style={styles.infoPlate}>
         <View style={styles.platePad}>
           <View style={styles.bannerRow}>
             <MedallionIcon glyph="info" size={40} />
@@ -309,7 +314,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
       </Plate>
 
       {error ? (
-        <Plate style={styles.errorPlate}>
+        <Plate glass style={styles.errorPlate}>
           <View style={styles.platePad}>
             <View style={styles.bannerRow}>
               <MedallionIcon glyph="alert_triangle" size={40} />
@@ -400,7 +405,7 @@ function QuotaTab() {
         const c = TYPE_CARD[q.type];
         const progress = q.total !== null ? q.used / q.total : 0.25;
         return (
-          <Plate key={q.type} style={styles.quotaPlate}>
+          <Plate glass key={q.type} style={styles.quotaPlate}>
             <View style={styles.platePad}>
               <View style={styles.quotaTop}>
               <MedallionIcon glyph={c.icon} size={52} variant={c.variant} />
@@ -418,7 +423,7 @@ function QuotaTab() {
         );
       })}
       <SectionTitle>Riwayat Pemakaian</SectionTitle>
-      <Plate style={styles.usagePlate}>
+      <Plate glass style={styles.usagePlate}>
         <View style={styles.platePad}>
           <UsageRow label="Cuti • 10–12 Nov 2026" tone="menunggu" value="Menunggu" />
           <UsageRow label="Ijin • 3 Okt 2026" tone="disetujui" value="Disetujui" />
@@ -483,7 +488,7 @@ export function RequestRow({
   }
   const chip = REQ_STATUS_CHIP[request.status];
   return (
-    <Plate style={styles.reqPlate}>
+    <Plate glass style={styles.reqPlate}>
       <View style={styles.platePad}>
         <View style={styles.reqInner}>
           <Avatar gradientId={emp?.gradientId ?? '01'} name={emp?.name ?? '?'} size={44} shape="square" />
@@ -506,8 +511,11 @@ export function RequestRow({
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
+  safe: { flex: 1 },
+  scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   header: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 22,
     marginTop: spacing.sm,
@@ -515,13 +523,13 @@ const styles = StyleSheet.create({
   segmentWrap: { marginTop: spacing.md, marginBottom: spacing.sm },
   secWrap: { marginBottom: spacing.sm, marginTop: spacing.lg },
   secTitle: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 15,
     letterSpacing: 0.4,
   },
-  ruleThick: { backgroundColor: colors.ink, height: 3, marginTop: 6 },
-  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3, marginTop: 6 },
+  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
   platePad: { padding: spacing.md },
   tabRow: { flexDirection: 'row', gap: spacing.sm },
   tabTouch: { flex: 1 },
@@ -534,7 +542,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '-0.6deg' }],
   },
   tabActive: { backgroundColor: colors.etch, borderColor: colors.etchDeep },
-  tabIdle: { backgroundColor: 'transparent', borderColor: colors.ink3 },
+  tabIdle: { backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.4)' },
   tabText: {
     fontFamily: fontFamily('700'),
     fontSize: 11,
@@ -542,7 +550,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   tabTextActive: { color: colors.surface },
-  tabTextIdle: { color: colors.ink2 },
+  tabTextIdle: { color: 'rgba(255,255,255,0.75)' },
   typeRow: { flexDirection: 'row', gap: spacing.sm },
   typeTouch: { flex: 1 },
   typePlate: { flex: 1 },
@@ -561,12 +569,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  halfLabel: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
-  halfHint: { color: colors.ink2, fontFamily: fontFamily('400'), fontSize: 12, marginTop: 2 },
+  halfLabel: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
+  halfHint: { color: 'rgba(255,255,255,0.7)', fontFamily: fontFamily('400'), fontSize: 12, marginTop: 2 },
   dateRow: { flexDirection: 'row', gap: spacing.sm },
   dateCol: { flex: 1 },
   fieldLabel: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('600'),
     fontSize: 12,
     marginBottom: 6,
@@ -575,7 +583,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: colors.surface,
-    borderColor: colors.etch,
+    borderColor: 'rgba(255,255,255,0.4)',
     borderRadius: 3,
     borderWidth: 1.5,
     color: colors.ink,
@@ -605,9 +613,9 @@ const styles = StyleSheet.create({
   quotaPlate: { marginTop: spacing.md },
   quotaTop: { alignItems: 'center', flexDirection: 'row', marginBottom: 12 },
   quotaText: { flex: 1, marginLeft: 12 },
-  quotaTitle: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 16 },
+  quotaTitle: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 16 },
   quotaSub: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
@@ -615,7 +623,7 @@ const styles = StyleSheet.create({
   quotaNum: { fontFamily: serifFamily('800'), fontSize: 24 },
   hatchTrack: {
     backgroundColor: colors.paper2,
-    borderColor: colors.ink,
+    borderColor: 'rgba(255,255,255,0.5)',
     borderRadius: 3,
     borderWidth: 1.5,
     height: 14,
@@ -626,25 +634,25 @@ const styles = StyleSheet.create({
   usagePlate: { marginBottom: spacing.lg },
   usageRow: {
     alignItems: 'center',
-    borderBottomColor: colors.line,
+    borderBottomColor: 'rgba(255,255,255,0.25)',
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
-  usageLabel: { color: colors.ink, fontFamily: fontFamily('500'), fontSize: 13 },
+  usageLabel: { color: '#ffffff', fontFamily: fontFamily('500'), fontSize: 13 },
   reqPlate: { marginTop: spacing.sm },
   reqInner: { alignItems: 'center', flexDirection: 'row' },
   reqText: { flex: 1, marginLeft: 12 },
-  reqTitle: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 13.5 },
+  reqTitle: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 13.5 },
   reqSub: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
   },
   reqDate: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.7)',
     fontFamily: fontFamily('400'),
     fontSize: 11,
     marginTop: 2,
