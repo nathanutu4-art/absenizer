@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
+  Animated,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -42,6 +43,25 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
       children
     );
   // Mode liquid-glass: tombol kaca tanpa bayangan keras.
+  // Animasi loading bar putih kiri-ke-kanan saat disentuh.
+  const fillAnim = useRef(new Animated.Value(0)).current;
+
+  const handlePressIn = () => {
+    Animated.timing(fillAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(fillAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
   if (glass) {
     return (
       <TouchableOpacity
@@ -49,6 +69,8 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
         activeOpacity={0.85}
         disabled={disabled}
         onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         style={[
           styles.button,
           {
@@ -57,10 +79,24 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
             borderRadius: GLASS_RADIUS,
             borderWidth: 1,
             opacity: disabled ? 0.6 : 1,
+            overflow: 'hidden',
           },
           style,
         ]}
       >
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: 'rgba(255,255,255,0.35)',
+              width: fillAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+            },
+          ]}
+        />
         {label}
       </TouchableOpacity>
     );
