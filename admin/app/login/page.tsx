@@ -64,7 +64,6 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="card login-card">
         <div className="login-brand">
-          <span className="brand-mark">A</span>
           Absenizer
         </div>
         <div className="login-sub">Panel Admin HR — Login</div>
@@ -94,11 +93,6 @@ export default function LoginPage() {
             {busy ? "Memeriksa…" : "Masuk"}
           </button>
         </form>
-        <p className="hint">
-          HR pertama? Buat user di dashboard Supabase → <em>Authentication →
-          Users</em> → <em>Add user</em>, lalu login di sini untuk mendaftarkan
-          data HR-nya.
-        </p>
       </div>
     </div>
   );
