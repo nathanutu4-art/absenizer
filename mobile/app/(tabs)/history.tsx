@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AttendanceDetailModal } from '../../src/components/AttendanceDetailModal';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
@@ -11,8 +11,6 @@ import { getMyAttendance } from '../../src/lib/db';
 import { calcDuration } from '../../src/lib/duration';
 import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
-
-const BG_DASHBOARD = 'https://fzvphovffdhewpcjqjje.supabase.co/storage/v1/object/public/avatars/bg-dashboard.jpg';
 
 const STATUS_TONE: Record<HistoryRow['status'], 'green' | 'yellow' | 'blue' | 'red'> = {
   Hadir: 'green',
@@ -96,13 +94,7 @@ export default function HistoryScreen() {
   );
 
   return (
-    <View style={styles.root}>
-      {/* Background gambar dashboard */}
-      <Image
-        source={{ uri: BG_DASHBOARD }}
-        resizeMode="cover"
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={[styles.root, { backgroundColor: colors.wadaIndigo }]}>
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
       {/* Tajuk arsip */}
