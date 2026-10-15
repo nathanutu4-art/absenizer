@@ -28,7 +28,7 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
   const glass = isGlassMode() || glassProp;
   const bg =
     glass && variant === 'primary'
-      ? 'rgba(40,60,140,0.45)'
+      ? 'rgba(246,140,80,0.45)'
       : variant === 'primary'
         ? colors.indigoDark
         : variant === 'danger'
