@@ -397,8 +397,6 @@ export default function HomeScreen() {
                 tint="dark"
                 style={StyleSheet.absoluteFill}
               />
-              {/* Ring glow luar */}
-              <View style={styles.clockGlowRing} />
               <SketchClock size={160} style={styles.clockMedal} />
               <View style={styles.clockTextWrap}>
                 <Text style={styles.clockLabel}>{clockLabel}</Text>
@@ -678,18 +676,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 30,
     elevation: 10,
-  },
-  clockGlowRing: {
-    borderColor: 'rgba(246,140,80,0.6)',
-    borderRadius: (CLOCK_DIAMETER - 24) / 2,
-    borderWidth: 2,
-    height: CLOCK_DIAMETER - 24,
-    position: 'absolute',
-    width: CLOCK_DIAMETER - 24,
-    shadowColor: '#f68c50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.7,
-    shadowRadius: 16,
   },
   clockPlateOut: { borderColor: 'rgba(246,140,80,0.7)' },
   clockDimmed: { opacity: 0.55 },
