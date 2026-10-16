@@ -172,6 +172,13 @@ export default function ProfileScreen() {
           />
           <Text style={styles.headerTitle}>Profil</Text>
           <Plate solidColor="#1a56a8" style={styles.profileCard}>
+            {/* Background ilustrasi */}
+            <Image
+              source={require('../../assets/desk-illustration.jpg')}
+              style={StyleSheet.absoluteFill}
+              resizeMode="cover"
+            />
+            <View style={styles.cardOverlay} />
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
                 <Image
@@ -187,11 +194,6 @@ export default function ProfileScreen() {
                   <Text style={styles.outlineChipText}>AKTIF • WFO</Text>
                 </View>
               </View>
-              <Image
-                source={require('../../assets/desk-illustration.jpg')}
-                style={styles.deskIllustration}
-                resizeMode="cover"
-              />
             </View>
             <View style={styles.contactDivider} />
             <View style={styles.contactRow}>
@@ -377,6 +379,14 @@ const styles = StyleSheet.create({
     width: 68,
   },
   profileCard: { marginTop: spacing.sm },
+  cardOverlay: {
+    backgroundColor: 'rgba(26,86,168,0.55)',
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
   profileRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -384,12 +394,6 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   profileText: { flex: 1, marginLeft: spacing.md },
-  deskIllustration: {
-    borderRadius: 8,
-    height: 160,
-    marginLeft: spacing.sm,
-    width: 160,
-  },
   name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 28 },
   position: {
     color: 'rgba(255,255,255,0.9)',
