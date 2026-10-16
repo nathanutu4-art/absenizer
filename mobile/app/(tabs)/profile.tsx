@@ -386,9 +386,9 @@ const styles = StyleSheet.create({
   profileText: { flex: 1, marginLeft: spacing.md },
   deskIllustration: {
     borderRadius: 8,
-    height: 110,
+    height: 160,
     marginLeft: spacing.sm,
-    width: 90,
+    width: 130,
   },
   name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 28 },
   position: {
