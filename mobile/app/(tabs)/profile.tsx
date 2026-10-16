@@ -418,6 +418,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
     paddingVertical: 4,
+    paddingBottom: spacing.md,
   },
   contactItem: {
     alignItems: 'center',
