@@ -258,7 +258,7 @@ export default function ConfirmScreen() {
 
         <View style={styles.ctaWrap}>
           <PlateButton onPress={handleConfirm} variant="primary">
-            {busy ? 'Mengirim…' : 'Konfirmasi & Clock In'}
+            {busy ? 'Mengirim…' : isOut ? 'Konfirmasi & Clock Out' : 'Konfirmasi & Clock In'}
           </PlateButton>
         </View>
       </SafeAreaView>

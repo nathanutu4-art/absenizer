@@ -206,49 +206,79 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                       label="Clock Out"
                       value={locationText(row.clockOutLat, row.clockOutLng)}
                     />
-                    {row.clockInLat != null && row.clockInLng != null ? (
-                      mapReady ? (
-                        <MapView
-                          style={styles.map}
-                          initialRegion={{
-                            latitude: row.clockInLat,
-                            longitude: row.clockInLng,
-                            latitudeDelta: 0.01,
-                            longitudeDelta: 0.01,
-                          }}
-                          scrollEnabled={false}
-                          zoomEnabled={false}
-                        >
-                          <Marker
-                            coordinate={{
-                              latitude: row.clockInLat,
-                              longitude: row.clockInLng,
-                            }}
-                            title="Clock In"
-                            pinColor={colors.green}
-                          />
-                          {row.clockOutLat != null &&
-                          row.clockOutLng != null ? (
-                            <Marker
-                              coordinate={{
+                    {/* Peta clock in & clock out berdampingan */}
+                    <View style={styles.mapRow}>
+                      <View style={styles.mapBox}>
+                        <Text style={styles.photoLabel}>Masuk</Text>
+                        {row.clockInLat != null && row.clockInLng != null ? (
+                          mapReady ? (
+                            <MapView
+                              style={styles.mapSmall}
+                              initialRegion={{
+                                latitude: row.clockInLat,
+                                longitude: row.clockInLng,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                              }}
+                              scrollEnabled={false}
+                              zoomEnabled={false}
+                            >
+                              <Marker
+                                coordinate={{
+                                  latitude: row.clockInLat,
+                                  longitude: row.clockInLng,
+                                }}
+                                title="Clock In"
+                                pinColor={colors.green}
+                              />
+                            </MapView>
+                          ) : (
+                            <Skeleton width="100%" height={140} borderRadius={2} />
+                          )
+                        ) : (
+                          <View style={[styles.photoEmpty, styles.mapSmall]}>
+                            <Text style={styles.photoEmptyText}>
+                              Tidak tercatat
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      <View style={styles.mapBox}>
+                        <Text style={styles.photoLabel}>Pulang</Text>
+                        {row.clockOutLat != null && row.clockOutLng != null ? (
+                          mapReady ? (
+                            <MapView
+                              style={styles.mapSmall}
+                              initialRegion={{
                                 latitude: row.clockOutLat,
                                 longitude: row.clockOutLng,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
                               }}
-                              title="Clock Out"
-                              pinColor={colors.orange}
-                            />
-                          ) : null}
-                        </MapView>
-                      ) : (
-                        <Skeleton width="100%" height={180} borderRadius={2} />
-                      )
-                    ) : (
-                      <View style={styles.photoEmpty}>
-                        <Text style={styles.photoEmptyText}>
-                          Lokasi tidak tercatat
-                        </Text>
+                              scrollEnabled={false}
+                              zoomEnabled={false}
+                            >
+                              <Marker
+                                coordinate={{
+                                  latitude: row.clockOutLat,
+                                  longitude: row.clockOutLng,
+                                }}
+                                title="Clock Out"
+                                pinColor={colors.orange}
+                              />
+                            </MapView>
+                          ) : (
+                            <Skeleton width="100%" height={140} borderRadius={2} />
+                          )
+                        ) : (
+                          <View style={[styles.photoEmpty, styles.mapSmall]}>
+                            <Text style={styles.photoEmptyText}>
+                              Tidak tercatat
+                            </Text>
+                          </View>
+                        )}
                       </View>
-                    )}
+                    </View>
                   </>
                 ) : null}
               </ScrollView>
@@ -367,6 +397,18 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     height: 180,
     marginTop: spacing.sm,
+    width: '100%',
+  },
+  mapRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  mapBox: { flex: 1 },
+  mapSmall: {
+    borderColor: 'rgba(255,255,255,0.25)',
+    borderWidth: 1.5,
+    height: 140,
     width: '100%',
   },
 });
