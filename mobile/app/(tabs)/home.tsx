@@ -409,6 +409,22 @@ export default function HomeScreen() {
                     <Text style={styles.timeLabel}>Durasi</Text>
                   </View>
                 </View>
+                {/* SEMENTARA: reset clock in/out untuk testing */}
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  onPress={async () => {
+                    const ok = await deleteTodayAttendance();
+                    resetClock();
+                    showToast(
+                      ok
+                        ? 'Absensi hari ini direset.'
+                        : 'Reset lokal saja (DB tidak terjangkau).',
+                    );
+                  }}
+                  style={styles.resetLink}
+                >
+                  <Text style={styles.resetLinkText}>Reset sementara</Text>
+                </TouchableOpacity>
               </View>
             </LiquidGlassCard>
           </SafeAreaView>
@@ -454,22 +470,6 @@ export default function HomeScreen() {
                 ? 'Ketuk untuk menyelesaikan absensi'
                 : 'Terima kasih, absensi hari ini lengkap'}
           </Text>
-          {/* SEMENTARA: reset clock in/out untuk testing */}
-          <TouchableOpacity
-            accessibilityRole="button"
-            onPress={async () => {
-              const ok = await deleteTodayAttendance();
-              resetClock();
-              showToast(
-                ok
-                  ? 'Absensi hari ini direset.'
-                  : 'Reset lokal saja (DB tidak terjangkau).',
-              );
-            }}
-            style={styles.resetLink}
-          >
-            <Text style={styles.resetLinkText}>Reset sementara</Text>
-          </TouchableOpacity>
         </Animated.View>
 
         {/* JAM KERJA & LOKASI */}
