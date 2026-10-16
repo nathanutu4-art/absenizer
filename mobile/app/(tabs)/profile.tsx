@@ -172,15 +172,14 @@ export default function ProfileScreen() {
           />
           <Text style={styles.headerTitle}>Profil</Text>
           <View style={styles.profileCard}>
-            {/* Kartu belakang: gambar */}
+            {/* Gambar 160x160 di kanan belakang */}
             <Image
               source={require('../../assets/desk-illustration.jpg')}
               style={styles.cardBgImage}
               resizeMode="cover"
             />
-            {/* Lapisan oranye transparan */}
+            {/* Kartu depan: data oranye transparan */}
             <View style={styles.cardOrangeTint} />
-            {/* Kartu depan: data */}
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
                 <Image
@@ -387,11 +386,12 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   cardBgImage: {
-    bottom: 0,
-    left: 0,
+    borderRadius: 8,
+    height: 160,
     position: 'absolute',
-    right: 0,
-    top: 0,
+    right: spacing.md,
+    top: spacing.md,
+    width: 160,
   },
   cardOrangeTint: {
     backgroundColor: 'rgba(246,140,80,0.45)',
