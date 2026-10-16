@@ -221,13 +221,13 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
               onPress={() => setType(t)}
               style={styles.typeTouch}
             >
-              <Plate glass
+              <Plate solidColor="rgba(2,85,179,0.85)"
                 shadowColor={active ? c.fg : undefined}
                 style={styles.typePlate}
               >
                 <View style={styles.typeInner}>
                   <MedallionIcon glyph={c.icon} size={48} variant={c.variant} />
-                  <Text style={[styles.typeLabel, { color: active ? c.fg : colors.ink }]}>
+                  <Text style={[styles.typeLabel, { color: active ? c.fg : '#ffffff' }]}>
                     {TYPE_LABEL[t]}
                   </Text>
                   {active ? (
@@ -241,7 +241,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
       </View>
 
       {type === 'ijin' ? (
-        <Plate glass style={styles.halfPlate}>
+        <Plate solidColor="rgba(2,85,179,0.85)" style={styles.halfPlate}>
           <View style={styles.platePad}>
             <View style={styles.halfInner}>
             <View>
@@ -296,7 +296,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
             Surat Dokter <Text style={styles.required}>*wajib</Text>
           </SectionTitle>
           <TouchableOpacity onPress={() => setFile('surat-dokter.pdf')}>
-            <Plate glass>
+            <Plate solidColor="rgba(2,85,179,0.85)">
               <View style={styles.uploadInner}>
                 <MedallionIcon glyph="paperclip" size={40} />
                 <Text style={styles.uploadText}>
@@ -308,7 +308,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
         </View>
       ) : null}
 
-      <Plate glass style={styles.infoPlate}>
+      <Plate solidColor="rgba(2,85,179,0.85)" style={styles.infoPlate}>
         <View style={styles.platePad}>
           <View style={styles.bannerRow}>
             <MedallionIcon glyph="info" size={40} />
@@ -320,7 +320,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
       </Plate>
 
       {error ? (
-        <Plate glass style={styles.errorPlate}>
+        <Plate solidColor="rgba(2,85,179,0.85)" style={styles.errorPlate}>
           <View style={styles.platePad}>
             <View style={styles.bannerRow}>
               <MedallionIcon glyph="alert_triangle" size={40} />
@@ -411,7 +411,7 @@ function QuotaTab() {
         const c = TYPE_CARD[q.type];
         const progress = q.total !== null ? q.used / q.total : 0.25;
         return (
-          <Plate glass key={q.type} style={styles.quotaPlate}>
+          <Plate solidColor="rgba(2,85,179,0.85)" key={q.type} style={styles.quotaPlate}>
             <View style={styles.platePad}>
               <View style={styles.quotaTop}>
               <MedallionIcon glyph={c.icon} size={52} variant={c.variant} />
@@ -419,7 +419,7 @@ function QuotaTab() {
                 <Text style={styles.quotaTitle}>{TYPE_LABEL[q.type]}</Text>
                 <Text style={styles.quotaSub}>{q.usedLabel}</Text>
               </View>
-              <Text style={[styles.quotaNum, { color: c.fg }]}>
+              <Text style={[styles.quotaNum, { color: '#ffffff' }]}>
                 {q.total !== null ? `${q.total - q.used}` : '∞'}
               </Text>
             </View>
@@ -429,7 +429,7 @@ function QuotaTab() {
         );
       })}
       <SectionTitle>Riwayat Pemakaian</SectionTitle>
-      <Plate glass style={styles.usagePlate}>
+      <Plate solidColor="rgba(2,85,179,0.85)" style={styles.usagePlate}>
         <View style={styles.platePad}>
           <UsageRow label="Cuti • 10–12 Nov 2026" tone="menunggu" value="Menunggu" />
           <UsageRow label="Ijin • 3 Okt 2026" tone="disetujui" value="Disetujui" />
@@ -494,7 +494,7 @@ export function RequestRow({
   }
   const chip = REQ_STATUS_CHIP[request.status];
   return (
-    <Plate glass style={styles.reqPlate}>
+    <Plate solidColor="rgba(2,85,179,0.85)" style={styles.reqPlate}>
       <View style={styles.platePad}>
         <View style={styles.reqInner}>
           <Avatar gradientId={emp?.gradientId ?? '01'} name={emp?.name ?? '?'} size={44} shape="square" />
@@ -575,8 +575,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  halfLabel: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
-  halfHint: { color: colors.ink3, fontFamily: fontFamily('400'), fontSize: 12, marginTop: 2 },
+  halfLabel: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
+  halfHint: { color: 'rgba(255,255,255,0.75)', fontFamily: fontFamily('400'), fontSize: 12, marginTop: 2 },
   dateRow: { flexDirection: 'row', gap: spacing.sm },
   dateCol: { flex: 1 },
   fieldLabel: {
@@ -603,25 +603,25 @@ const styles = StyleSheet.create({
 
   uploadInner: { alignItems: 'center', flexDirection: 'row', padding: spacing.md },
   uploadText: {
-    color: colors.red,
+    color: '#ffffff',
     flex: 1,
     fontFamily: fontFamily('600'),
     fontSize: 13,
     marginLeft: 10,
   },
   infoPlate: { marginTop: spacing.lg },
-  infoText: { color: colors.blue, fontFamily: fontFamily('500'), fontSize: 12.5 },
+  infoText: { color: '#ffffff', fontFamily: fontFamily('500'), fontSize: 12.5 },
   bannerRow: { alignItems: 'center', flexDirection: 'row' },
   bannerText: { flex: 1, marginLeft: 10 },
   errorPlate: { marginTop: spacing.sm },
-  errorText: { color: colors.red, fontFamily: fontFamily('600'), fontSize: 13 },
+  errorText: { color: '#ffffff', fontFamily: fontFamily('600'), fontSize: 13 },
   submit: { marginBottom: spacing.lg, marginTop: spacing.lg },
   quotaPlate: { marginTop: spacing.md },
   quotaTop: { alignItems: 'center', flexDirection: 'row', marginBottom: 12 },
   quotaText: { flex: 1, marginLeft: 12 },
-  quotaTitle: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 16 },
+  quotaTitle: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 16 },
   quotaSub: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
@@ -640,25 +640,25 @@ const styles = StyleSheet.create({
   usagePlate: { marginBottom: spacing.lg },
   usageRow: {
     alignItems: 'center',
-    borderBottomColor: colors.line,
+    borderBottomColor: 'rgba(255,255,255,0.25)',
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
-  usageLabel: { color: colors.ink, fontFamily: fontFamily('500'), fontSize: 13 },
+  usageLabel: { color: '#ffffff', fontFamily: fontFamily('500'), fontSize: 13 },
   reqPlate: { marginTop: spacing.sm },
   reqInner: { alignItems: 'center', flexDirection: 'row' },
   reqText: { flex: 1, marginLeft: 12 },
-  reqTitle: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 13.5 },
+  reqTitle: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 13.5 },
   reqSub: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
   },
   reqDate: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 11,
     marginTop: 2,
