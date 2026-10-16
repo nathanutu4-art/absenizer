@@ -13,7 +13,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
-import { LiquidGlassCard } from '../../src/components/LiquidGlassCard';
 import { SketchClock } from '../../src/components/SketchClock';
 import { Skeleton } from '../../src/components/Skeleton';
 import { BG_ABSTRACT } from '../../src/data/bgAbstract';
@@ -343,7 +342,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Kartu status */}
-            <LiquidGlassCard tint="light" intensity={40} style={styles.statusPlate} pressable={false} overlayColor="rgba(1,86,179,0.15)">
+            <Plate solidColor="#e9f1fd" style={styles.statusPlate}>
               <View style={styles.statusInner}>
                 <View style={styles.statusHeader}>
                   <StampChip
@@ -373,7 +372,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-            </LiquidGlassCard>
+            </Plate>
           </SafeAreaView>
         </View>
 
@@ -420,7 +419,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.hoursPlate}>
+        <Plate solidColor="#e9f1fd" style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />
@@ -447,7 +446,7 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcutTouch}
             >
-              <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.shortcutPlate}>
+              <Plate solidColor="#e9f1fd" style={styles.shortcutPlate}>
                 <View style={styles.shortcutInner}>
                   <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
                   <Text style={styles.shortcutLabel}>{s.label}</Text>
@@ -459,7 +458,7 @@ export default function HomeScreen() {
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
+          <Plate solidColor="#e9f1fd" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Sisa Kuota</SectionTitle>
               {quotaRows.length === 0 ? (
@@ -486,7 +485,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/approvals')}
             style={styles.sectionTouch}
           >
-            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
+            <Plate solidColor="#e9f1fd" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Menunggu Persetujuan</SectionTitle>
                 <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
@@ -500,7 +499,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/takeover')}
             style={styles.sectionTouch}
           >
-            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
+            <Plate solidColor="#e9f1fd" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Bisa Diambil Alih</SectionTitle>
                 <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
@@ -512,7 +511,7 @@ export default function HomeScreen() {
 
         {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
         {activities.length > 0 ? (
-          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
+          <Plate solidColor="#e9f1fd" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Aktivitas Terakhir</SectionTitle>
               {activities.map((a, i) => (

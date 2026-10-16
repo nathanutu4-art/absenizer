@@ -17,6 +17,8 @@ interface Props {
   glow?: boolean;
   /** Warna tint kustom untuk kartu kaca (override default). */
   tintColor?: string;
+  /** Warna solid untuk kartu solid (non-kaca, gaya seperti input login). */
+  solidColor?: string;
 }
 
 /**
@@ -26,7 +28,26 @@ interface Props {
  * Prop glass: kartu kaca individual tanpa mengubah theme global.
  * Prop glow: blur lebih kuat + border glowing.
  */
-export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false, glow = false, tintColor }: Props) {
+export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false, glow = false, tintColor, solidColor }: Props) {
+  // Kartu solid: background warna solid, rounded seperti input login.
+  if (solidColor) {
+    return (
+      <View
+        style={[
+          {
+            backgroundColor: solidColor,
+            borderColor: 'rgba(1,86,179,0.22)',
+            borderRadius: 12,
+            borderWidth: 1,
+            overflow: 'hidden',
+          },
+          style,
+        ]}
+      >
+        {children}
+      </View>
+    );
+  }
   if (isGlassMode() || glass) {
     const cardContent = (
       <BlurView
