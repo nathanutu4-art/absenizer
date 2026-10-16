@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, View, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
@@ -53,6 +53,28 @@ export default function ProfileScreen() {
   const [confirmPass, setConfirmPass] = useState('');
   const [pwBusy, setPwBusy] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  // Animasi skeleton saat loading
+  const skeletonAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(skeletonAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(skeletonAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => {
+      loop.stop();
+    };
+  }, [skeletonAnim]);
 
   useEffect(() => {
     let alive = true;
@@ -175,7 +197,22 @@ export default function ProfileScreen() {
 
         <View style={styles.body}>
           {loading ? (
-            <Text style={styles.loadingText}>Memuat profil…</Text>
+            /* Skeleton animasi saat data loading */
+            <Animated.View
+              style={{
+                opacity: skeletonAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.4, 1],
+                }),
+              }}
+            >
+              {[0, 1, 2, 3, 4].map((i) => (
+                <View key={i} style={styles.skeletonCard}>
+                  <View style={styles.skeletonLine} />
+                  <View style={[styles.skeletonLine, styles.skeletonLineShort]} />
+                </View>
+              ))}
+            </Animated.View>
           ) : (
             kv.map(([label, value]) => (
               <Plate solidColor="rgba(2,85,179,0.85)" key={label} style={styles.kvWrap}>
@@ -350,12 +387,24 @@ const styles = StyleSheet.create({
   statusChip: { marginTop: 10 },
   body: { paddingTop: spacing.md },
   kvWrap: { marginBottom: spacing.sm },
-  loadingText: {
-    color: colors.ink2,
-    fontFamily: fontFamily('500'),
-    fontSize: 14,
-    marginVertical: spacing.md,
-    textAlign: 'center',
+  /* Skeleton loading */
+  skeletonCard: {
+    backgroundColor: 'rgba(2,85,179,0.15)',
+    borderRadius: 8,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 14,
+  },
+  skeletonLine: {
+    backgroundColor: 'rgba(2,85,179,0.25)',
+    borderRadius: 4,
+    height: 12,
+    marginBottom: 8,
+    width: '70%',
+  },
+  skeletonLineShort: {
+    marginBottom: 0,
+    width: '40%',
   },
   kvRow: { paddingHorizontal: spacing.md, paddingVertical: 10 },
   kvLabel: { color: 'rgba(255,255,255,0.6)', fontFamily: fontFamily('500'), fontSize: 12 },
