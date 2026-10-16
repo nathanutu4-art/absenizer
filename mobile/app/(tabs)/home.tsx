@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MedallionIcon, type MedallionVariant } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
+import { LiquidGlassCard } from '../../src/components/LiquidGlassCard';
 import { SketchClock } from '../../src/components/SketchClock';
 import { Skeleton } from '../../src/components/Skeleton';
 import { BG_ABSTRACT } from '../../src/data/bgAbstract';
@@ -342,7 +343,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Kartu status */}
-            <Plate solidColor="#e9f1fd" style={styles.statusPlate}>
+            <LiquidGlassCard tint="light" intensity={40} style={styles.statusPlate} pressable={false} overlayColor="rgba(1,86,179,0.15)">
               <View style={styles.statusInner}>
                 <View style={styles.statusHeader}>
                   <StampChip
@@ -372,7 +373,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-            </Plate>
+            </LiquidGlassCard>
           </SafeAreaView>
         </View>
 
@@ -419,18 +420,23 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <Plate solidColor="#e9f1fd" style={styles.hoursPlate}>
+        <Plate solidColor="#0255b3" style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />
-              <Text style={styles.hoursText}>
+              <Text style={[styles.hoursText, styles.hoursTextOnBlue]}>
                 {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
               </Text>
             </View>
-            <View style={styles.hoursDivider} />
+          </View>
+        </Plate>
+
+        {/* LOKASI */}
+        <Plate solidColor="#0255b3" style={styles.hoursPlate}>
+          <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="map_pin" size={40} variant="cream" />
-              <Text style={styles.hoursText}>
+              <Text style={[styles.hoursText, styles.hoursTextOnBlue]}>
                 WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
               </Text>
             </View>
@@ -446,7 +452,7 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcutTouch}
             >
-              <Plate solidColor="#e9f1fd" style={styles.shortcutPlate}>
+              <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.shortcutPlate}>
                 <View style={styles.shortcutInner}>
                   <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
                   <Text style={styles.shortcutLabel}>{s.label}</Text>
@@ -458,7 +464,7 @@ export default function HomeScreen() {
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <Plate solidColor="#e9f1fd" style={styles.sectionPlate}>
+          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Sisa Kuota</SectionTitle>
               {quotaRows.length === 0 ? (
@@ -485,7 +491,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/approvals')}
             style={styles.sectionTouch}
           >
-            <Plate solidColor="#e9f1fd" style={styles.sectionPlateTight}>
+            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Menunggu Persetujuan</SectionTitle>
                 <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
@@ -499,7 +505,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/takeover')}
             style={styles.sectionTouch}
           >
-            <Plate solidColor="#e9f1fd" style={styles.sectionPlateTight}>
+            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Bisa Diambil Alih</SectionTitle>
                 <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
@@ -511,7 +517,7 @@ export default function HomeScreen() {
 
         {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
         {activities.length > 0 ? (
-          <Plate solidColor="#e9f1fd" style={styles.sectionPlate}>
+          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Aktivitas Terakhir</SectionTitle>
               {activities.map((a, i) => (
@@ -743,6 +749,9 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginLeft: 12,
+  },
+  hoursTextOnBlue: {
+    color: '#ffffff',
   },
   hoursDivider: { backgroundColor: colors.line, height: 1, marginVertical: spacing.sm },
   shortcutGrid: {
