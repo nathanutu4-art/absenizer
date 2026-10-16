@@ -371,7 +371,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     marginTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
   },
   headerText: { flex: 1, marginLeft: 12 },
   headerTitle: {
@@ -379,7 +378,7 @@ const styles = StyleSheet.create({
     fontFamily: serifFamily('800'),
     fontSize: 22,
   },
-  doubleRule: { marginTop: spacing.md, paddingHorizontal: spacing.lg },
+  doubleRule: { marginTop: spacing.md },
   headerRuleThick: { backgroundColor: colors.ink, height: 3 },
   headerRuleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
   /** Bingkai foto profil persegi ala bingkai gambar (sama seperti dashboard). */
