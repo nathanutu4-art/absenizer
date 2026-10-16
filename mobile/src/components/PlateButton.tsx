@@ -13,8 +13,8 @@ import { GLASS_RADIUS, colors, fontFamily, isGlassMode, radius } from '../theme'
 interface Props {
   children: React.ReactNode;
   onPress: () => void;
-  /** 'primary' (indigo tua) | 'paper' (kertas ber-border tinta) | 'danger' */
-  variant?: 'primary' | 'paper' | 'danger';
+  /** 'primary' (indigo tua) | 'paper' (kertas ber-border tinta) | 'danger' | 'accent' (oranye solid + animasi) */
+  variant?: 'primary' | 'paper' | 'danger' | 'accent';
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
   /** Paksa gaya kaca (seperti prop glass di Plate). */
@@ -27,14 +27,17 @@ interface Props {
  */
 export function PlateButton({ children, onPress, variant = 'primary', style, disabled, glass: glassProp = false }: Props) {
   const glass = isGlassMode() || glassProp;
+  const isAccent = variant === 'accent' && !glass;
   const bg =
     glass && variant === 'primary'
       ? 'rgba(246,140,80,0.45)'
-      : variant === 'primary'
-        ? colors.indigoDark
-        : variant === 'danger'
-          ? colors.reject
-          : colors.surface;
+      : isAccent
+        ? '#f68c50'
+        : variant === 'primary'
+          ? colors.indigoDark
+          : variant === 'danger'
+            ? colors.reject
+            : colors.surface;
   const fg = variant === 'paper' && !glass ? colors.etch : '#ffffff';
   const label =
     typeof children === 'string' ? (
@@ -45,6 +48,8 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
   // Mode liquid-glass: tombol kaca tanpa bayangan keras.
   // Saat ditekan: background jadi solid orange + halo border neon orange.
   const glowAnim = useRef(new Animated.Value(0)).current;
+  // Accent: animasi scale saat ditekan (spring, native driver).
+  const scaleAnim = useRef(new Animated.Value(1)).current;
   const [pressed, setPressed] = useState(false);
 
   const handlePressIn = () => {
@@ -54,6 +59,14 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
       duration: 100,
       useNativeDriver: false,
     }).start();
+    if (isAccent) {
+      Animated.spring(scaleAnim, {
+        toValue: 0.96,
+        speed: 30,
+        bounciness: 4,
+        useNativeDriver: true,
+      }).start();
+    }
   };
 
   const handlePressOut = () => {
@@ -63,6 +76,14 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
       duration: 200,
       useNativeDriver: false,
     }).start();
+    if (isAccent) {
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        speed: 20,
+        bounciness: 6,
+        useNativeDriver: true,
+      }).start();
+    }
   };
 
   if (glass) {
@@ -115,14 +136,39 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
     );
   }
   return (
-    <View style={[styles.wrap, style]}>
-      <View style={[styles.shadow, { backgroundColor: colors.etchDeep }]} />
+    <Animated.View
+      style={[
+        styles.wrap,
+        style,
+        isAccent && { transform: [{ scale: scaleAnim }] },
+      ]}
+    >
+      {isAccent ? null : (
+        <View style={[styles.shadow, { backgroundColor: colors.etchDeep }]} />
+      )}
       <TouchableOpacity
         accessibilityRole="button"
         activeOpacity={0.85}
         disabled={disabled}
         onPress={onPress}
-        style={[styles.button, { backgroundColor: bg, opacity: disabled ? 0.6 : 1 }]}
+        onPressIn={isAccent ? handlePressIn : undefined}
+        onPressOut={isAccent ? handlePressOut : undefined}
+        style={[
+          styles.button,
+          {
+            backgroundColor: bg,
+            borderColor: isAccent ? '#d9732f' : colors.etchDeep,
+            borderRadius: isAccent ? 14 : radius.button,
+            opacity: disabled ? 0.6 : 1,
+          },
+          isAccent && {
+            shadowColor: '#f68c50',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.45,
+            shadowRadius: 16,
+            elevation: 6,
+          },
+        ]}
       >
         {typeof children === 'string' ? (
           <Text style={[styles.text, { color: fg }]}>{children}</Text>
@@ -130,7 +176,7 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
           children
         )}
       </TouchableOpacity>
-    </View>
+    </Animated.View>
   );
 }
 

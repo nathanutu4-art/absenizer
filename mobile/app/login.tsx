@@ -224,7 +224,7 @@ export default function LoginScreen() {
                 disabled={loading}
                 onPress={handleLogin}
                 style={styles.loginBtn}
-                variant="primary"
+                variant="accent"
               >
                 {loading ? 'Memuat…' : 'Masuk'}
               </PlateButton>
