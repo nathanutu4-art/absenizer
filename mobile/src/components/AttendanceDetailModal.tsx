@@ -91,7 +91,7 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
         style={styles.backdrop}
       >
         <TouchableOpacity activeOpacity={1} style={styles.cardTouch}>
-          <Plate style={styles.card}>
+          <Plate glass style={styles.card}>
             <View style={styles.cardInner}>
               <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Kepala */}
@@ -122,8 +122,8 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                     {/* Status */}
                     <View style={styles.chipRow}>
                       <StampChip
-                        color={colors.ink}
-                        backgroundColor={colors.paper2}
+                        color="#ffffff"
+                        backgroundColor="rgba(255,255,255,0.2)"
                       >
                         {row.status}
                       </StampChip>
@@ -273,25 +273,25 @@ const styles = StyleSheet.create({
   },
   headText: { flex: 1 },
   title: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 19,
   },
   subtitle: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: 2,
   },
   closeBtn: { marginLeft: spacing.sm, padding: 6 },
   closeText: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('800'),
     fontSize: 20,
   },
   doubleRule: { marginTop: spacing.sm },
-  ruleThick: { backgroundColor: colors.ink, height: 3 },
-  ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: 'rgba(255,255,255,0.6)', height: 3 },
+  ruleThin: { backgroundColor: 'rgba(255,255,255,0.6)', height: 1, marginTop: 3 },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -304,17 +304,17 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   detailLabel: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('600'),
     fontSize: 13,
   },
   detailValue: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('700'),
     fontSize: 13,
   },
   sectionLabel: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 14,
     marginBottom: 2,
@@ -327,33 +327,33 @@ const styles = StyleSheet.create({
   },
   photoBox: { flex: 1 },
   photoLabel: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('600'),
     fontSize: 12,
     marginBottom: 6,
   },
   photo: {
-    borderColor: colors.etch,
+    borderColor: 'rgba(255,255,255,0.25)',
     borderWidth: 1.5,
     height: 180,
     width: '100%',
   },
   photoEmpty: {
     alignItems: 'center',
-    backgroundColor: colors.paper2,
-    borderColor: colors.line,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.25)',
     borderStyle: 'dashed',
     borderWidth: 1.5,
     height: 180,
     justifyContent: 'center',
   },
   photoEmptyText: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.6)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
   },
   map: {
-    borderColor: colors.etch,
+    borderColor: 'rgba(255,255,255,0.25)',
     borderWidth: 1.5,
     height: 180,
     marginTop: spacing.sm,
