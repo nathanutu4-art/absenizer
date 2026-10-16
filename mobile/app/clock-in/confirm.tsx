@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   StyleSheet,
   Switch,
   Text,
@@ -91,12 +92,30 @@ export default function ConfirmScreen() {
     };
   }, []);
 
+  // Animasi radar saat lokasi loading
+  const radarAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.timing(radarAnim, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      }),
+    );
+    loop.start();
+    return () => {
+      loop.stop();
+    };
+  }, [radarAnim]);
+
   const office = settings ?? DEMO_SETTINGS;
   const officeCoord = { latitude: office.officeLat, longitude: office.officeLng };
   const realDist = coords ? distanceMeters(coords, officeCoord) : null;
   const realInside = coords ? isInsideGeofence(coords, officeCoord, office.geofenceM) : null;
   // Toggle simulasi menimpa hasil GPS asli (untuk demo).
   const isFar = simFar || (realInside === false);
+  // Lokasi masih loading: coords null dan tidak ditolak
+  const locLoading = coords === null && !locDenied;
   const distanceLabel = simFar
     ? '1,4 km'
     : realDist == null
@@ -183,10 +202,58 @@ export default function ConfirmScreen() {
             <View style={styles.officePin}>
               <MedallionIcon glyph="building" size={46} variant="wadaIndigo" />
             </View>
-            {/* pin pengguna */}
-            <View style={[styles.userPin, isFar && styles.userPinFar]}>
-              <View style={styles.userDot} />
-            </View>
+            {locLoading ? (
+              /* Animasi radar saat lokasi loading */
+              <View style={styles.radarWrap}>
+                <Animated.View
+                  style={[
+                    styles.radarRing,
+                    {
+                      opacity: radarAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.6, 0],
+                      }),
+                      transform: [
+                        {
+                          scale: radarAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.3, 1.5],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+                <Animated.View
+                  style={[
+                    styles.radarRing,
+                    {
+                      opacity: radarAnim.interpolate({
+                        inputRange: [0, 0.5, 1],
+                        outputRange: [0, 0.6, 0],
+                      }),
+                      transform: [
+                        {
+                          scale: radarAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.3, 1.5],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                />
+                <View style={styles.radarCenter}>
+                  <MedallionIcon glyph="map_pin" size={40} variant="wadaIndigo" />
+                </View>
+                <Text style={styles.radarText}>Mencari lokasi…</Text>
+              </View>
+            ) : (
+              /* pin pengguna */
+              <View style={[styles.userPin, isFar && styles.userPinFar]}>
+                <View style={styles.userDot} />
+              </View>
+            )}
             <View style={styles.gpsChipWrap}>
               <StampChip color={colors.green} backgroundColor={colors.greenBg}>
                 {gpsLabel}
@@ -257,8 +324,18 @@ export default function ConfirmScreen() {
         </Plate>
 
         <View style={styles.ctaWrap}>
-          <PlateButton onPress={handleConfirm} variant="primary">
-            {busy ? 'Mengirim…' : isOut ? 'Konfirmasi & Clock Out' : 'Konfirmasi & Clock In'}
+          <PlateButton
+            disabled={locLoading || busy}
+            onPress={handleConfirm}
+            variant="primary"
+          >
+            {busy
+              ? 'Mengirim…'
+              : locLoading
+                ? 'Mencari lokasi…'
+                : isOut
+                  ? 'Konfirmasi & Clock Out'
+                  : 'Konfirmasi & Clock In'}
           </PlateButton>
         </View>
       </SafeAreaView>
@@ -306,6 +383,33 @@ const styles = StyleSheet.create({
   },
   userPin: { left: '58%', position: 'absolute', top: '38%' },
   userPinFar: { left: '82%', top: '12%' },
+  /* Animasi radar saat lokasi loading */
+  radarWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    left: '58%',
+    position: 'absolute',
+    top: '38%',
+  },
+  radarRing: {
+    borderColor: 'rgba(1,86,179,0.5)',
+    borderRadius: 60,
+    borderWidth: 2,
+    height: 120,
+    position: 'absolute',
+    width: 120,
+  },
+  radarCenter: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radarText: {
+    color: colors.ink2,
+    fontFamily: fontFamily('600'),
+    fontSize: 11,
+    marginTop: 8,
+    textAlign: 'center',
+  },
   userDot: {
     backgroundColor: colors.indigo,
     borderColor: '#ffffff',
