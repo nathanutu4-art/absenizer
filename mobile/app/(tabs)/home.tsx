@@ -35,9 +35,9 @@ import {
   getEmployee,
 } from '../../src/data/demo';
 import { getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, saveClockOut, type RecentActivity } from '../../src/lib/db';
+import { getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, getTodayAttendance, saveClockOut, type RecentActivity } from '../../src/lib/db';
 import { calcDuration } from '../../src/lib/duration';
-import { recordClockOut, useClockState } from '../../src/lib/clockState';
+import { hydrateFromDb, recordClockOut, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 function useWibClock(): string {
@@ -230,6 +230,24 @@ export default function HomeScreen() {
       if (session?.demo === false) {
         const acts = await getRecentActivities();
         if (alive) setActivities(acts);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Tarik jam masuk/pulang hari ini dari database.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const session = await getSession();
+      if (!alive) return;
+      if (session?.demo === false) {
+        const today = await getTodayAttendance();
+        if (alive && today) {
+          hydrateFromDb(today.clockIn, today.clockOut);
+        }
       }
     })();
     return () => {

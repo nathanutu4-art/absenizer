@@ -826,6 +826,33 @@ export interface AwayEmployee {
 }
 
 /**
+ * Absensi hari ini (Asia/Jakarta) untuk user yang login.
+ * null bila belum ada record / DB tak terkonfigurasi.
+ */
+export async function getTodayAttendance(): Promise<{
+  clockIn: string;
+  clockOut: string;
+} | null> {
+  const employeeId = await getMyEmployeeId();
+  if (!employeeId) return null;
+  try {
+    const { data, error } = await supabase
+      .from('attendance')
+      .select('clock_in_at, clock_out_at')
+      .eq('employee_id', employeeId)
+      .eq('date', jakartaToday())
+      .maybeSingle();
+    if (error || !data) return null;
+    return {
+      clockIn: formatJamSingkat(data.clock_in_at),
+      clockOut: formatJamSingkat(data.clock_out_at),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Karyawan yang sedang tidak masuk hari ini: pengajuan berstatus disetujui
  * yang rentang tanggalnya mencakup hari ini (Asia/Jakarta).
  * null bila Supabase tak terkonfigurasi / galat → pemanggil memakai demo.

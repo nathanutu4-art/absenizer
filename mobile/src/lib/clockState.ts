@@ -43,6 +43,23 @@ export function recordClockOut(time: string): void {
   emit();
 }
 
+/**
+ * Isi status clock dari database (dipanggil saat dashboard dimuat).
+ * '-' berarti belum ada data.
+ */
+export function hydrateFromDb(inTime: string, outTime: string): void {
+  const hasIn = inTime !== '-';
+  const hasOut = outTime !== '-';
+  if (hasIn && hasOut) {
+    state = { phase: 'done', inTime, outTime, flags: [] };
+  } else if (hasIn) {
+    state = { phase: 'out', inTime, outTime: null, flags: [] };
+  } else {
+    state = { phase: 'in', inTime: null, outTime: null, flags: [] };
+  }
+  emit();
+}
+
 /** Reset untuk demo (tidak dipakai di alur normal). */
 export function resetClock(): void {
   state = { phase: 'in', inTime: null, outTime: null, flags: [] };
