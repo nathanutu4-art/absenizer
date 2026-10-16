@@ -170,7 +170,10 @@ export default function ProfileScreen() {
             resizeMode="repeat"
             style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
           />
-          <Text style={styles.headerTitle}>Profil</Text>
+          <View style={styles.headerRow}>
+            <MedallionIcon glyph="user" size={40} variant="wadaIndigo" />
+            <Text style={styles.headerTitle}>Profil</Text>
+          </View>
           <View style={styles.profileCard}>
             {/* Gambar 160x160 di kanan belakang */}
             <Image
@@ -358,13 +361,18 @@ const styles = StyleSheet.create({
   hero: {
     paddingBottom: spacing.lg,
   },
+  headerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingBottom: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl + spacing.md,
+  },
   headerTitle: {
     color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 20,
-    paddingBottom: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl + spacing.md,
+    marginLeft: spacing.sm,
   },
   /** Bingkai foto profil persegi ala bingkai gambar (sama seperti dashboard). */
   avatarFrame: {
