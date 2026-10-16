@@ -11,6 +11,7 @@
  */
 import 'expo-blob'; // Polyfill Blob native agar res.blob() tidak memicu warning LogBox.
 import * as FileSystem from 'expo-file-system';
+import { showToast } from '../components/Toast';
 import type { AvatarGradientId } from '../components/Avatar';
 import {
   EMPLOYEES,
@@ -497,14 +498,22 @@ export async function uploadSelfie(
     const base64 = await FileSystem.readAsStringAsync(localUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
+    if (!base64) {
+      showToast('Debug: file selfie kosong');
+      return null;
+    }
     const bytes = base64ToBytes(base64);
     const path = `${employeeId}/${jakartaToday()}_${kind}.jpg`;
     const { error } = await supabase.storage
       .from('selfies')
       .upload(path, bytes, { contentType: 'image/jpeg', upsert: true });
-    if (error) return null;
+    if (error) {
+      showToast(`Debug upload: ${error.message}`);
+      return null;
+    }
     return path;
-  } catch {
+  } catch (e) {
+    showToast(`Debug upload ex: ${e instanceof Error ? e.message : 'unknown'}`);
     return null;
   }
 }
