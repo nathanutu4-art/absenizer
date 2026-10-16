@@ -187,6 +187,11 @@ export default function ProfileScreen() {
                   <Text style={styles.outlineChipText}>AKTIF • WFO</Text>
                 </View>
               </View>
+              <Image
+                source={require('../../assets/desk-illustration.jpg')}
+                style={styles.deskIllustration}
+                resizeMode="cover"
+              />
             </View>
             <View style={styles.contactDivider} />
             <View style={styles.contactRow}>
@@ -379,6 +384,12 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   profileText: { flex: 1, marginLeft: spacing.md },
+  deskIllustration: {
+    borderRadius: 8,
+    height: 110,
+    marginLeft: spacing.sm,
+    width: 90,
+  },
   name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 28 },
   position: {
     color: 'rgba(255,255,255,0.9)',
