@@ -148,8 +148,8 @@ export default function ProfileScreen() {
             resizeMode="repeat"
             style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
           />
-          <View>
-            <Text style={styles.headerTitle}>Profil</Text>
+          <Text style={styles.headerTitle}>Profil</Text>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.profileCard}>
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
                 <Image
@@ -162,15 +162,15 @@ export default function ProfileScreen() {
                 <Text style={styles.position}>{me.position}</Text>
                 <Text style={styles.empNo}>{me.employeeNo}</Text>
                 <StampChip
-                  color={colors.wadaIndigo}
-                  backgroundColor="rgba(5,18,48,0.08)"
+                  color="#ffffff"
+                  backgroundColor="rgba(255,255,255,0.2)"
                   style={styles.statusChip}
                 >
                   AKTIF • WFO
                 </StampChip>
               </View>
             </View>
-          </View>
+          </Plate>
         </View>
 
         <View style={styles.body}>
@@ -178,7 +178,7 @@ export default function ProfileScreen() {
             <Text style={styles.loadingText}>Memuat profil…</Text>
           ) : (
             kv.map(([label, value]) => (
-              <Plate glass key={label} style={styles.kvWrap}>
+              <Plate solidColor="rgba(2,85,179,0.85)" key={label} style={styles.kvWrap}>
                 <View style={styles.kvRow}>
                   <Text style={styles.kvLabel}>{label}</Text>
                   <Text style={styles.kvValue}>{value}</Text>
@@ -188,7 +188,7 @@ export default function ProfileScreen() {
           )}
 
           {pic ? (
-          <Plate glass style={styles.picWrap}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.picWrap}>
             <View style={styles.picInner}>
               <View style={styles.sectionHead}>
                 <Text style={styles.cardTitle}>PIC Saya</Text>
@@ -228,7 +228,7 @@ export default function ProfileScreen() {
           </Plate>
           ) : null}
 
-          <Plate glass style={styles.picWrap}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.picWrap}>
             <View style={styles.picInner}>
               <View style={styles.sectionHead}>
                 <Text style={styles.cardTitle}>Ganti Kata Sandi</Text>
@@ -327,22 +327,22 @@ const styles = StyleSheet.create({
     height: 68,
     width: 68,
   },
+  profileCard: { marginHorizontal: spacing.lg, marginTop: spacing.sm },
   profileRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    padding: spacing.md,
   },
   profileText: { flex: 1, marginLeft: spacing.md },
-  name: { color: colors.ink, fontFamily: serifFamily('800'), fontSize: 22 },
+  name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 22 },
   position: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: 2,
   },
   empNo: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.6)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: 2,
@@ -358,9 +358,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   kvRow: { paddingHorizontal: spacing.md, paddingVertical: 10 },
-  kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12 },
+  kvLabel: { color: 'rgba(255,255,255,0.6)', fontFamily: fontFamily('500'), fontSize: 12 },
   kvValue: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('600'),
     fontSize: 14,
     marginTop: 3,
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
   },
   pwBtn: { marginTop: spacing.md },
   pwNote: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: spacing.xs,
@@ -393,18 +393,18 @@ const styles = StyleSheet.create({
   picInner: { padding: spacing.lg },
   sectionHead: { marginBottom: spacing.sm },
   cardTitle: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 15,
     marginBottom: 6,
   },
-  ruleThick: { backgroundColor: colors.ink, height: 3 },
-  ruleThin: { backgroundColor: colors.line, height: 1, marginTop: 3 },
+  ruleThick: { backgroundColor: 'rgba(255,255,255,0.25)', height: 3 },
+  ruleThin: { backgroundColor: 'rgba(255,255,255,0.25)', height: 1, marginTop: 3 },
   picRow: { alignItems: 'center', flexDirection: 'row' },
   picText: { flex: 1, marginLeft: 12 },
-  picName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  picName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   picPos: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
