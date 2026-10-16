@@ -337,7 +337,7 @@ export default function HomeScreen() {
                 onPress={() => showToast('Belum ada notifikasi baru.')}
                 style={styles.bell}
               >
-                <MedallionIcon glyph="bell" size={44} variant="cream" />
+                <MedallionIcon glyph="bell" size={44} variant="wadaIndigo" />
                 <View style={styles.bellDot} />
               </TouchableOpacity>
             </View>
