@@ -208,7 +208,7 @@ export default function ConfirmScreen() {
         </View>
 
         {/* Kartu kantor */}
-        <Plate style={styles.officePlate}>
+        <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.officePlate}>
           <View style={styles.officeInner}>
             <MedallionIcon glyph="map_pin" size={44} variant="ink" />
             <View style={styles.officeText}>
@@ -227,7 +227,7 @@ export default function ConfirmScreen() {
         </Plate>
 
         {/* Simulasi */}
-        <Plate style={styles.simPlate}>
+        <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.simPlate}>
           <View style={styles.simInner}>
             <View style={styles.simRow}>
               <Text style={styles.simLabel}>
@@ -235,7 +235,7 @@ export default function ConfirmScreen() {
               </Text>
               <Switch
                 onValueChange={setSimFar}
-                trackColor={{ false: colors.line, true: colors.orange }}
+                trackColor={{ false: colors.line, true: colors.blue }}
                 value={simFar}
               />
             </View>
