@@ -491,7 +491,18 @@ export async function uploadSelfie(
   employeeId: string,
   kind: 'in' | 'out',
 ): Promise<string | null> {
-  if (!isSupabaseConfigured() || !localUri || !employeeId) return null;
+  if (!isSupabaseConfigured()) {
+    showToast('Debug: supabase tidak terkonfigurasi');
+    return null;
+  }
+  if (!localUri) {
+    showToast('Debug: localUri kosong (foto tidak tersimpan)');
+    return null;
+  }
+  if (!employeeId) {
+    showToast('Debug: employeeId kosong');
+    return null;
+  }
   try {
     // Baca file sebagai base64 lalu konversi ke bytes — lebih andal
     // daripada fetch().blob() di React Native.
