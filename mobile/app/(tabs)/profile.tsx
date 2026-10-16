@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     height: 68,
     width: 68,
   },
-  profileCard: { marginHorizontal: 24, marginTop: spacing.sm },
+  profileCard: { marginTop: spacing.sm },
   profileRow: {
     alignItems: 'center',
     flexDirection: 'row',
