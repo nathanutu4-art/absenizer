@@ -5,9 +5,9 @@ import { Image, ScrollView, StyleSheet, Text, TextInput, View, Animated } from '
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
+import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
-import { StampChip } from '../../src/components/StampChip';
 import { showToast } from '../../src/components/Toast';
 import { getEmployee, getPicOf, type Employee } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
@@ -171,7 +171,7 @@ export default function ProfileScreen() {
             style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
           />
           <Text style={styles.headerTitle}>Profil</Text>
-          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.profileCard}>
+          <Plate solidColor="#1a56a8" style={styles.profileCard}>
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
                 <Image
@@ -183,14 +183,19 @@ export default function ProfileScreen() {
                 <Text style={styles.name}>{me.name}</Text>
                 <Text style={styles.position}>{me.position}</Text>
                 <Text style={styles.empNo}>{me.employeeNo}</Text>
-                <StampChip
-                  color="#ffffff"
-                  backgroundColor="rgba(255,255,255,0.2)"
-                  style={styles.statusChip}
-                >
-                  AKTIF • WFO
-                </StampChip>
+                <View style={styles.outlineChip}>
+                  <Text style={styles.outlineChipText}>AKTIF • WFO</Text>
+                </View>
               </View>
+            </View>
+            <View style={styles.contactDivider} />
+            <View style={styles.contactRow}>
+              <MedallionIcon glyph="mail" size={28} variant="cream" />
+              <Text style={styles.contactText}>{me.email}</Text>
+            </View>
+            <View style={styles.contactRow}>
+              <MedallionIcon glyph="phone" size={28} variant="cream" />
+              <Text style={styles.contactText}>{me.phone}</Text>
             </View>
           </Plate>
         </View>
@@ -369,22 +374,55 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     padding: spacing.md,
+    paddingBottom: spacing.sm,
   },
   profileText: { flex: 1, marginLeft: spacing.md },
-  name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 22 },
+  name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 28 },
   position: {
+    color: 'rgba(255,255,255,0.9)',
+    fontFamily: fontFamily('500'),
+    fontSize: 14,
+    marginTop: 4,
+  },
+  empNo: {
     color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 13,
     marginTop: 2,
   },
-  empNo: {
-    color: 'rgba(255,255,255,0.6)',
-    fontFamily: fontFamily('500'),
-    fontSize: 12,
-    marginTop: 2,
+  outlineChip: {
+    alignSelf: 'flex-start',
+    borderColor: 'rgba(255,255,255,0.9)',
+    borderRadius: 4,
+    borderWidth: 1.5,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
   },
-  statusChip: { marginTop: 10 },
+  outlineChipText: {
+    color: '#ffffff',
+    fontFamily: fontFamily('700'),
+    fontSize: 12,
+    letterSpacing: 1,
+  },
+  contactDivider: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    height: 1,
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.sm,
+  },
+  contactRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+  },
+  contactText: {
+    color: 'rgba(255,255,255,0.9)',
+    fontFamily: fontFamily('500'),
+    fontSize: 13,
+    marginLeft: 10,
+  },
   body: { paddingTop: spacing.md },
   kvWrap: { marginBottom: spacing.sm },
   /* Skeleton loading */
