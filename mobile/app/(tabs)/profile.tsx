@@ -420,8 +420,8 @@ const styles = StyleSheet.create({
   contactText: {
     color: 'rgba(255,255,255,0.9)',
     fontFamily: fontFamily('500'),
-    fontSize: 11,
-    marginLeft: 8,
+    fontSize: 9,
+    marginLeft: 6,
   },
   body: { paddingTop: spacing.md },
   kvWrap: { marginBottom: spacing.sm },
