@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     width: 160,
   },
   cardOrangeTint: {
-    backgroundColor: 'rgba(246,140,80,0.45)',
+    backgroundColor: 'rgba(2,85,179,0.45)',
     bottom: 0,
     left: 0,
     position: 'absolute',
