@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     width: 200,
   },
   clockMedal: {
-    left: (CLOCK_DIAMETER - 160) / 2,
+    left: (CLOCK_DIAMETER - 160) / 2 - 8,
     position: 'absolute',
     top: (CLOCK_DIAMETER - 160) / 2 - 8,
   },
