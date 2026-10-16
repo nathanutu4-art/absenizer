@@ -35,9 +35,9 @@ import {
   getEmployee,
 } from '../../src/data/demo';
 import { getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { deleteTodayAttendance, getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, getTodayAttendance, saveClockOut, type CompanySettings, type RecentActivity } from '../../src/lib/db';
+import { deleteTodayAttendance, getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, getTodayAttendance, type CompanySettings, type RecentActivity } from '../../src/lib/db';
 import { calcDuration } from '../../src/lib/duration';
-import { hydrateFromDb, recordClockOut, resetClock, useClockState } from '../../src/lib/clockState';
+import { hydrateFromDb, resetClock, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 function useWibClock(): string {
@@ -303,12 +303,7 @@ export default function HomeScreen() {
     if (clock.phase === 'in') {
       router.push('/clock-in/selfie');
     } else if (clock.phase === 'out') {
-      recordClockOut(nowShort());
-      showToast('Clock out tercatat. Sampai jumpa!');
-      // Simpan clock-out ke Supabase (best-effort; status lokal sudah benar).
-      saveClockOut({ coords: null }).then((ok) => {
-        if (!ok) showToast('Clock out tersimpan lokal; sinkronisasi menyusul.');
-      });
+      router.push({ pathname: '/clock-in/selfie', params: { kind: 'out' } });
     } else {
       showToast('Absensi hari ini sudah lengkap.');
     }

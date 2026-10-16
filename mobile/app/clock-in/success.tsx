@@ -19,14 +19,16 @@ const ROLE_EMPLOYEE: Record<DemoRole, string> = {
 };
 
 /**
- * Sukses Clock In — struk dengan baris putus-putus + daftar penanda.
+ * Sukses Clock In/Out — struk dengan baris putus-putus + daftar penanda.
  */
 export default function SuccessScreen() {
-  const { time, distance, simFar } = useLocalSearchParams<{
+  const { time, distance, simFar, kind } = useLocalSearchParams<{
     time?: string;
     distance?: string;
     simFar?: string;
+    kind?: string;
   }>();
+  const isOut = kind === 'out';
   const [name, setName] = useState('—');
   const [photo, setPhoto] = useState<string | null>(null);
 
@@ -66,7 +68,7 @@ export default function SuccessScreen() {
             </View>
           </View>
         </View>
-        <Text style={styles.title}>Clock In Berhasil</Text>
+        <Text style={styles.title}>{isOut ? 'Clock Out Berhasil' : 'Clock In Berhasil'}</Text>
         {photo && (
           <View style={styles.photoWrap}>
             <Image source={{ uri: photo }} style={styles.photo} />

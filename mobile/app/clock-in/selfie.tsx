@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
@@ -16,9 +16,11 @@ import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/them
 /**
  * Ambil Selfie — pratinjau kamera depan asli (expo-camera).
  * Tombol shutter mengambil foto sungguhan lalu lanjut ke konfirmasi GPS.
- * Tidak ada verifikasi wajah: clock-in hanya foto + lokasi.
+ * Tidak ada verifikasi wajah: clock-in/out hanya foto + lokasi.
  */
 export default function SelfieScreen() {
+  const { kind } = useLocalSearchParams<{ kind?: string }>();
+  const isOut = kind === 'out';
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const [busy, setBusy] = useState(false);
@@ -45,7 +47,10 @@ export default function SelfieScreen() {
     } finally {
       setBusy(false);
     }
-    router.push('/clock-in/confirm');
+    router.push({
+      pathname: '/clock-in/confirm',
+      params: isOut ? { kind: 'out' } : {},
+    });
   }
 
   const camReady = permission?.granted === true;

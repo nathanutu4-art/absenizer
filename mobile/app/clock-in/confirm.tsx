@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
@@ -19,10 +19,11 @@ import {
   getCompanySettings,
   getMyEmployeeId,
   saveAttendance,
+  saveClockOut,
   uploadSelfie,
   type CompanySettings,
 } from '../../src/lib/db';
-import { recordClockIn } from '../../src/lib/clockState';
+import { recordClockIn, recordClockOut } from '../../src/lib/clockState';
 import { distanceMeters, isInsideGeofence } from '../../src/lib/geo';
 import { getSelfiePhoto } from '../../src/lib/selfiePhoto';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
@@ -41,6 +42,8 @@ function formatDistance(meters: number): string {
  * memaksa skenario demo. Di luar area TETAP DITERIMA + penanda oranye.
  */
 export default function ConfirmScreen() {
+  const { kind } = useLocalSearchParams<{ kind?: string }>();
+  const isOut = kind === 'out';
   const [simFar, setSimFar] = useState(false);
   const [busy, setBusy] = useState(false);
   const [coords, setCoords] =
@@ -118,24 +121,31 @@ export default function ConfirmScreen() {
       .replace(':', '.');
     const flags: string[] = [];
     if (isFar) flags.push('Di Luar Area');
-    recordClockIn(now, flags);
     // Upload selfie (resize dulu) lalu simpan ke Supabase — best-effort,
-    // clock-in tidak diblokir bila upload gagal.
+    // clock-in/out tidak diblokir bila upload gagal.
     try {
       const photoUri = getSelfiePhoto();
       const employeeId = await getMyEmployeeId();
       const selfieUrl =
         photoUri && employeeId
-          ? await uploadSelfie(photoUri, employeeId, 'in')
+          ? await uploadSelfie(photoUri, employeeId, isOut ? 'out' : 'in')
           : null;
-      await saveAttendance({
-        isFar,
-        distanceM: realDist,
-        coords,
-        selfieUrl,
-      });
+      if (isOut) {
+        recordClockOut(now);
+        await saveClockOut({ coords, selfieUrl });
+      } else {
+        recordClockIn(now, flags);
+        await saveAttendance({
+          isFar,
+          distanceM: realDist,
+          coords,
+          selfieUrl,
+        });
+      }
     } catch {
       // Diabaikan — status lokal sudah tercatat.
+      if (isOut) recordClockOut(now);
+      else recordClockIn(now, flags);
     } finally {
       setBusy(false);
     }
@@ -145,6 +155,7 @@ export default function ConfirmScreen() {
         time: now,
         distance: distanceLabel,
         ...(isFar ? { simFar: '1' } : {}),
+        ...(isOut ? { kind: 'out' } : {}),
       },
     });
   }
