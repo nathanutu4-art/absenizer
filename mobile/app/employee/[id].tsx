@@ -1,15 +1,14 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '../../src/components/Avatar';
-import { GradientView } from '../../src/components/GradientView';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { Skeleton } from '../../src/components/Skeleton';
 import { StampChip } from '../../src/components/StampChip';
 import { getPicOf, type Employee } from '../../src/data/demo';
-import { HATCH_TILE } from '../../src/data/medallions';
 import { getEmployees } from '../../src/lib/db';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -24,7 +23,7 @@ function validPhoto(url?: string | null): string | undefined {
   return url && /^(https?:\/\/|data:)/i.test(url) ? url : undefined;
 }
 
-/** Detail Karyawan — hero ukiran + kartu keterangan + kartu PIC. */
+/** Detail Karyawan — tema dashboard: gradient putih, kartu biru solid. */
 export default function EmployeeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [loaded, setLoaded] = useState(false);
@@ -60,28 +59,40 @@ export default function EmployeeDetailScreen() {
 
   if (!loaded) {
     return (
-      <SafeAreaView style={styles.fallback}>
-        <View style={styles.skeletonHead}>
-          <Skeleton width={76} height={76} borderRadius={2} />
-          <View style={styles.skeletonHeadText}>
-            <Skeleton width={160} height={22} />
-            <Skeleton width={110} height={14} style={styles.skeletonGap} />
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#ffffff', '#eef3fa']}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.fallback}>
+          <View style={styles.skeletonHead}>
+            <Skeleton width={76} height={76} borderRadius={2} />
+            <View style={styles.skeletonHeadText}>
+              <Skeleton width={160} height={22} />
+              <Skeleton width={110} height={14} style={styles.skeletonGap} />
+            </View>
           </View>
-        </View>
-        <View style={styles.skeletonBody}>
-          <Skeleton width="100%" height={54} style={styles.skeletonGap} />
-          <Skeleton width="100%" height={54} style={styles.skeletonGap} />
-          <Skeleton width="100%" height={54} style={styles.skeletonGap} />
-        </View>
-      </SafeAreaView>
+          <View style={styles.skeletonBody}>
+            <Skeleton width="100%" height={54} style={styles.skeletonGap} />
+            <Skeleton width="100%" height={54} style={styles.skeletonGap} />
+            <Skeleton width="100%" height={54} style={styles.skeletonGap} />
+          </View>
+        </SafeAreaView>
+      </View>
     );
   }
 
   if (!employee) {
     return (
-      <SafeAreaView style={styles.fallback}>
-        <Text style={styles.fallbackText}>Karyawan tidak ditemukan.</Text>
-      </SafeAreaView>
+      <View style={styles.root}>
+        <LinearGradient
+          colors={['#ffffff', '#eef3fa']}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.fallback}>
+          <Text style={styles.fallbackText}>Karyawan tidak ditemukan.</Text>
+        </SafeAreaView>
+      </View>
     );
   }
 
@@ -96,21 +107,21 @@ export default function EmployeeDetailScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView>
-        <GradientView kind="hero" style={styles.hero}>
-          <Image
-            source={{ uri: HATCH_TILE }}
-            resizeMode="repeat"
-            style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
-          />
-          <SafeAreaView edges={['top']}>
-            <View style={styles.header}>
-              <TouchableOpacity onPress={() => router.back()}>
-                <MedallionIcon glyph="chevron_left" size={36} variant="cream" />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>Detail Karyawan</Text>
-              <View style={styles.backSpacer} />
-            </View>
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
+      <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <MedallionIcon glyph="chevron_left" size={36} variant="wadaIndigo" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Detail Karyawan</Text>
+            <View style={styles.backSpacer} />
+          </View>
+
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.profileCard}>
             <View style={styles.profileRow}>
               <Avatar gradientId={employee.gradientId} name={employee.name} size={76} shape="square" photoUri={validPhoto(employee.photoUrl)} />
               <View style={styles.profileText}>
@@ -118,24 +129,22 @@ export default function EmployeeDetailScreen() {
                 <Text style={styles.position}>{employee.position}</Text>
                 <StampChip
                   color="#ffffff"
-                  backgroundColor="rgba(255,255,255,0.14)"
+                  backgroundColor="rgba(255,255,255,0.2)"
                   style={styles.statusChip}
                 >
                   {STATUS_LABEL[employee.status]}
                 </StampChip>
               </View>
             </View>
-          </SafeAreaView>
-        </GradientView>
+          </Plate>
 
-        <View style={styles.body}>
           <View style={styles.sectionHead}>
             <Text style={styles.cardTitle}>Keterangan Karyawan</Text>
             <View style={styles.ruleThick} />
             <View style={styles.ruleThin} />
           </View>
           {kv.map(([label, value]) => (
-            <Plate key={label} style={styles.kvWrap}>
+            <Plate key={label} solidColor="rgba(2,85,179,0.85)" style={styles.kvWrap}>
               <View style={styles.kvRow}>
                 <Text style={styles.kvLabel}>{label}</Text>
                 <Text style={styles.kvValue}>{value}</Text>
@@ -149,7 +158,7 @@ export default function EmployeeDetailScreen() {
             <View style={styles.ruleThin} />
           </View>
           {pic ? (
-            <Plate style={styles.picWrap}>
+            <Plate solidColor="rgba(2,85,179,0.85)" style={styles.picWrap}>
               <View style={styles.picRow}>
                 <Avatar gradientId={pic.gradientId} name={pic.name} size={46} shape="square" photoUri={validPhoto(pic.photoUrl)} />
                 <View style={styles.picText}>
@@ -161,17 +170,18 @@ export default function EmployeeDetailScreen() {
           ) : (
             <Text style={styles.fallbackText}>Belum ada PIC terdaftar.</Text>
           )}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: colors.bg, flex: 1 },
+  root: { backgroundColor: '#ffffff', flex: 1 },
+  safe: { flex: 1 },
+  scroll: { padding: spacing.md, paddingBottom: spacing.xl },
   fallback: {
     alignItems: 'center',
-    backgroundColor: colors.bg,
     flex: 1,
     justifyContent: 'center',
   },
@@ -185,11 +195,6 @@ const styles = StyleSheet.create({
   skeletonHeadText: { flex: 1, marginLeft: spacing.md },
   skeletonGap: { marginTop: spacing.sm },
   skeletonBody: { marginTop: spacing.lg, paddingHorizontal: spacing.lg, width: '100%' },
-  hero: {
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    paddingBottom: spacing.lg,
-  },
   header: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -198,15 +203,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   backSpacer: { height: 36, width: 36 },
-  headerTitle: { color: '#fff', fontFamily: serifFamily('800'), fontSize: 18 },
+  headerTitle: {
+    color: colors.ink,
+    fontFamily: serifFamily('800'),
+    fontSize: 20,
+  },
+  profileCard: { marginHorizontal: spacing.lg, marginTop: spacing.sm },
   profileRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    padding: spacing.md,
   },
   profileText: { flex: 1, marginLeft: spacing.md },
-  name: { color: '#fff', fontFamily: serifFamily('800'), fontSize: 22 },
+  name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 22 },
   position: {
     color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('500'),
@@ -214,8 +223,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   statusChip: { marginTop: 10 },
-  body: { padding: spacing.lg },
-  sectionHead: { marginBottom: spacing.sm },
+  sectionHead: { marginBottom: spacing.sm, marginTop: spacing.md },
   cardTitle: {
     color: colors.ink,
     fontFamily: serifFamily('800'),
@@ -226,9 +234,13 @@ const styles = StyleSheet.create({
   ruleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
   kvWrap: { marginBottom: spacing.sm },
   kvRow: { paddingHorizontal: spacing.md, paddingVertical: 10 },
-  kvLabel: { color: colors.ink3, fontFamily: fontFamily('500'), fontSize: 12 },
+  kvLabel: {
+    color: 'rgba(255,255,255,0.6)',
+    fontFamily: fontFamily('500'),
+    fontSize: 12,
+  },
   kvValue: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('600'),
     fontSize: 14,
     marginTop: 3,
@@ -236,9 +248,9 @@ const styles = StyleSheet.create({
   picWrap: { marginTop: 4 },
   picRow: { alignItems: 'center', flexDirection: 'row', padding: spacing.md },
   picText: { flex: 1, marginLeft: 12 },
-  picName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  picName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   picPos: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
