@@ -10,6 +10,7 @@
  * dan dikembalikan sebagai fallback, bukan dilempar ke UI.
  */
 import 'expo-blob'; // Polyfill Blob native agar res.blob() tidak memicu warning LogBox.
+import * as FileSystem from 'expo-file-system';
 import type { AvatarGradientId } from '../components/Avatar';
 import {
   EMPLOYEES,
@@ -460,6 +461,30 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
  * Mengembalikan storage path bila sukses, null bila gagal (bucket belum
  * ada, jaringan, dsb.) — tidak pernah melempar error.
  */
+/** Decode base64 ke Uint8Array (tanpa atob, aman di Hermes). */
+function base64ToBytes(base64: string): Uint8Array {
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  const clean = base64.replace(/\s/g, '');
+  const padLen = clean.endsWith('==') ? 2 : clean.endsWith('=') ? 1 : 0;
+  const outLen = Math.floor((clean.length * 3) / 4) - padLen;
+  const out = new Uint8Array(outLen);
+  let p = 0;
+  for (let i = 0; i < clean.length; i += 4) {
+    const e1 = chars.indexOf(clean[i] ?? '');
+    const e2 = chars.indexOf(clean[i + 1] ?? '');
+    const e3 = chars.indexOf(clean[i + 2] ?? '');
+    const e4 = chars.indexOf(clean[i + 3] ?? '');
+    const c1 = (e1 << 2) | (e2 >> 4);
+    const c2 = ((e2 & 15) << 4) | (e3 >> 2);
+    const c3 = ((e3 & 3) << 6) | e4;
+    out[p++] = c1;
+    if (p < outLen) out[p++] = c2;
+    if (p < outLen) out[p++] = c3;
+  }
+  return out;
+}
+
 export async function uploadSelfie(
   localUri: string,
   employeeId: string,
@@ -467,12 +492,16 @@ export async function uploadSelfie(
 ): Promise<string | null> {
   if (!isSupabaseConfigured() || !localUri || !employeeId) return null;
   try {
-    const res = await fetch(localUri);
-    const blob = await res.blob();
+    // Baca file sebagai base64 lalu konversi ke bytes — lebih andal
+    // daripada fetch().blob() di React Native.
+    const base64 = await FileSystem.readAsStringAsync(localUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const bytes = base64ToBytes(base64);
     const path = `${employeeId}/${jakartaToday()}_${kind}.jpg`;
     const { error } = await supabase.storage
       .from('selfies')
-      .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      .upload(path, bytes, { contentType: 'image/jpeg', upsert: true });
     if (error) return null;
     return path;
   } catch {
