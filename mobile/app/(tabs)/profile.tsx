@@ -190,12 +190,14 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.contactDivider} />
             <View style={styles.contactRow}>
-              <MedallionIcon glyph="mail" size={28} variant="cream" />
-              <Text style={styles.contactText}>{me.email}</Text>
-            </View>
-            <View style={styles.contactRow}>
-              <MedallionIcon glyph="phone" size={28} variant="cream" />
-              <Text style={styles.contactText}>{me.phone}</Text>
+              <View style={styles.contactItem}>
+                <MedallionIcon glyph="mail" size={24} variant="cream" />
+                <Text style={styles.contactText}>{me.email}</Text>
+              </View>
+              <View style={styles.contactItem}>
+                <MedallionIcon glyph="phone" size={24} variant="cream" />
+                <Text style={styles.contactText}>{me.phone}</Text>
+              </View>
             </View>
           </Plate>
         </View>
@@ -416,6 +418,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: spacing.md,
     paddingVertical: 4,
+  },
+  contactItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
   },
   contactText: {
     color: 'rgba(255,255,255,0.9)',
