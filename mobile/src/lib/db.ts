@@ -883,6 +883,24 @@ export async function getTodayAttendance(): Promise<{
 }
 
 /**
+ * Hapus record absensi hari ini (untuk testing/reset sementara).
+ */
+export async function deleteTodayAttendance(): Promise<boolean> {
+  const employeeId = await getMyEmployeeId();
+  if (!employeeId) return false;
+  try {
+    const { error } = await supabase
+      .from('attendance')
+      .delete()
+      .eq('employee_id', employeeId)
+      .eq('date', jakartaToday());
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Karyawan yang sedang tidak masuk hari ini: pengajuan berstatus disetujui
  * yang rentang tanggalnya mencakup hari ini (Asia/Jakarta).
  * null bila Supabase tak terkonfigurasi / galat → pemanggil memakai demo.

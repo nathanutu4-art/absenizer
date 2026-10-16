@@ -35,9 +35,9 @@ import {
   getEmployee,
 } from '../../src/data/demo';
 import { getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, getTodayAttendance, saveClockOut, type CompanySettings, type RecentActivity } from '../../src/lib/db';
+import { deleteTodayAttendance, getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, getTodayAttendance, saveClockOut, type CompanySettings, type RecentActivity } from '../../src/lib/db';
 import { calcDuration } from '../../src/lib/duration';
-import { hydrateFromDb, recordClockOut, useClockState } from '../../src/lib/clockState';
+import { hydrateFromDb, recordClockOut, resetClock, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
 function useWibClock(): string {
@@ -454,6 +454,22 @@ export default function HomeScreen() {
                 ? 'Ketuk untuk menyelesaikan absensi'
                 : 'Terima kasih, absensi hari ini lengkap'}
           </Text>
+          {/* SEMENTARA: reset clock in/out untuk testing */}
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={async () => {
+              const ok = await deleteTodayAttendance();
+              resetClock();
+              showToast(
+                ok
+                  ? 'Absensi hari ini direset.'
+                  : 'Reset lokal saja (DB tidak terjangkau).',
+              );
+            }}
+            style={styles.resetLink}
+          >
+            <Text style={styles.resetLinkText}>Reset sementara</Text>
+          </TouchableOpacity>
         </Animated.View>
 
         {/* JAM KERJA & LOKASI */}
@@ -771,6 +787,17 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: spacing.md,
+  },
+  resetLink: {
+    marginTop: spacing.sm,
+    padding: spacing.xs,
+  },
+  resetLinkText: {
+    color: colors.ink3,
+    fontFamily: fontFamily('500'),
+    fontSize: 11,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
   hoursPlate: { marginHorizontal: spacing.lg, marginTop: spacing.lg },
   hoursInner: { padding: spacing.md },
