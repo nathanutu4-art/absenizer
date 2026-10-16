@@ -87,14 +87,14 @@ const ROLE_LABEL: Record<DemoRole, string> = {
 };
 
 /** Judul seksi ukiran: serif + garis ganda (3px, jeda 3px, 1px). */
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children, onBlue }: { children: React.ReactNode; onBlue?: boolean }) {
   return (
     <View style={styles.sectionHead}>
-      <Text style={styles.sectionTitle}>{children}</Text>
+      <Text style={[styles.sectionTitle, onBlue && styles.onBlueText, onBlue && { textShadowColor: 'transparent' }]}>{children}</Text>
       <View style={styles.doubleRule}>
-        <View style={styles.ruleThick} />
+        <View style={[styles.ruleThick, onBlue && styles.onBlueDivider]} />
         <View style={styles.ruleGap} />
-        <View style={styles.ruleThin} />
+        <View style={[styles.ruleThin, onBlue && styles.onBlueDivider]} />
       </View>
     </View>
   );
@@ -447,10 +447,10 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcutTouch}
             >
-              <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.shortcutPlate}>
+              <Plate solidColor="rgba(2,85,179,0.85)" style={styles.shortcutPlate}>
                 <View style={styles.shortcutInner}>
                   <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
-                  <Text style={styles.shortcutLabel}>{s.label}</Text>
+                  <Text style={[styles.shortcutLabel, styles.onBlueText]}>{s.label}</Text>
                 </View>
               </Plate>
             </TouchableOpacity>
@@ -459,9 +459,9 @@ export default function HomeScreen() {
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
-              <SectionTitle>Sisa Kuota</SectionTitle>
+              <SectionTitle onBlue>Sisa Kuota</SectionTitle>
               {quotaRows.length === 0 ? (
                 <>
                   <Skeleton width="100%" height={16} style={styles.quotaSkeleton} />
@@ -470,13 +470,13 @@ export default function HomeScreen() {
               ) : (
                 quotaRows.map((q) => (
                   <View key={q.label} style={styles.quotaRow}>
-                    <Text style={styles.quotaLabel}>{q.label}</Text>
-                    <Text style={styles.quotaValue}>{q.remaining}</Text>
+                    <Text style={[styles.quotaLabel, styles.onBlueText]}>{q.label}</Text>
+                    <Text style={[styles.quotaValue, styles.onBlueText]}>{q.remaining}</Text>
                   </View>
                 ))
               )}
               <TouchableOpacity onPress={() => router.push('/(tabs)/requests')}>
-                <Text style={styles.linkText}>Lihat semua kuota →</Text>
+                <Text style={[styles.linkText, styles.onBlueText]}>Lihat semua kuota →</Text>
               </TouchableOpacity>
             </View>
           </Plate>
@@ -486,11 +486,11 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/approvals')}
             style={styles.sectionTouch}
           >
-            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
+            <Plate solidColor="rgba(2,85,179,0.85)" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
-                <SectionTitle>Menunggu Persetujuan</SectionTitle>
-                <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
-                <Text style={styles.linkText}>Tinjau sekarang →</Text>
+                <SectionTitle onBlue>Menunggu Persetujuan</SectionTitle>
+                <Text style={[styles.roleBig, styles.onBlueText]}>{pendingCount} pengajuan</Text>
+                <Text style={[styles.linkText, styles.onBlueText]}>Tinjau sekarang →</Text>
               </View>
             </Plate>
           </TouchableOpacity>
@@ -500,11 +500,11 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/takeover')}
             style={styles.sectionTouch}
           >
-            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
+            <Plate solidColor="rgba(2,85,179,0.85)" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
-                <SectionTitle>Bisa Diambil Alih</SectionTitle>
-                <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
-                <Text style={styles.linkText}>Tinjau sekarang →</Text>
+                <SectionTitle onBlue>Bisa Diambil Alih</SectionTitle>
+                <Text style={[styles.roleBig, styles.onBlueText]}>{escalatedCount} pengajuan</Text>
+                <Text style={[styles.linkText, styles.onBlueText]}>Tinjau sekarang →</Text>
               </View>
             </Plate>
           </TouchableOpacity>
@@ -512,12 +512,12 @@ export default function HomeScreen() {
 
         {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
         {activities.length > 0 ? (
-          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
-              <SectionTitle>Aktivitas Terakhir</SectionTitle>
+              <SectionTitle onBlue>Aktivitas Terakhir</SectionTitle>
               {activities.map((a, i) => (
                 <React.Fragment key={a.id}>
-                  {i > 0 ? <View style={styles.activityDivider} /> : null}
+                  {i > 0 ? <View style={[styles.activityDivider, styles.onBlueDivider]} /> : null}
                   <View style={styles.activityRow}>
                     <MedallionIcon
                       glyph={
@@ -529,8 +529,8 @@ export default function HomeScreen() {
                       variant="cream"
                     />
                     <View style={styles.activityText}>
-                      <Text style={styles.activityTitle}>{a.title}</Text>
-                      <Text style={styles.activitySub}>{a.subtitle}</Text>
+                      <Text style={[styles.activityTitle, styles.onBlueText]}>{a.title}</Text>
+                      <Text style={[styles.activitySub, styles.onBlueSubtext]}>{a.subtitle}</Text>
                     </View>
                     <StampChip
                       color={
@@ -753,6 +753,10 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: spacing.sm,
   },
+  /* Override teks untuk kartu biru */
+  onBlueText: { color: '#ffffff' },
+  onBlueSubtext: { color: 'rgba(255,255,255,0.75)' },
+  onBlueDivider: { backgroundColor: 'rgba(255,255,255,0.25)' },
   hoursDivider: { backgroundColor: colors.line, height: 1, marginVertical: spacing.sm },
   shortcutGrid: {
     flexDirection: 'row',
