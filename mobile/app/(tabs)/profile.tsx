@@ -171,8 +171,14 @@ export default function ProfileScreen() {
             style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
           />
           <View style={styles.headerRow}>
-            <MedallionIcon glyph="user" size={40} variant="wadaIndigo" />
-            <Text style={styles.headerTitle}>Profil</Text>
+            <MedallionIcon glyph="user" size={58} variant="wadaIndigo" />
+            <View style={styles.headerText}>
+              <Text style={styles.headerTitle}>Profil</Text>
+            </View>
+          </View>
+          <View style={styles.doubleRule}>
+            <View style={styles.headerRuleThick} />
+            <View style={styles.headerRuleThin} />
           </View>
           <View style={styles.profileCard}>
             {/* Gambar 160x160 di kanan belakang */}
@@ -364,16 +370,18 @@ const styles = StyleSheet.create({
   headerRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    paddingBottom: spacing.sm,
+    marginTop: spacing.sm,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl + spacing.md,
   },
+  headerText: { flex: 1, marginLeft: 12 },
   headerTitle: {
     color: colors.ink,
     fontFamily: serifFamily('800'),
-    fontSize: 20,
-    marginLeft: spacing.sm,
+    fontSize: 22,
   },
+  doubleRule: { marginTop: spacing.md, paddingHorizontal: spacing.lg },
+  headerRuleThick: { backgroundColor: colors.ink, height: 3 },
+  headerRuleThin: { backgroundColor: colors.ink, height: 1, marginTop: 3 },
   /** Bingkai foto profil persegi ala bingkai gambar (sama seperti dashboard). */
   avatarFrame: {
     backgroundColor: colors.paper2,
