@@ -210,7 +210,7 @@ export default function TeamScreen() {
       <SectionTitle label="Ulang Tahun Bulan Ini" />
       <View style={styles.birthGrid}>
         {birthdays.map((b) => (
-          <Plate glass key={b.employee.id} style={styles.birthCard}>
+          <Plate solidColor="rgba(2,85,179,0.85)" key={b.employee.id} style={styles.birthCard}>
             <View style={styles.birthInner}>
               <Avatar
                 gradientId={b.employee.gradientId}
@@ -251,7 +251,7 @@ export default function TeamScreen() {
       </View>
       {dirLoading ? (
         <>
-          <Plate glass style={styles.dirWrap}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.dirWrap}>
             <View style={styles.dirRow}>
               <Skeleton width={46} height={46} borderRadius={2} />
               <View style={styles.dirSkeletonText}>
@@ -260,7 +260,7 @@ export default function TeamScreen() {
               </View>
             </View>
           </Plate>
-          <Plate glass style={styles.dirWrap}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.dirWrap}>
             <View style={styles.dirRow}>
               <Skeleton width={46} height={46} borderRadius={2} />
               <View style={styles.dirSkeletonText}>
@@ -269,7 +269,7 @@ export default function TeamScreen() {
               </View>
             </View>
           </Plate>
-          <Plate glass style={styles.dirWrap}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.dirWrap}>
             <View style={styles.dirRow}>
               <Skeleton width={46} height={46} borderRadius={2} />
               <View style={styles.dirSkeletonText}>
@@ -283,7 +283,7 @@ export default function TeamScreen() {
       directory.map((e) => {
         const stamp = STAMP_COLORS[STATUS_TONE[e.status]];
         return (
-          <Plate glass key={e.id} style={styles.dirWrap}>
+          <Plate solidColor="rgba(2,85,179,0.85)" key={e.id} style={styles.dirWrap}>
             <TouchableOpacity
               onPress={() => router.push(`/employee/${e.id}`)}
               style={styles.dirRow}
@@ -392,24 +392,24 @@ const styles = StyleSheet.create({
   birthCard: { width: '31%' },
   birthInner: { alignItems: 'center', padding: spacing.sm },
   birthName: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('700'),
     fontSize: 12,
     marginTop: 6,
   },
-  birthDate: { color: colors.ink2, fontFamily: fontFamily('500'), fontSize: 11 },
+  birthDate: { color: 'rgba(255,255,255,0.75)', fontFamily: fontFamily('500'), fontSize: 11 },
   agePill: {
-    backgroundColor: '#eef1f6',
-    borderColor: '#d5dce8',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderColor: 'rgba(255,255,255,0.4)',
     borderRadius: 2,
     borderWidth: 1.5,
     marginTop: 6,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
-  ageText: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 11 },
+  ageText: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 11 },
   countdown: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 10.5,
     marginTop: 4,
@@ -442,9 +442,9 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   dirText: { flex: 1, marginLeft: 12 },
-  dirName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  dirName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   dirPos: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 2,
