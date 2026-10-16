@@ -420,18 +420,18 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA & LOKASI */}
-        <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.hoursPlate}>
+        <Plate solidColor="rgba(2,85,179,0.85)" style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />
-              <Text style={styles.hoursText}>
+              <Text style={[styles.hoursText, styles.hoursTextOnBlue]}>
                 {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
               </Text>
             </View>
-            <View style={styles.hoursDivider} />
+            <View style={styles.hoursDividerOnBlue} />
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="map_pin" size={40} variant="cream" />
-              <Text style={styles.hoursText}>
+              <Text style={[styles.hoursText, styles.hoursTextOnBlue]}>
                 WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
               </Text>
             </View>
