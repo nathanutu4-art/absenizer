@@ -380,6 +380,7 @@ const styles = StyleSheet.create({
     width: 68,
   },
   profileCard: {
+    backgroundColor: '#1a56a8',
     borderRadius: 12,
     marginTop: spacing.sm,
     overflow: 'hidden',
