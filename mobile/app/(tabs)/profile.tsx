@@ -178,7 +178,9 @@ export default function ProfileScreen() {
               style={styles.cardBgImage}
               resizeMode="cover"
             />
-            {/* Kartu depan: data transparan */}
+            {/* Lapisan oranye transparan */}
+            <View style={styles.cardOrangeTint} />
+            {/* Kartu depan: data */}
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
                 <Image
@@ -385,6 +387,14 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   cardBgImage: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  cardOrangeTint: {
+    backgroundColor: 'rgba(246,140,80,0.45)',
     bottom: 0,
     left: 0,
     position: 'absolute',
