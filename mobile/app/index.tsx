@@ -47,10 +47,9 @@ export default function OpeningScreen() {
               cuti — semua dalam satu aplikasi.
             </Text>
             <PlateButton
-              glass
               onPress={() => router.push('/login')}
               style={styles.cta}
-              variant="primary"
+              variant="accent"
             >
               Masuk
             </PlateButton>
