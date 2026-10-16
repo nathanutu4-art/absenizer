@@ -419,7 +419,7 @@ export default function HomeScreen() {
           </Text>
         </Animated.View>
 
-        {/* JAM KERJA */}
+        {/* JAM KERJA & LOKASI */}
         <Plate solidColor="#0255b3" style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
@@ -428,12 +428,7 @@ export default function HomeScreen() {
                 {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
               </Text>
             </View>
-          </View>
-        </Plate>
-
-        {/* LOKASI */}
-        <Plate solidColor="#0255b3" style={styles.hoursPlate}>
-          <View style={styles.hoursInner}>
+            <View style={styles.hoursDividerOnBlue} />
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="map_pin" size={40} variant="cream" />
               <Text style={[styles.hoursText, styles.hoursTextOnBlue]}>
@@ -752,6 +747,11 @@ const styles = StyleSheet.create({
   },
   hoursTextOnBlue: {
     color: '#ffffff',
+  },
+  hoursDividerOnBlue: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    height: 1,
+    marginVertical: spacing.sm,
   },
   hoursDivider: { backgroundColor: colors.line, height: 1, marginVertical: spacing.sm },
   shortcutGrid: {
