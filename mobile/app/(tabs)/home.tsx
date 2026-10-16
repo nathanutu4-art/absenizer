@@ -379,7 +379,7 @@ export default function HomeScreen() {
               <View style={styles.statusInner}>
                 <View style={styles.statusHeader}>
                   <StampChip
-                    backgroundColor={clock.phase === 'in' ? colors.paper2 : colors.greenBg}
+                    backgroundColor="rgba(255,255,255,0.45)"
                     color={clock.phase === 'in' ? '#000000' : colors.green}
                   >
                     {statusChip}
