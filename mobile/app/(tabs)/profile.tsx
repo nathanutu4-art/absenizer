@@ -13,6 +13,7 @@ import { getEmployee, getPicOf, type Employee } from '../../src/data/demo';
 import { HATCH_TILE } from '../../src/data/medallions';
 import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
 import { DUMMY_AVATAR } from '../../src/data/dummy-avatar';
+import { DESK_ILLUSTRATION } from '../../src/data/desk-illustration';
 import { clearSession, getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
 import { getEmployees, getMyEmployee, isSupabaseConfigured } from '../../src/lib/db';
 import { supabase } from '../../src/lib/supabase';
@@ -183,7 +184,7 @@ export default function ProfileScreen() {
           <View style={styles.profileCard}>
             {/* Gambar 160x160 di kanan belakang */}
             <Image
-              source={require('../../assets/desk-illustration.jpg')}
+              source={{ uri: DESK_ILLUSTRATION }}
               style={styles.cardBgImage}
               resizeMode="cover"
             />
