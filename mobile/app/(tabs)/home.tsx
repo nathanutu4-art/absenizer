@@ -35,7 +35,7 @@ import {
   getEmployee,
 } from '../../src/data/demo';
 import { getActiveRole, getSession, type DemoRole } from '../../src/lib/session';
-import { getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, getTodayAttendance, saveClockOut, type RecentActivity } from '../../src/lib/db';
+import { getCompanySettings, getMyEmployee, getMyLeaveBalance, getRecentActivities, getTodayAttendance, saveClockOut, type CompanySettings, type RecentActivity } from '../../src/lib/db';
 import { calcDuration } from '../../src/lib/duration';
 import { hydrateFromDb, recordClockOut, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
@@ -120,6 +120,9 @@ export default function HomeScreen() {
 
   // Aktivitas terakhir dari database; [] = seksi disembunyikan.
   const [activities, setActivities] = useState<RecentActivity[]>([]);
+
+  // Pengaturan perusahaan dari database (jam kerja, lokasi, geofence).
+  const [settings, setSettings] = useState<CompanySettings | null>(null);
 
   useEffect(() => {
     getActiveRole().then(setRole);
@@ -248,6 +251,22 @@ export default function HomeScreen() {
         if (alive && today) {
           hydrateFromDb(today.clockIn, today.clockOut);
         }
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Tarik pengaturan perusahaan (jam kerja, lokasi, geofence) dari database.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const session = await getSession();
+      if (!alive) return;
+      if (session?.demo === false) {
+        const s = await getCompanySettings();
+        if (alive) setSettings(s);
       }
     })();
     return () => {
@@ -443,14 +462,14 @@ export default function HomeScreen() {
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />
               <Text style={[styles.hoursText, styles.hoursTextOnBlue]}>
-                {WORK_START}–{WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
+                {settings?.workStart ?? WORK_START}–{settings?.workEnd ?? WORK_END} • toleransi {LATE_TOLERANCE_MIN} mnt
               </Text>
             </View>
             <View style={styles.hoursDividerOnBlue} />
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="map_pin" size={40} variant="cream" />
               <Text style={[styles.hoursText, styles.hoursTextOnBlue]}>
-                WFO {OFFICE_NAME} • geofence {GEOFENCE_M.toLocaleString('id-ID')} m
+                WFO {settings?.officeName ?? OFFICE_NAME} • geofence {(settings?.geofenceM ?? GEOFENCE_M).toLocaleString('id-ID')} m
               </Text>
             </View>
           </View>
