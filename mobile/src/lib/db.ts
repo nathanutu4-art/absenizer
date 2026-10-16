@@ -9,6 +9,7 @@
  * Semua fungsi di sini bersifat best-effort: galat jaringan/DB ditangkap
  * dan dikembalikan sebagai fallback, bukan dilempar ke UI.
  */
+import 'expo-blob'; // Polyfill Blob native agar res.blob() tidak memicu warning LogBox.
 import type { AvatarGradientId } from '../components/Avatar';
 import {
   EMPLOYEES,
