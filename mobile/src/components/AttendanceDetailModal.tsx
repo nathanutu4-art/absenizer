@@ -91,7 +91,7 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
         style={styles.backdrop}
       >
         <TouchableOpacity activeOpacity={1} style={styles.cardTouch}>
-          <Plate glass style={styles.card}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.card}>
             <View style={styles.cardInner}>
               <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Kepala */}
