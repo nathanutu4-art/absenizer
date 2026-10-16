@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Image,
   Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -85,12 +86,13 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
       transparent
       visible={row !== null}
     >
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={onClose}
-        style={styles.backdrop}
-      >
-        <TouchableOpacity activeOpacity={1} style={styles.cardTouch}>
+      <View style={styles.backdrop}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onClose}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={styles.cardTouch}>
           <Plate solidColor="rgba(2,85,179,0.85)" style={styles.card}>
             <View style={styles.cardInner}>
               <ScrollView showsVerticalScrollIndicator={false}>
@@ -252,8 +254,8 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
               </ScrollView>
             </View>
           </Plate>
-        </TouchableOpacity>
-      </TouchableOpacity>
+        </View>
+      </View>
     </Modal>
   );
 }
