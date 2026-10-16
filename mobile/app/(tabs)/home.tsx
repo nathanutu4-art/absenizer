@@ -343,7 +343,7 @@ export default function HomeScreen() {
             </View>
 
             {/* Kartu status */}
-            <LiquidGlassCard tint="light" intensity={40} style={styles.statusPlate} pressable={false} overlayColor="rgba(5,18,48,0.2)">
+            <LiquidGlassCard tint="light" intensity={40} style={styles.statusPlate} pressable={false} overlayColor="rgba(1,86,179,0.15)">
               <View style={styles.statusInner}>
                 <View style={styles.statusHeader}>
                   <StampChip
@@ -420,7 +420,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* JAM KERJA */}
-        <Plate glass style={styles.hoursPlate}>
+        <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.hoursPlate}>
           <View style={styles.hoursInner}>
             <View style={styles.hoursRow}>
               <MedallionIcon glyph="clock" size={40} variant="cream" />
@@ -447,7 +447,7 @@ export default function HomeScreen() {
               onPress={() => router.push(s.route as never)}
               style={styles.shortcutTouch}
             >
-              <Plate glass style={styles.shortcutPlate}>
+              <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.shortcutPlate}>
                 <View style={styles.shortcutInner}>
                   <MedallionIcon glyph={s.icon} size={44} variant={s.variant} />
                   <Text style={styles.shortcutLabel}>{s.label}</Text>
@@ -459,7 +459,7 @@ export default function HomeScreen() {
 
         {/* SEKSI PERAN */}
         {role === 'karyawan' ? (
-          <Plate glass style={styles.sectionPlate}>
+          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Sisa Kuota</SectionTitle>
               {quotaRows.length === 0 ? (
@@ -486,7 +486,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/approvals')}
             style={styles.sectionTouch}
           >
-            <Plate glass style={styles.sectionPlateTight}>
+            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Menunggu Persetujuan</SectionTitle>
                 <Text style={styles.roleBig}>{pendingCount} pengajuan</Text>
@@ -500,7 +500,7 @@ export default function HomeScreen() {
             onPress={() => router.push('/(tabs)/takeover')}
             style={styles.sectionTouch}
           >
-            <Plate glass style={styles.sectionPlateTight}>
+            <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlateTight}>
               <View style={styles.sectionInner}>
                 <SectionTitle>Bisa Diambil Alih</SectionTitle>
                 <Text style={styles.roleBig}>{escalatedCount} pengajuan</Text>
@@ -512,7 +512,7 @@ export default function HomeScreen() {
 
         {/* AKTIVITAS TERAKHIR — data real; sembunyi bila kosong */}
         {activities.length > 0 ? (
-          <Plate glass style={styles.sectionPlate}>
+          <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.sectionPlate}>
             <View style={styles.sectionInner}>
               <SectionTitle>Aktivitas Terakhir</SectionTitle>
               {activities.map((a, i) => (

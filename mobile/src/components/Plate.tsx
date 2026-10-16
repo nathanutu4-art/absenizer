@@ -15,6 +15,8 @@ interface Props {
   glass?: boolean;
   /** True = kartu kaca dengan border glowing (seperti referensi UI). */
   glow?: boolean;
+  /** Warna tint kustom untuk kartu kaca (override default). */
+  tintColor?: string;
 }
 
 /**
@@ -24,14 +26,14 @@ interface Props {
  * Prop glass: kartu kaca individual tanpa mengubah theme global.
  * Prop glow: blur lebih kuat + border glowing.
  */
-export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false, glow = false }: Props) {
+export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false, glow = false, tintColor }: Props) {
   if (isGlassMode() || glass) {
     const cardContent = (
       <BlurView
         intensity={glow ? 90 : 35}
         tint="dark"
         style={{
-          backgroundColor: glow ? 'rgba(40,60,140,0.4)' : 'rgba(40,60,140,0.18)',
+          backgroundColor: tintColor ?? (glow ? 'rgba(40,60,140,0.4)' : 'rgba(40,60,140,0.18)'),
           borderRadius: GLASS_RADIUS,
         }}
       >
