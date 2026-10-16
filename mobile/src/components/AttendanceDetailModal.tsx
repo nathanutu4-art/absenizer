@@ -144,6 +144,56 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                     <DetailRow label="Jam Pulang" value={row.clockOut} />
                     <DetailRow label="Total Jam Kerja" value={duration} />
 
+                    {/* Foto selfie */}
+                    <Text style={styles.sectionLabel}>Foto Selfie</Text>
+                    {photoLoading ? (
+                      <Skeleton width="100%" height={180} borderRadius={2} />
+                    ) : (
+                      <View style={styles.photoRow}>
+                        <View style={styles.photoBox}>
+                          <Text style={styles.photoLabel}>Masuk</Text>
+                          {selfieInUrl ? (
+                            <Image
+                              resizeMode="cover"
+                              source={{ uri: selfieInUrl }}
+                              style={styles.photo}
+                            />
+                          ) : (
+                            <View style={styles.photoEmpty}>
+                              <Text style={styles.photoEmptyIcon}>📷</Text>
+                              <Text style={styles.photoEmptyText}>
+                                Tidak ada foto
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                        <View style={styles.photoBox}>
+                          <Text style={styles.photoLabel}>Pulang</Text>
+                          {row.clockOut === '-' ? (
+                            <View style={styles.photoEmpty}>
+                              <Text style={styles.photoEmptyIcon}>📷</Text>
+                              <Text style={styles.photoEmptyText}>
+                                Belum clock out
+                              </Text>
+                            </View>
+                          ) : selfieOutUrl ? (
+                            <Image
+                              resizeMode="cover"
+                              source={{ uri: selfieOutUrl }}
+                              style={styles.photo}
+                            />
+                          ) : (
+                            <View style={styles.photoEmpty}>
+                              <Text style={styles.photoEmptyIcon}>📷</Text>
+                              <Text style={styles.photoEmptyText}>
+                                Tidak ada foto
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    )}
+
                     {/* Lokasi */}
                     <Text style={styles.sectionLabel}>Lokasi</Text>
                     <DetailRow
@@ -195,53 +245,6 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                         <Text style={styles.photoEmptyText}>
                           Lokasi tidak tercatat
                         </Text>
-                      </View>
-                    )}
-
-                    {/* Foto selfie */}
-                    <Text style={styles.sectionLabel}>Foto Selfie</Text>
-                    {photoLoading ? (
-                      <Skeleton width="100%" height={180} borderRadius={2} />
-                    ) : (
-                      <View style={styles.photoRow}>
-                        <View style={styles.photoBox}>
-                          <Text style={styles.photoLabel}>Masuk</Text>
-                          {selfieInUrl ? (
-                            <Image
-                              resizeMode="cover"
-                              source={{ uri: selfieInUrl }}
-                              style={styles.photo}
-                            />
-                          ) : (
-                            <View style={styles.photoEmpty}>
-                              <Text style={styles.photoEmptyText}>
-                                Tidak ada foto
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                        <View style={styles.photoBox}>
-                          <Text style={styles.photoLabel}>Pulang</Text>
-                          {row.clockOut === '-' ? (
-                            <View style={styles.photoEmpty}>
-                              <Text style={styles.photoEmptyText}>
-                                Belum clock out
-                              </Text>
-                            </View>
-                          ) : selfieOutUrl ? (
-                            <Image
-                              resizeMode="cover"
-                              source={{ uri: selfieOutUrl }}
-                              style={styles.photo}
-                            />
-                          ) : (
-                            <View style={styles.photoEmpty}>
-                              <Text style={styles.photoEmptyText}>
-                                Tidak ada foto
-                              </Text>
-                            </View>
-                          )}
-                        </View>
                       </View>
                     )}
                   </>
@@ -351,6 +354,11 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.6)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
+  },
+  photoEmptyIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   map: {
     borderColor: 'rgba(255,255,255,0.25)',
