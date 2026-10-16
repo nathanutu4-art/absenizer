@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     height: 160,
     marginLeft: spacing.sm,
-    width: 130,
+    width: 160,
   },
   name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 28 },
   position: {
