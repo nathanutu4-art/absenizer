@@ -122,10 +122,10 @@ export default function HistoryScreen() {
       {/* Strip ringkasan */}
       <View style={styles.summary}>
         {summary.map((s) => (
-          <Plate glass key={s.label} style={styles.cell}>
+          <Plate solidColor="rgba(2,85,179,0.85)" key={s.label} style={styles.cell}>
             <View style={styles.cellInner}>
-              <Text style={styles.cellValue}>{s.value}</Text>
-              <Text style={styles.cellLabel}>{s.label}</Text>
+              <Text style={[styles.cellValue, styles.onBlueText]}>{s.value}</Text>
+              <Text style={[styles.cellLabel, styles.onBlueSubtext]}>{s.label}</Text>
               <View
                 style={[
                   styles.cellBar,
@@ -142,13 +142,13 @@ export default function HistoryScreen() {
         {loading ? (
           <>
             {[0, 1, 2].map((i) => (
-              <Plate glass key={i} style={styles.itemWrap}>
+              <Plate solidColor="rgba(2,85,179,0.85)" key={i} style={styles.itemWrap}>
                 <View style={styles.item}>
                   <View style={styles.dateBlock}>
                     <Skeleton width={30} height={24} />
                     <Skeleton width={30} height={12} style={styles.rowSkeletonGap} />
                   </View>
-                  <View style={styles.divider} />
+                  <View style={[styles.divider, styles.onBlueDividerBorder]} />
                   <View style={styles.itemBody}>
                     <Skeleton width="70%" height={16} />
                     <Skeleton width="45%" height={12} style={styles.rowSkeletonGap} />
@@ -164,7 +164,7 @@ export default function HistoryScreen() {
           const stamp = STAMP_COLORS[STATUS_TONE[row.status]];
           const duration = calcDuration(row.clockIn, row.clockOut);
           return (
-            <Plate glass key={row.id} style={styles.itemWrap}>
+            <Plate solidColor="rgba(2,85,179,0.85)" key={row.id} style={styles.itemWrap}>
               <TouchableOpacity
                 accessibilityRole="button"
                 activeOpacity={0.85}
@@ -172,20 +172,20 @@ export default function HistoryScreen() {
               >
               <View style={styles.item}>
                 <View style={styles.dateBlock}>
-                  <Text style={styles.dayNum}>{row.dayNum}</Text>
-                  <Text style={styles.dateLabel}>{row.dateLabel}</Text>
+                  <Text style={[styles.dayNum, styles.onBlueText]}>{row.dayNum}</Text>
+                  <Text style={[styles.dateLabel, styles.onBlueTertiary]}>{row.dateLabel}</Text>
                 </View>
-                <View style={styles.divider} />
+                <View style={[styles.divider, styles.onBlueDividerBorder]} />
                 <View style={styles.itemBody}>
                   <View style={styles.itemTop}>
-                    <Text style={styles.itemTime}>
+                    <Text style={[styles.itemTime, styles.onBlueText]}>
                       {row.clockIn} – {row.clockOut}
                     </Text>
                     <StampChip color={stamp.color} backgroundColor={stamp.bg}>
                       {row.status}
                     </StampChip>
                   </View>
-                  <Text style={styles.durationText}>
+                  <Text style={[styles.durationText, styles.onBlueTertiary]}>
                     Masuk {row.clockIn} • Pulang {row.clockOut} • Durasi {duration}
                   </Text>
                   {row.flags.length > 0 ? (
@@ -202,7 +202,7 @@ export default function HistoryScreen() {
                       ))}
                     </View>
                   ) : null}
-                  <Text style={styles.detailLink}>Lihat detail →</Text>
+                  <Text style={[styles.detailLink, styles.onBlueText]}>Lihat detail →</Text>
                 </View>
               </View>
               </TouchableOpacity>
@@ -312,6 +312,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   rowSkeletonGap: { marginTop: 6 },
+  /* Override teks untuk kartu biru */
+  onBlueText: { color: '#ffffff' },
+  onBlueSubtext: { color: 'rgba(255,255,255,0.75)' },
+  onBlueTertiary: { color: 'rgba(255,255,255,0.6)' },
+  onBlueDividerBorder: { borderColor: 'rgba(255,255,255,0.25)' },
   flagRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
   flagChip: { marginRight: 6, marginTop: 4 },
   detailLink: {
