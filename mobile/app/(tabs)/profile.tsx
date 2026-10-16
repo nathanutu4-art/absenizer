@@ -344,7 +344,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   root: { backgroundColor: '#ffffff', flex: 1 },
   safe: { flex: 1 },
-  scroll: { padding: spacing.md, paddingBottom: spacing.xl },
+  scroll: { paddingVertical: spacing.md, paddingBottom: spacing.xl },
   hero: {
     paddingBottom: spacing.lg,
   },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     height: 68,
     width: 68,
   },
-  profileCard: { marginHorizontal: spacing.lg, marginTop: spacing.sm },
+  profileCard: { marginTop: spacing.sm },
   profileRow: {
     alignItems: 'center',
     flexDirection: 'row',
