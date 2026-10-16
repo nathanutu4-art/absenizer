@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
@@ -59,6 +60,11 @@ export default function SuccessScreen() {
 
   return (
     <View style={styles.root}>
+      {/* Background: putih dengan sentuhan gradient lembut */}
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
       <SafeAreaView style={styles.safe}>
         <View style={styles.checkWrap}>
           <View style={styles.checkPlate}>
@@ -98,7 +104,7 @@ export default function SuccessScreen() {
         </View>
 
         {/* Struk */}
-        <Plate style={styles.receiptPlate}>
+        <Plate solidColor="rgba(2,85,179,0.85)" style={styles.receiptPlate}>
           <View style={styles.receiptInner}>
             {rows.map(([label, value], i) => (
               <View key={label}>
@@ -113,7 +119,7 @@ export default function SuccessScreen() {
         </Plate>
 
         <View style={styles.ctaWrap}>
-          <PlateButton onPress={() => router.replace('/(tabs)/home')} variant="paper">
+          <PlateButton onPress={() => router.replace('/(tabs)/home')} variant="accent">
             Kembali ke Beranda
           </PlateButton>
         </View>
@@ -135,7 +141,7 @@ function todayLong(): string {
 const CHECK_SIZE = 112;
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: colors.bg, flex: 1 },
+  root: { flex: 1 },
   safe: { flex: 1, padding: spacing.lg },
   checkWrap: { alignItems: 'center', marginTop: spacing.xl },
   checkPlate: {
@@ -144,7 +150,7 @@ const styles = StyleSheet.create({
     width: CHECK_SIZE,
   },
   checkShadow: {
-    backgroundColor: colors.etchDeep,
+    backgroundColor: 'rgba(2,85,179,0.25)',
     borderRadius: CHECK_SIZE / 2,
     height: CHECK_SIZE,
     left: 4,
@@ -155,7 +161,7 @@ const styles = StyleSheet.create({
   checkCircle: {
     alignItems: 'center',
     backgroundColor: colors.green,
-    borderColor: colors.etch,
+    borderColor: '#ffffff',
     borderRadius: CHECK_SIZE / 2,
     borderWidth: 1.5,
     height: CHECK_SIZE,
@@ -181,7 +187,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   photo: {
-    borderColor: colors.etch,
+    borderColor: '#ffffff',
     borderWidth: 2,
     height: 120,
     width: 120,
@@ -201,15 +207,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
   },
-  rowLabel: { color: colors.ink2, fontFamily: fontFamily('500'), fontSize: 13 },
+  rowLabel: { color: 'rgba(255,255,255,0.75)', fontFamily: fontFamily('500'), fontSize: 13 },
   rowValue: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('700'),
     fontSize: 13,
     textAlign: 'right',
   },
   dashed: {
-    borderBottomColor: colors.line,
+    borderBottomColor: 'rgba(255,255,255,0.3)',
     borderBottomWidth: 1,
     borderStyle: 'dashed',
   },

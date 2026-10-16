@@ -275,7 +275,7 @@ export default function ProfileScreen() {
                   )}
                   <PlateButton
                     onPress={handleChangePassword}
-                    variant="primary"
+                    variant="accent"
                     style={styles.pwBtn}
                   >
                     {pwBusy ? 'Menyimpan…' : 'Simpan Kata Sandi'}

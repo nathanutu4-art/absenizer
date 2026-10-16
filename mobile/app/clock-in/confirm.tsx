@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
@@ -181,6 +182,11 @@ export default function ConfirmScreen() {
 
   return (
     <View style={styles.root}>
+      {/* Background: putih dengan sentuhan gradient lembut */}
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
       <SafeAreaView style={styles.safe}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -194,13 +200,13 @@ export default function ConfirmScreen() {
         </View>
 
         {/* Peta simulasi */}
-        <Plate style={styles.mapPlate}>
+        <Plate solidColor="rgba(2,85,179,0.85)" style={styles.mapPlate}>
           <View style={styles.mapInner}>
             {/* lingkaran geofence */}
             <View style={styles.geofence} />
             {/* pin kantor */}
             <View style={styles.officePin}>
-              <MedallionIcon glyph="building" size={46} variant="wadaIndigo" />
+              <MedallionIcon glyph="building" size={46} variant="cream" />
             </View>
             {locLoading ? (
               /* Animasi radar saat lokasi loading */
@@ -264,13 +270,13 @@ export default function ConfirmScreen() {
 
         {/* Statistik jarak */}
         <View style={styles.statsRow}>
-          <Plate style={styles.statPlate}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.statPlate}>
             <View style={styles.statInner}>
               <Text style={styles.statValue}>{distanceLabel}</Text>
               <Text style={styles.statLabel}>Jarak ke kantor</Text>
             </View>
           </Plate>
-          <Plate style={styles.statPlate}>
+          <Plate solidColor="rgba(2,85,179,0.85)" style={styles.statPlate}>
             <View style={styles.statInner}>
               <Text
                 style={[
@@ -286,7 +292,7 @@ export default function ConfirmScreen() {
         </View>
 
         {/* Kartu kantor */}
-        <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.officePlate}>
+        <Plate solidColor="rgba(2,85,179,0.85)" style={styles.officePlate}>
           <View style={styles.officeInner}>
             <MedallionIcon glyph="map_pin" size={44} variant="ink" />
             <View style={styles.officeText}>
@@ -305,7 +311,7 @@ export default function ConfirmScreen() {
         </Plate>
 
         {/* Simulasi */}
-        <Plate glass tintColor="rgba(1,86,179,0.12)" style={styles.simPlate}>
+        <Plate solidColor="rgba(2,85,179,0.85)" style={styles.simPlate}>
           <View style={styles.simInner}>
             <View style={styles.simRow}>
               <Text style={styles.simLabel}>
@@ -327,7 +333,7 @@ export default function ConfirmScreen() {
           <PlateButton
             disabled={locLoading || busy}
             onPress={handleConfirm}
-            variant="primary"
+            variant="accent"
           >
             {busy
               ? 'Mengirim…'
@@ -344,7 +350,7 @@ export default function ConfirmScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { backgroundColor: colors.bg, flex: 1 },
+  root: { flex: 1 },
   safe: { flex: 1 },
   header: {
     alignItems: 'center',
@@ -362,14 +368,14 @@ const styles = StyleSheet.create({
   mapPlate: { marginHorizontal: spacing.lg, marginTop: spacing.sm },
   mapInner: {
     alignItems: 'center',
-    backgroundColor: colors.paper2,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: radius.card,
     height: 300,
     justifyContent: 'center',
     overflow: 'hidden',
   },
   geofence: {
-    borderColor: colors.indigo,
+    borderColor: 'rgba(255,255,255,0.55)',
     borderRadius: 130,
     borderStyle: 'dashed',
     borderWidth: 2,
@@ -392,7 +398,7 @@ const styles = StyleSheet.create({
     top: '38%',
   },
   radarRing: {
-    borderColor: 'rgba(1,86,179,0.5)',
+    borderColor: 'rgba(255,255,255,0.5)',
     borderRadius: 60,
     borderWidth: 2,
     height: 120,
@@ -404,7 +410,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radarText: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('600'),
     fontSize: 11,
     marginTop: 8,
@@ -434,12 +440,12 @@ const styles = StyleSheet.create({
   statPlate: { flex: 1 },
   statInner: { alignItems: 'center', padding: spacing.md },
   statValue: {
-    color: colors.ink,
+    color: '#ffffff',
     fontFamily: fontFamily('800'),
     fontSize: 18,
   },
   statLabel: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 11,
     marginTop: 4,
@@ -451,15 +457,15 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   officeText: { flex: 1, marginLeft: 12 },
-  officeName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  officeName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   officeAddress: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.85)',
     fontFamily: fontFamily('400'),
     fontSize: 13,
     marginTop: 2,
   },
   officeMeta: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.7)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
     marginTop: 4,
@@ -472,14 +478,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   simLabel: {
-    color: colors.ink,
+    color: '#ffffff',
     flex: 1,
     fontFamily: fontFamily('600'),
     fontSize: 13,
     marginRight: 8,
   },
   simHint: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 11,
     marginTop: 6,

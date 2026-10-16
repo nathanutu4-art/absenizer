@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from '../../src/components/Avatar';
@@ -39,7 +40,12 @@ export default function ApprovalsScreen() {
   const decided = PIC_REQUESTS.filter((r) => r.status !== 'menunggu');
 
   return (
-    <ScreenContainer>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
+      <ScreenContainer backgroundColor="transparent">
       <View style={styles.headerRow}>
         <Text style={styles.header}>Persetujuan</Text>
         <StampChip color={colors.red} backgroundColor={colors.redBg}>
@@ -47,10 +53,10 @@ export default function ApprovalsScreen() {
         </StampChip>
       </View>
 
-      <Plate style={styles.infoPlate}>
+      <Plate solidColor="rgba(2,85,179,0.85)" style={styles.infoPlate}>
         <View style={styles.platePad}>
           <View style={styles.infoRow}>
-            <MedallionIcon glyph="info" size={40} variant="wadaApricot" />
+            <MedallionIcon glyph="info" size={40} variant="cream" />
             <Text style={[styles.infoText, styles.infoBody]}>
               Tinjau pengajuan dari anggota tim Anda. Penolakan wajib disertai
               catatan.
@@ -68,7 +74,8 @@ export default function ApprovalsScreen() {
       {decided.map((r) => (
         <ApprovalRow key={r.id} request={r} />
       ))}
-    </ScreenContainer>
+      </ScreenContainer>
+    </View>
   );
 }
 
@@ -80,7 +87,7 @@ export function ApprovalRow({ request }: { request: LeaveRequest }) {
       activeOpacity={0.9}
       onPress={() => router.push(`/pic/detail?id=${request.id}`)}
     >
-      <Plate style={styles.rowPlate}>
+      <Plate solidColor="rgba(2,85,179,0.85)" style={styles.rowPlate}>
         <View style={styles.platePad}>
           <View style={styles.row}>
           <Avatar gradientId={employee.gradientId} name={employee.name} size={46} shape="square" />
@@ -102,6 +109,7 @@ export function ApprovalRow({ request }: { request: LeaveRequest }) {
 }
 
 const styles = StyleSheet.create({
+  root: { backgroundColor: '#ffffff', flex: 1 },
   headerRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -112,7 +120,7 @@ const styles = StyleSheet.create({
   infoPlate: { marginTop: spacing.md },
   platePad: { padding: spacing.md },
   infoRow: { alignItems: 'center', flexDirection: 'row' },
-  infoText: { color: colors.blue, fontFamily: fontFamily('500'), fontSize: 12.5 },
+  infoText: { color: '#ffffff', fontFamily: fontFamily('500'), fontSize: 12.5 },
   infoBody: { flex: 1, marginLeft: 10 },
   secWrap: { marginBottom: spacing.sm, marginTop: spacing.lg },
   secTitle: {
@@ -126,15 +134,15 @@ const styles = StyleSheet.create({
   rowPlate: { marginBottom: spacing.sm },
   row: { alignItems: 'center', flexDirection: 'row' },
   rowText: { flex: 1, marginLeft: 12 },
-  rowName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  rowName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   rowDesc: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 12.5,
     marginTop: 2,
   },
   rowDate: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.6)',
     fontFamily: fontFamily('400'),
     fontSize: 11,
     marginTop: 2,

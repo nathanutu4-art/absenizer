@@ -63,7 +63,7 @@ export default function SelfieScreen() {
             accessibilityRole="button"
             onPress={() => router.back()}
           >
-            <MedallionIcon glyph="chevron_left" size={36} variant="cream" />
+            <MedallionIcon glyph="chevron_left" size={36} variant="wadaIndigo" />
           </TouchableOpacity>
           <Text style={styles.title}>Ambil Selfie</Text>
           <View style={styles.headerSpacer} />
@@ -116,7 +116,7 @@ export default function SelfieScreen() {
             accessibilityRole="button"
             onPress={handleShutter}
           >
-            <MedallionIcon glyph="check" size={72} variant="cream" />
+            <MedallionIcon glyph="check" size={72} variant="wadaIndigo" />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   viewfinder: {
     alignItems: 'center',
     backgroundColor: colors.darkSurface,
-    borderColor: colors.etch,
+    borderColor: 'rgba(255,255,255,0.3)',
     borderRadius: radius.card,
     borderWidth: 1.5,
     height: 400,
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   noCamRetry: {
-    color: colors.wadaApricot,
+    color: colors.wadaIndigo,
     fontFamily: fontFamily('700'),
     fontSize: 14,
     marginTop: spacing.sm,

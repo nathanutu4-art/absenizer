@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from '../../src/components/Avatar';
@@ -36,7 +37,12 @@ export default function TakeoverScreen() {
   const takenOver = PIC_REQUESTS.filter((r) => r.takenOverBy);
 
   return (
-    <ScreenContainer>
+    <View style={styles.root}>
+      <LinearGradient
+        colors={['#ffffff', '#eef3fa']}
+        style={StyleSheet.absoluteFill}
+      />
+      <ScreenContainer backgroundColor="transparent">
       <View style={styles.headerRow}>
         <Text style={styles.header}>Pengambilalihan</Text>
         <StampChip color={colors.indigo} backgroundColor={colors.blueBg}>
@@ -45,12 +51,12 @@ export default function TakeoverScreen() {
       </View>
 
       {/* Banner audit persisten */}
-      <Plate style={styles.auditPlate}>
+      <Plate solidColor="rgba(2,85,179,0.85)" style={styles.auditPlate}>
         <View style={styles.platePad}>
           <View style={styles.auditRow}>
-          <MedallionIcon glyph="shield" size={52} />
+          <MedallionIcon glyph="shield" size={52} variant="cream" />
           <View style={styles.auditText}>
-            <StampChip color={colors.orange} backgroundColor={colors.orangeBg}>
+            <StampChip color="#ffffff" backgroundColor="rgba(255,255,255,0.25)">
               Audit
             </StampChip>
             <Text style={styles.auditTitle}>Penanda Audit Aktif</Text>
@@ -75,7 +81,8 @@ export default function TakeoverScreen() {
       ) : (
         takenOver.map((r) => <TakeoverRow key={r.id} request={r} />)
       )}
-    </ScreenContainer>
+      </ScreenContainer>
+    </View>
   );
 }
 
@@ -87,7 +94,7 @@ export function TakeoverRow({ request }: { request: LeaveRequest }) {
       activeOpacity={0.9}
       onPress={() => router.push(`/hr/detail?id=${request.id}`)}
     >
-      <Plate style={styles.rowPlate}>
+      <Plate solidColor="rgba(2,85,179,0.85)" style={styles.rowPlate}>
         <View style={styles.platePad}>
           <View style={styles.row}>
           <Avatar gradientId={employee.gradientId} name={employee.name} size={46} shape="square" />
@@ -112,6 +119,7 @@ export function TakeoverRow({ request }: { request: LeaveRequest }) {
 }
 
 const styles = StyleSheet.create({
+  root: { backgroundColor: '#ffffff', flex: 1 },
   headerRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -124,13 +132,13 @@ const styles = StyleSheet.create({
   auditRow: { alignItems: 'center', flexDirection: 'row' },
   auditText: { flex: 1, marginLeft: 12 },
   auditTitle: {
-    color: colors.orange,
+    color: '#ffffff',
     fontFamily: serifFamily('800'),
     fontSize: 16,
     marginTop: 6,
   },
   auditSub: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('400'),
     fontSize: 12,
     marginTop: 3,
@@ -153,15 +161,15 @@ const styles = StyleSheet.create({
   rowPlate: { marginBottom: spacing.sm },
   row: { alignItems: 'center', flexDirection: 'row' },
   rowText: { flex: 1, marginLeft: 12 },
-  rowName: { color: colors.ink, fontFamily: fontFamily('700'), fontSize: 14 },
+  rowName: { color: '#ffffff', fontFamily: fontFamily('700'), fontSize: 14 },
   rowDesc: {
-    color: colors.ink2,
+    color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('500'),
     fontSize: 12.5,
     marginTop: 2,
   },
   rowDate: {
-    color: colors.ink3,
+    color: 'rgba(255,255,255,0.6)',
     fontFamily: fontFamily('400'),
     fontSize: 11,
     marginTop: 2,

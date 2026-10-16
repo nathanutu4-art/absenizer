@@ -330,7 +330,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
         </Plate>
       ) : null}
 
-      <PlateButton onPress={handleSubmit} style={styles.submit} variant="primary">
+      <PlateButton onPress={handleSubmit} style={styles.submit} variant="accent">
         {sending ? 'Mengirim…' : 'Kirim Pengajuan'}
       </PlateButton>
     </View>
@@ -547,7 +547,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     transform: [{ rotate: '-0.6deg' }],
   },
-  tabActive: { backgroundColor: colors.etch, borderColor: colors.etchDeep },
+  tabActive: {
+    backgroundColor: 'rgba(2,85,179,0.9)',
+    borderColor: 'rgba(2,85,179,0.9)',
+  },
   tabIdle: { backgroundColor: 'transparent', borderColor: '#d5dce8' },
   tabText: {
     fontFamily: fontFamily('700'),
