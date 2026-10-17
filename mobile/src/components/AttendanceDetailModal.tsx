@@ -143,75 +143,37 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                       ))}
                     </View>
 
-                    {/* Jam */}
-                    <DetailRow label="Jam Masuk" value={row.clockIn} />
-                    <DetailRow label="Jam Pulang" value={row.clockOut} />
+                    {/* Total durasi */}
                     <DetailRow label="Total Jam Kerja" value={duration} />
 
-                    {/* Foto selfie */}
-                    <Text style={styles.sectionLabel}>Foto Selfie</Text>
-                    {photoLoading ? (
-                      <Skeleton width="100%" height={180} borderRadius={2} />
-                    ) : (
-                      <View style={styles.photoRow}>
-                        <View style={styles.photoBox}>
-                          <Text style={styles.photoLabel}>Masuk</Text>
-                          {selfieInUrl ? (
-                            <Image
-                              resizeMode="cover"
-                              source={{ uri: selfieInUrl }}
-                              style={styles.photo}
-                            />
-                          ) : (
-                            <View style={styles.photoEmpty}>
-                              <Text style={styles.photoEmptyIcon}>📷</Text>
-                              <Text style={styles.photoEmptyText}>
-                                Tidak ada foto
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                        <View style={styles.photoBox}>
-                          <Text style={styles.photoLabel}>Pulang</Text>
-                          {row.clockOut === '-' ? (
-                            <View style={styles.photoEmpty}>
-                              <Text style={styles.photoEmptyIcon}>📷</Text>
-                              <Text style={styles.photoEmptyText}>
-                                Belum clock out
-                              </Text>
-                            </View>
-                          ) : selfieOutUrl ? (
-                            <Image
-                              resizeMode="cover"
-                              source={{ uri: selfieOutUrl }}
-                              style={styles.photo}
-                            />
-                          ) : (
-                            <View style={styles.photoEmpty}>
-                              <Text style={styles.photoEmptyIcon}>📷</Text>
-                              <Text style={styles.photoEmptyText}>
-                                Tidak ada foto
-                              </Text>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    )}
-
-                    {/* Lokasi */}
-                    <Text style={styles.sectionLabel}>Lokasi</Text>
-                    <DetailRow
-                      label="Clock In"
-                      value={locationText(row.clockInLat, row.clockInLng)}
-                    />
-                    <DetailRow
-                      label="Clock Out"
-                      value={locationText(row.clockOutLat, row.clockOutLng)}
-                    />
-                    {/* Peta clock in & clock out berdampingan */}
-                    <View style={styles.mapRow}>
-                      <View style={styles.mapBox}>
-                        <Text style={styles.photoLabel}>Masuk</Text>
+                    {/* Dua kolom: kiri Clock In, kanan Clock Out */}
+                    <View style={styles.columnsRow}>
+                      {/* Kolom kiri: Clock In */}
+                      <View style={styles.column}>
+                        <Text style={styles.columnTitle}>Masuk</Text>
+                        <DetailRow label="Jam" value={row.clockIn} />
+                        <Text style={styles.sectionLabel}>Foto Selfie</Text>
+                        {photoLoading ? (
+                          <Skeleton width="100%" height={180} borderRadius={2} />
+                        ) : selfieInUrl ? (
+                          <Image
+                            resizeMode="cover"
+                            source={{ uri: selfieInUrl }}
+                            style={styles.photo}
+                          />
+                        ) : (
+                          <View style={styles.photoEmpty}>
+                            <Text style={styles.photoEmptyIcon}>📷</Text>
+                            <Text style={styles.photoEmptyText}>
+                              Tidak ada foto
+                            </Text>
+                          </View>
+                        )}
+                        <Text style={styles.sectionLabel}>Lokasi</Text>
+                        <DetailRow
+                          label="Koordinat"
+                          value={locationText(row.clockInLat, row.clockInLng)}
+                        />
                         {row.clockInLat != null && row.clockInLng != null ? (
                           mapReady ? (
                             <MapView
@@ -245,8 +207,39 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                           </View>
                         )}
                       </View>
-                      <View style={styles.mapBox}>
-                        <Text style={styles.photoLabel}>Pulang</Text>
+                      {/* Kolom kanan: Clock Out */}
+                      <View style={styles.column}>
+                        <Text style={styles.columnTitle}>Pulang</Text>
+                        <DetailRow label="Jam" value={row.clockOut} />
+                        <Text style={styles.sectionLabel}>Foto Selfie</Text>
+                        {photoLoading ? (
+                          <Skeleton width="100%" height={180} borderRadius={2} />
+                        ) : row.clockOut === '-' ? (
+                          <View style={styles.photoEmpty}>
+                            <Text style={styles.photoEmptyIcon}>📷</Text>
+                            <Text style={styles.photoEmptyText}>
+                              Belum clock out
+                            </Text>
+                          </View>
+                        ) : selfieOutUrl ? (
+                          <Image
+                            resizeMode="cover"
+                            source={{ uri: selfieOutUrl }}
+                            style={styles.photo}
+                          />
+                        ) : (
+                          <View style={styles.photoEmpty}>
+                            <Text style={styles.photoEmptyIcon}>📷</Text>
+                            <Text style={styles.photoEmptyText}>
+                              Tidak ada foto
+                            </Text>
+                          </View>
+                        )}
+                        <Text style={styles.sectionLabel}>Lokasi</Text>
+                        <DetailRow
+                          label="Koordinat"
+                          value={locationText(row.clockOutLat, row.clockOutLng)}
+                        />
                         {row.clockOutLat != null && row.clockOutLng != null ? (
                           mapReady ? (
                             <MapView
@@ -357,12 +350,19 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     marginTop: spacing.md,
   },
-  photoRow: {
+  columnsRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: spacing.md,
     marginTop: spacing.sm,
   },
-  photoBox: { flex: 1 },
+  column: { flex: 1 },
+  columnTitle: {
+    color: '#ffffff',
+    fontFamily: serifFamily('800'),
+    fontSize: 15,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
   photoLabel: {
     color: 'rgba(255,255,255,0.75)',
     fontFamily: fontFamily('600'),
@@ -394,12 +394,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-  mapRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  mapBox: { flex: 1 },
   mapSmall: {
     borderColor: 'rgba(255,255,255,0.25)',
     borderWidth: 1.5,
