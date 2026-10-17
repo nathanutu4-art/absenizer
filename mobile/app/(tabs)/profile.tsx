@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, View, Animated } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, View, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppIcon } from '../../src/components/AppIcon';
 import { Avatar } from '../../src/components/Avatar';
@@ -10,7 +10,6 @@ import { Plate } from '../../src/components/Plate';
 import { PlateButton } from '../../src/components/PlateButton';
 import { showToast } from '../../src/components/Toast';
 import { getEmployee, getPicOf, type Employee } from '../../src/data/demo';
-import { HATCH_TILE } from '../../src/data/medallions';
 import { AVATAR_PLACEHOLDER } from '../../src/data/avatar-placeholder';
 import { DUMMY_AVATAR } from '../../src/data/dummy-avatar';
 import { DESK_ILLUSTRATION } from '../../src/data/desk-illustration';
@@ -109,6 +108,30 @@ export default function ProfileScreen() {
   const me: Employee = isDemo ? demoMe : (meDb ?? EMPTY_EMPLOYEE);
   const pic: Employee | null = isDemo ? getPicOf(demoMe) : picDb;
   const loading = isDemo === null || (!isDemo && !meLoaded);
+
+  // Animasi skeleton: hanya jalan saat loading.
+  useEffect(() => {
+    if (!loading) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(skeletonAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(skeletonAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => {
+      loop.stop();
+    };
+  }, [loading, skeletonAnim]);
+
   const avatarUri = isDemo
     ? AVATAR_PLACEHOLDER
     : mePhoto && /^https?:\/\//i.test(mePhoto)
@@ -125,8 +148,21 @@ export default function ProfileScreen() {
   ];
 
   async function handleLogout() {
-    await clearSession();
-    router.replace('/login');
+    Alert.alert(
+      'Keluar dari akun?',
+      'Kamu harus masuk lagi untuk menggunakan aplikasi.',
+      [
+        { text: 'Batal', style: 'cancel' },
+        {
+          text: 'Keluar',
+          style: 'destructive',
+          onPress: async () => {
+            await clearSession();
+            router.replace('/login');
+          },
+        },
+      ],
+    );
   }
 
   async function handleChangePassword() {
@@ -166,11 +202,6 @@ export default function ProfileScreen() {
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.hero}>
-          <Image
-            source={{ uri: HATCH_TILE }}
-            resizeMode="repeat"
-            style={[StyleSheet.absoluteFill, { opacity: 0.07 }]}
-          />
           <View style={styles.headerRow}>
             <MedallionIcon glyph="user" size={58} variant="wadaIndigo" />
             <View style={styles.headerText}>
@@ -188,7 +219,7 @@ export default function ProfileScreen() {
               style={styles.cardBgImage}
               resizeMode="cover"
             />
-            {/* Kartu depan: data oranye transparan */}
+            {/* Kartu depan: data biru transparan */}
             <View style={styles.cardOrangeTint} />
             <View style={styles.profileRow}>
               <View style={styles.avatarFrame}>
@@ -210,11 +241,11 @@ export default function ProfileScreen() {
             <View style={styles.contactRow}>
               <View style={styles.contactItem}>
                 <MedallionIcon glyph="mail" size={24} variant="cream" />
-                <Text style={styles.contactText}>{me.email}</Text>
+                <Text style={styles.contactText} numberOfLines={1} ellipsizeMode="tail">{me.email}</Text>
               </View>
               <View style={styles.contactItem}>
                 <MedallionIcon glyph="phone" size={24} variant="cream" />
-                <Text style={styles.contactText}>{me.phone}</Text>
+                <Text style={styles.contactText} numberOfLines={1} ellipsizeMode="tail">{me.phone}</Text>
               </View>
             </View>
           </View>
@@ -326,13 +357,8 @@ export default function ProfileScreen() {
                     value={confirmPass}
                   />
                   {pwMsg && (
-                    <Text
-                      style={[
-                        styles.pwMsg,
-                        { color: pwMsg.ok ? colors.green : colors.red },
-                      ]}
-                    >
-                      {pwMsg.text}
+                    <Text style={styles.pwMsg}>
+                      {pwMsg.ok ? '✓ ' : '✕ '}{pwMsg.text}
                     </Text>
                   )}
                   <PlateButton
@@ -424,7 +450,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingBottom: spacing.sm,
   },
-  profileText: { flex: 1, marginLeft: spacing.md },
+  profileText: { flex: 1, marginLeft: spacing.md, paddingRight: 160 + spacing.md },
   name: { color: '#ffffff', fontFamily: serifFamily('800'), fontSize: 28 },
   position: {
     color: 'rgba(255,255,255,0.9)',
@@ -474,7 +500,7 @@ const styles = StyleSheet.create({
   contactText: {
     color: 'rgba(255,255,255,0.9)',
     fontFamily: fontFamily('500'),
-    fontSize: 9,
+    fontSize: 11,
     marginLeft: 6,
   },
   body: { paddingTop: spacing.md },
@@ -508,8 +534,8 @@ const styles = StyleSheet.create({
   },
   picWrap: { marginTop: spacing.sm },
   pwInput: {
-    backgroundColor: '#f2f5fa',
-    borderColor: '#d5dce8',
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
     borderRadius: 4,
     borderWidth: 1.5,
     color: colors.ink,
@@ -520,6 +546,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   pwMsg: {
+    color: colors.surface,
     fontFamily: fontFamily('600'),
     fontSize: 13,
     marginTop: spacing.sm,

@@ -1,6 +1,7 @@
-import { router } from 'expo-router';
+import { router, useIsFocused } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   Image,
   ScrollView,
@@ -40,19 +41,22 @@ import { calcDuration } from '../../src/lib/duration';
 import { hydrateFromDb, resetClock, useClockState } from '../../src/lib/clockState';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
-function useWibClock(): string {
+/** Tampilan jam WIB — komponen terpisah + memoized agar interval 1 detik
+ *  tidak me-render ulang seluruh HomeScreen. */
+const ClockDisplay = React.memo(function ClockDisplay() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
-  return new Intl.DateTimeFormat('id-ID', {
+  const wib = new Intl.DateTimeFormat('id-ID', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
     timeZone: 'Asia/Jakarta',
   }).format(now);
-}
+  return <Text style={styles.clockTime}>{wib} WIB</Text>;
+});
 
 function todayLine(): string {
   return new Intl.DateTimeFormat('id-ID', {
@@ -103,7 +107,7 @@ function SectionTitle({ children, onBlue }: { children: React.ReactNode; onBlue?
 export default function HomeScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
   const clock = useClockState();
-  const wib = useWibClock();
+  const isFocused = useIsFocused();
   // Animasi pop-up lingkaran clock saat muncul (scale 0 -> 1).
   const popIn = useRef(new Animated.Value(0)).current;
   // Nama & foto pengguna yang login (dari DB bila tersedia).
@@ -128,12 +132,16 @@ export default function HomeScreen() {
     getActiveRole().then(setRole);
   }, []);
 
+  // Muat semua data sesi dalam satu effect (satu panggilan getSession).
   useEffect(() => {
     let alive = true;
     (async () => {
       const session = await getSession();
       if (!alive) return;
-      setIsDemo(session?.demo !== false);
+      const demo = session?.demo !== false;
+      setIsDemo(demo);
+
+      // Profil pengguna yang login.
       const me = await getMyEmployee();
       if (!alive) return;
       if (me) {
@@ -141,18 +149,8 @@ export default function HomeScreen() {
         setMePhoto(me.photoUrl ?? null);
       }
       setMeLoading(false);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
 
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const session = await getSession();
-      if (!alive) return;
-      if (session?.demo !== false) {
+      if (demo) {
         // Sesi demo: tampilkan angka demo.
         setQuotaRows(
           QUOTAS.slice(0, 2).map((q) => ({
@@ -165,17 +163,21 @@ export default function HomeScreen() {
         );
         return;
       }
+
+      // Sesi real: kuota, aktivitas, absensi hari ini, pengaturan — paralel.
       try {
-        const [balance, settings] = await Promise.all([
+        const [balance, companySettings, acts, today] = await Promise.all([
           getMyLeaveBalance(),
           getCompanySettings(),
+          getRecentActivities(),
+          getTodayAttendance(),
         ]);
         if (!alive) return;
         // Kuota penuh bila belum ada pemakaian (used = 0/null);
         // sisa = kuota - terpakai.
-        const cutiQuota = balance?.cutiQuota ?? settings.cutiQuotaDefault;
+        const cutiQuota = balance?.cutiQuota ?? companySettings.cutiQuotaDefault;
         const cutiUsed = balance?.cutiUsed ?? 0;
-        const ijinQuota = balance?.ijinQuota ?? settings.ijinQuotaDefault;
+        const ijinQuota = balance?.ijinQuota ?? companySettings.ijinQuotaDefault;
         const ijinUsed = balance?.ijinUsed ?? 0;
         setQuotaRows([
           {
@@ -187,6 +189,9 @@ export default function HomeScreen() {
             remaining: `${ijinQuota - ijinUsed} dari ${ijinQuota} tersisa`,
           },
         ]);
+        setActivities(acts);
+        if (today) hydrateFromDb(today.clockIn, today.clockOut);
+        setSettings(companySettings);
       } catch {
         if (!alive) return;
         setQuotaRows([]);
@@ -205,7 +210,9 @@ export default function HomeScreen() {
 
   const pulse = useRef(new Animated.Value(0)).current;
 
+  // Animasi pulse hanya jalan saat tab fokus (hemat baterai).
   useEffect(() => {
+    if (!isFocused) return;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, {
@@ -222,57 +229,7 @@ export default function HomeScreen() {
     );
     loop.start();
     return () => loop.stop();
-  }, [pulse]);
-
-  // Muat aktivitas terakhir dari database (sembunyikan bila kosong).
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const session = await getSession();
-      if (!alive) return;
-      if (session?.demo === false) {
-        const acts = await getRecentActivities();
-        if (alive) setActivities(acts);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  // Tarik jam masuk/pulang hari ini dari database.
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const session = await getSession();
-      if (!alive) return;
-      if (session?.demo === false) {
-        const today = await getTodayAttendance();
-        if (alive && today) {
-          hydrateFromDb(today.clockIn, today.clockOut);
-        }
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  // Tarik pengaturan perusahaan (jam kerja, lokasi, geofence) dari database.
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const session = await getSession();
-      if (!alive) return;
-      if (session?.demo === false) {
-        const s = await getCompanySettings();
-        if (alive) setSettings(s);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
+  }, [pulse, isFocused]);
 
   // Pop-up lingkaran clock saat layar muncul.
   useEffect(() => {
@@ -299,7 +256,11 @@ export default function HomeScreen() {
     outputRange: [0.45, 0],
   });
 
+  // Guard anti double-tap: cegah push route ganda.
+  const navigating = useRef(false);
   function handleClockPress() {
+    if (navigating.current) return;
+    navigating.current = true;
     if (clock.phase === 'in') {
       router.push('/clock-in/selfie');
     } else if (clock.phase === 'out') {
@@ -307,6 +268,9 @@ export default function HomeScreen() {
     } else {
       showToast('Absensi hari ini sudah lengkap.');
     }
+    setTimeout(() => {
+      navigating.current = false;
+    }, 800);
   }
 
   const clockLabel =
@@ -365,6 +329,7 @@ export default function HomeScreen() {
                 </View>
               </View>
               <TouchableOpacity
+                accessibilityLabel="Notifikasi"
                 accessibilityRole="button"
                 onPress={() => showToast('Belum ada notifikasi baru.')}
                 style={styles.bell}
@@ -406,14 +371,28 @@ export default function HomeScreen() {
                 </View>
                 {/* SEMENTARA: reset clock in/out untuk testing */}
                 <TouchableOpacity
+                  accessibilityLabel="Reset absensi hari ini"
                   accessibilityRole="button"
-                  onPress={async () => {
-                    const ok = await deleteTodayAttendance();
-                    resetClock();
-                    showToast(
-                      ok
-                        ? 'Absensi hari ini direset.'
-                        : 'Reset lokal saja (DB tidak terjangkau).',
+                  onPress={() => {
+                    Alert.alert(
+                      'Reset absensi?',
+                      'Data absensi hari ini akan dihapus.',
+                      [
+                        { text: 'Batal', style: 'cancel' },
+                        {
+                          text: 'Reset',
+                          style: 'destructive',
+                          onPress: async () => {
+                            const ok = await deleteTodayAttendance();
+                            resetClock();
+                            showToast(
+                              ok
+                                ? 'Absensi hari ini direset.'
+                                : 'Reset lokal saja (DB tidak terjangkau).',
+                            );
+                          },
+                        },
+                      ],
                     );
                   }}
                   style={styles.resetLink}
@@ -442,6 +421,7 @@ export default function HomeScreen() {
             />
             <View style={styles.clockShadow} />
             <TouchableOpacity
+              accessibilityLabel={clockLabel}
               accessibilityRole="button"
               activeOpacity={0.85}
               onPress={handleClockPress}
@@ -454,7 +434,7 @@ export default function HomeScreen() {
               <SketchClock size={160} style={styles.clockMedal} />
               <View style={styles.clockTextWrap}>
                 <Text style={styles.clockLabel}>{clockLabel}</Text>
-                <Text style={styles.clockTime}>{wib} WIB</Text>
+                <ClockDisplay />
               </View>
             </TouchableOpacity>
           </View>
@@ -490,6 +470,7 @@ export default function HomeScreen() {
         <View style={styles.shortcutGrid}>
           {shortcuts.map((s) => (
             <TouchableOpacity
+              accessibilityLabel={s.label}
               accessibilityRole="button"
               key={s.label}
               onPress={() => router.push(s.route as never)}
@@ -523,7 +504,11 @@ export default function HomeScreen() {
                   </View>
                 ))
               )}
-              <TouchableOpacity onPress={() => router.push('/(tabs)/requests')}>
+              <TouchableOpacity
+                accessibilityLabel="Lihat semua kuota"
+                accessibilityRole="button"
+                onPress={() => router.push('/(tabs)/requests')}
+              >
                 <Text style={[styles.linkText, styles.onBlueText]}>Lihat semua kuota →</Text>
               </TouchableOpacity>
             </View>
@@ -706,7 +691,7 @@ const styles = StyleSheet.create({
     height: 340,
   },
   glowCircle: {
-    backgroundColor: '#051230',
+    backgroundColor: colors.wadaIndigo,
     position: 'absolute',
     opacity: 0.06,
   },
@@ -717,7 +702,7 @@ const styles = StyleSheet.create({
     width: CLOCK_DIAMETER,
   },
   pulseRing: {
-    borderColor: '#f68c50',
+    borderColor: colors.wadaApricot,
     borderRadius: CLOCK_DIAMETER / 2,
     borderWidth: 2,
     height: CLOCK_DIAMETER,
@@ -757,7 +742,7 @@ const styles = StyleSheet.create({
   },
   clockTextWrap: {
     alignItems: 'center',
-    backgroundColor: '#051230',
+    backgroundColor: colors.wadaIndigo,
     borderRadius: 14,
     bottom: 8,
     left: 20,
@@ -767,7 +752,7 @@ const styles = StyleSheet.create({
     right: 20,
   },
   clockLabel: {
-    color: '#ffffff',
+    color: colors.surface,
     fontFamily: serifFamily('800'),
     fontSize: 19,
   },
@@ -788,9 +773,9 @@ const styles = StyleSheet.create({
     padding: spacing.xs,
   },
   resetLinkText: {
-    color: colors.ink3,
-    fontFamily: fontFamily('500'),
-    fontSize: 11,
+    color: colors.ink2,
+    fontFamily: fontFamily('600'),
+    fontSize: 12,
     textAlign: 'center',
     textDecorationLine: 'underline',
   },
@@ -805,7 +790,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   hoursTextOnBlue: {
-    color: '#ffffff',
+    color: colors.surface,
   },
   hoursDividerOnBlue: {
     backgroundColor: 'rgba(255,255,255,0.25)',
@@ -813,7 +798,7 @@ const styles = StyleSheet.create({
     marginVertical: spacing.sm,
   },
   /* Override teks untuk kartu biru */
-  onBlueText: { color: '#ffffff' },
+  onBlueText: { color: colors.surface },
   onBlueSubtext: { color: 'rgba(255,255,255,0.75)' },
   onBlueDivider: { backgroundColor: 'rgba(255,255,255,0.25)' },
   hoursDivider: { backgroundColor: colors.line, height: 1, marginVertical: spacing.sm },
