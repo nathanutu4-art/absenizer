@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   columnsRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: spacing.md,
     marginTop: spacing.sm,
   },
