@@ -1,15 +1,26 @@
-import { useLocalSearchParams } from 'expo-router';
-import React from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RequestDetail } from '../../src/components/RequestDetail';
 import { PIC_REQUESTS } from '../../src/data/demo';
+import { getActiveRole } from '../../src/lib/session';
 import { colors, fontFamily } from '../../src/theme';
 
 /** Detail Pengambilalihan (HR) — sama seperti PIC + banner audit. */
 export default function HrDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const request = PIC_REQUESTS.find((r) => r.id === id);
+
+  // Guard: hanya HR yang boleh membuka halaman ini.
+  useEffect(() => {
+    (async () => {
+      const role = await getActiveRole();
+      if (role !== 'hr') {
+        router.replace('/(tabs)/home');
+      }
+    })();
+  }, []);
 
   if (!request) {
     return (

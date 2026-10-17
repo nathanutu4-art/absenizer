@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -176,7 +176,7 @@ export default function TeamScreen() {
       {awayItems.length > 0 ? (
         <>
           <SectionTitle label="Sedang Tidak Masuk" />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.awayRow}>
+          <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false} style={styles.awayRow}>
             {awayItems.map((e) => (
               <TouchableOpacity
                 key={e.id}
@@ -285,6 +285,8 @@ export default function TeamScreen() {
         return (
           <Plate solidColor="rgba(2,85,179,0.85)" key={e.id} style={styles.dirWrap}>
             <TouchableOpacity
+              accessibilityLabel={`Detail karyawan: ${e.name}`}
+              accessibilityRole="button"
               onPress={() => router.push(`/employee/${e.id}`)}
               style={styles.dirRow}
             >
@@ -372,7 +374,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
   legendDot: {
-    borderColor: '#d5dce8',
+    borderColor: colors.line,
     borderRadius: 6,
     borderWidth: 1.5,
     height: 12,
@@ -416,8 +418,8 @@ const styles = StyleSheet.create({
   },
   searchRow: {
     alignItems: 'center',
-    backgroundColor: '#f2f5fa',
-    borderColor: '#d5dce8',
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
     borderRadius: 3,
     borderWidth: 1.5,
     flexDirection: 'row',

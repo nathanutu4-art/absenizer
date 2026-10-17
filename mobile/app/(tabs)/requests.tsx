@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Image,
   ScrollView,
@@ -31,7 +31,7 @@ import {
   type RequestStatus,
   type RequestType,
 } from '../../src/data/demo';
-import { getCompanySettings, getEmployees, getMyEmployeeId, getMyLeaveBalance, getMyLeaveRequests, submitLeaveRequest } from '../../src/lib/db';
+import { getCompanySettings, getEmployees, getMyEmployeeId, getMyLeaveBalance, getMyLeaveRequests, isSupabaseConfigured, submitLeaveRequest } from '../../src/lib/db';
 import { getSession } from '../../src/lib/session';
 import { colors, fontFamily, serifFamily, spacing } from '../../src/theme';
 
@@ -188,9 +188,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
     setError(null);
     setSending(true);
     try {
-      // Best-effort ke Supabase; di mode demo kembalikan ok:false dan
-      // lanjutkan perilaku demo (toast + reset form).
-      await submitLeaveRequest({
+      const { ok } = await submitLeaveRequest({
         type,
         startDate: start,
         endDate: end,
@@ -198,6 +196,12 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
         reason: reason.trim(),
         attachmentUrl: file,
       });
+      if (!ok && isSupabaseConfigured()) {
+        // Gagal nyata ke server: beri tahu user, jangan reset form.
+        setError('Gagal mengirim. Coba lagi.');
+        return;
+      }
+      // Mode demo (Supabase tak terkonfigurasi): anggap terkirim.
       onSubmitted();
     } finally {
       setSending(false);
@@ -216,18 +220,19 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
           const active = type === t;
           return (
             <TouchableOpacity
+              accessibilityLabel={`Jenis pengajuan: ${TYPE_LABEL[t]}${active ? ', dipilih' : ''}`}
+              accessibilityRole="button"
               activeOpacity={0.85}
               key={t}
               onPress={() => setType(t)}
               style={styles.typeTouch}
             >
               <Plate solidColor="rgba(2,85,179,0.85)"
-                shadowColor={active ? c.fg : undefined}
                 style={styles.typePlate}
               >
                 <View style={styles.typeInner}>
                   <MedallionIcon glyph={c.icon} size={48} variant={c.variant} />
-                  <Text style={[styles.typeLabel, { color: active ? c.fg : '#ffffff' }]}>
+                  <Text style={styles.typeLabel}>
                     {TYPE_LABEL[t]}
                   </Text>
                   {active ? (
@@ -249,6 +254,7 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
               <Text style={styles.halfHint}>Memotong 0,5 kuota ijin</Text>
             </View>
             <Switch
+              accessibilityLabel="Setengah hari, memotong 0,5 kuota ijin"
               onValueChange={setHalfDay}
               trackColor={{ false: colors.line, true: colors.yellowRing }}
               value={halfDay}
@@ -545,13 +551,12 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     paddingHorizontal: 6,
     paddingVertical: 10,
-    transform: [{ rotate: '-0.6deg' }],
   },
   tabActive: {
     backgroundColor: 'rgba(2,85,179,0.9)',
     borderColor: 'rgba(2,85,179,0.9)',
   },
-  tabIdle: { backgroundColor: 'transparent', borderColor: '#d5dce8' },
+  tabIdle: { backgroundColor: 'transparent', borderColor: colors.line },
   tabText: {
     fontFamily: fontFamily('700'),
     fontSize: 11,
@@ -565,6 +570,7 @@ const styles = StyleSheet.create({
   typePlate: { flex: 1 },
   typeInner: { alignItems: 'center', paddingVertical: spacing.md },
   typeLabel: {
+    color: colors.surface,
     fontFamily: fontFamily('700'),
     fontSize: 13,
     marginTop: 6,
@@ -591,8 +597,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
   },
   input: {
-    backgroundColor: '#f2f5fa',
-    borderColor: '#d5dce8',
+    backgroundColor: colors.surface,
+    borderColor: colors.line,
     borderRadius: 12,
     borderWidth: 1,
     color: colors.ink,
@@ -632,7 +638,7 @@ const styles = StyleSheet.create({
   quotaNum: { fontFamily: serifFamily('800'), fontSize: 24 },
   hatchTrack: {
     backgroundColor: colors.paper2,
-    borderColor: '#d5dce8',
+    borderColor: colors.line,
     borderRadius: 3,
     borderWidth: 1.5,
     height: 14,

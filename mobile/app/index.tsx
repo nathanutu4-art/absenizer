@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { getSession } from '../src/lib/session';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PlateButton } from '../src/components/PlateButton';
@@ -13,6 +14,16 @@ import { colors, fontFamily, serifFamily, spacing } from '../src/theme';
  * kartu kaca, teks putih. Alur ke /login tidak berubah.
  */
 export default function OpeningScreen() {
+  // Auto-login: sesi valid langsung ke home, lewati opening.
+  useEffect(() => {
+    (async () => {
+      const session = await getSession();
+      if (session?.userId) {
+        router.replace('/(tabs)/home');
+      }
+    })();
+  }, []);
+
   return (
     <View style={styles.root}>
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>

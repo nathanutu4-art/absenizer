@@ -6,11 +6,12 @@ import {
   PlusJakartaSans_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/plus-jakarta-sans';
-import { Stack } from 'expo-router';
+import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { RootErrorBoundary } from '../src/components/RootErrorBoundary';
 import { ToastHost } from '../src/components/Toast';
+import { getSession } from '../src/lib/session';
 
 /**
  * Layout akar: memuat Plus Jakarta Sans, lalu stack navigasi.
@@ -25,6 +26,21 @@ export default function RootLayout() {
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
+  const segments = useSegments();
+
+  // Auth guard: tanpa sesi, hanya index (opening) & login yang boleh dibuka.
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    (async () => {
+      const session = await getSession();
+      if (session?.userId) return;
+      const seg = segments[0] as string | undefined;
+      const isPublic = seg === undefined || seg === 'login';
+      if (!isPublic) {
+        router.replace('/login');
+      }
+    })();
+  }, [fontsLoaded, segments]);
 
   if (!fontsLoaded) return null;
 

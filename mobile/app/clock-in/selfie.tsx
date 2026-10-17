@@ -10,7 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { MedallionIcon } from '../../src/components/MedallionIcon';
 import { StampChip } from '../../src/components/StampChip';
-import { setSelfiePhoto } from '../../src/lib/selfiePhoto';
+import { setSelfiePhoto, clearSelfiePhoto } from '../../src/lib/selfiePhoto';
+import { showToast } from '../../src/components/Toast';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
 /**
@@ -31,19 +32,31 @@ export default function SelfieScreen() {
     }
   }, [permission, requestPermission]);
 
+  // Bersihkan foto dari flow sebelumnya agar tidak dipakai ulang.
+  useEffect(() => {
+    clearSelfiePhoto();
+  }, []);
+
   async function handleShutter() {
     if (busy) return;
     setBusy(true);
     try {
-      if (cameraRef.current && permission?.granted) {
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.7,
-          shutterSound: false,
-        });
-        if (photo?.uri) setSelfiePhoto(photo.uri);
+      if (!cameraRef.current || !permission?.granted) {
+        showToast('Kamera belum siap. Coba lagi.');
+        return;
       }
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.7,
+        shutterSound: false,
+      });
+      if (!photo?.uri) {
+        showToast('Gagal mengambil foto, coba lagi.');
+        return;
+      }
+      setSelfiePhoto(photo.uri);
     } catch {
-      // Gagal ambil foto — lanjutkan alur demo.
+      showToast('Gagal mengambil foto, coba lagi.');
+      return;
     } finally {
       setBusy(false);
     }
@@ -110,11 +123,14 @@ export default function SelfieScreen() {
           </Text>
         </View>
 
-        {/* Shutter */}
+        {/* Shutter — nonaktif sampai kamera siap */}
         <View style={styles.shutterRow}>
           <TouchableOpacity
             accessibilityRole="button"
+            accessibilityState={{ disabled: !camReady }}
+            disabled={!camReady || busy}
             onPress={handleShutter}
+            style={!camReady ? styles.shutterDisabled : undefined}
           >
             <MedallionIcon glyph="check" size={72} variant="wadaIndigo" />
           </TouchableOpacity>
@@ -201,4 +217,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   shutterRow: { alignItems: 'center', marginTop: spacing.lg },
+  shutterDisabled: { opacity: 0.35 },
 });
