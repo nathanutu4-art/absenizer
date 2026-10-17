@@ -25,9 +25,10 @@ import {
   uploadSelfie,
   type CompanySettings,
 } from '../../src/lib/db';
-import { recordClockIn, recordClockOut } from '../../src/lib/clockState';
+import { recordClockIn, recordClockOut, getClockState } from '../../src/lib/clockState';
 import { distanceMeters, isInsideGeofence } from '../../src/lib/geo';
-import { getSelfiePhoto } from '../../src/lib/selfiePhoto';
+import { getSelfiePhoto, clearSelfiePhoto } from '../../src/lib/selfiePhoto';
+import { showToast } from '../../src/components/Toast';
 import { colors, fontFamily, radius, serifFamily, spacing } from '../../src/theme';
 
 /** Format jarak: "850 m" atau "1,4 km". */
@@ -56,12 +57,29 @@ export default function ConfirmScreen() {
 
   useEffect(() => {
     let alive = true;
-    getCompanySettings().then((s) => {
-      if (alive) setSettings(s);
-    });
+    getCompanySettings()
+      .then((s) => {
+        if (alive) setSettings(s);
+      })
+      .catch(() => {
+        if (alive) setSettings(DEMO_SETTINGS);
+      });
     return () => {
       alive = false;
     };
+  }, []);
+
+  // Validasi alur: kind harus 'in' | 'out', dan clock-out hanya valid
+  // bila phase lokal memang 'out' (cegah deep-link bypass).
+  useEffect(() => {
+    if (kind !== undefined && kind !== 'in' && kind !== 'out') {
+      router.replace('/(tabs)/home');
+      return;
+    }
+    if (isOut && getClockState().phase !== 'out') {
+      router.replace('/(tabs)/home');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -141,35 +159,54 @@ export default function ConfirmScreen() {
       .replace(':', '.');
     const flags: string[] = [];
     if (isFar) flags.push('Di Luar Area');
-    // Upload selfie (resize dulu) lalu simpan ke Supabase — best-effort,
+    // Upload selfie lalu simpan ke Supabase — best-effort,
     // clock-in/out tidak diblokir bila upload gagal.
-    try {
-      const photoUri = getSelfiePhoto();
-      const employeeId = await getMyEmployeeId();
-      const selfieUrl =
-        photoUri && employeeId
-          ? await uploadSelfie(photoUri, employeeId, isOut ? 'out' : 'in')
-          : null;
-      if (isOut) {
-        recordClockOut(now);
-        await saveClockOut({ coords, selfieUrl });
-      } else {
-        recordClockIn(now, flags);
-        await saveAttendance({
-          isFar,
-          distanceM: realDist,
-          coords,
-          selfieUrl,
-        });
-      }
-    } catch {
-      // Diabaikan — status lokal sudah tercatat.
-      if (isOut) recordClockOut(now);
-      else recordClockIn(now, flags);
-    } finally {
+    // Selfie wajib: tolak bila tidak ada foto yang diambil.
+    const photoUri = getSelfiePhoto();
+    if (!photoUri) {
+      showToast('Foto selfie wajib diambil. Kembali dan ambil foto.');
       setBusy(false);
+      return;
     }
-    router.push({
+    const employeeId = await getMyEmployeeId();
+    if (!employeeId) {
+      showToast('Data karyawan tidak ditemukan. Coba login ulang.');
+      setBusy(false);
+      return;
+    }
+    // Upload selfie; bila gagal, absensi tetap dicatat tanpa foto.
+    let selfieUrl: string | null = null;
+    try {
+      selfieUrl = await uploadSelfie(photoUri, employeeId, isOut ? 'out' : 'in');
+    } catch {
+      showToast('Foto gagal diunggah, absensi tetap tercatat.');
+    }
+    // Simpan ke database DULU; hanya lanjut bila sukses.
+    let ok = false;
+    try {
+      ok = isOut
+        ? await saveClockOut({ coords, selfieUrl })
+        : await saveAttendance({
+            isFar,
+            distanceM: realDist,
+            coords,
+            selfieUrl,
+          });
+    } catch {
+      ok = false;
+    }
+    if (!ok) {
+      showToast('Gagal menyimpan ke server, coba lagi.');
+      setBusy(false);
+      return;
+    }
+    // Sukses: catat status lokal, bersihkan foto, lalu ke layar sukses.
+    // `replace` agar tombol back tidak bisa re-konfirmasi (timestamp aman).
+    if (isOut) recordClockOut(now);
+    else recordClockIn(now, flags);
+    clearSelfiePhoto();
+    setBusy(false);
+    router.replace({
       pathname: '/clock-in/success',
       params: {
         time: now,

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,13 +19,6 @@ const STATUS_TONE: Record<HistoryRow['status'], 'green' | 'yellow' | 'blue' | 'r
   Cuti: 'blue',
   Sakit: 'red',
   Ijin: 'yellow',
-};
-
-const SUMMARY_TONE: Record<string, 'green' | 'yellow' | 'blue' | 'red'> = {
-  green: 'green',
-  yellow: 'yellow',
-  blue: 'blue',
-  red: 'red',
 };
 
 const STAMP_COLORS = {
@@ -166,6 +159,7 @@ export default function HistoryScreen() {
           return (
             <Plate solidColor="rgba(2,85,179,0.85)" key={row.id} style={styles.itemWrap}>
               <TouchableOpacity
+                accessibilityLabel={`Detail kehadiran ${row.dayNum} ${row.monthYear}`}
                 accessibilityRole="button"
                 activeOpacity={0.85}
                 onPress={() => setSelectedRow(row)}
@@ -223,11 +217,11 @@ export default function HistoryScreen() {
 }
 
 function toneColor(tone: string): string {
-  return SUMMARY_TONE[tone] === 'green'
+  return tone === 'green'
     ? colors.green
-    : SUMMARY_TONE[tone] === 'yellow'
+    : tone === 'yellow'
       ? colors.yellowRing
-      : SUMMARY_TONE[tone] === 'blue'
+      : tone === 'blue'
         ? colors.blue
         : colors.red;
 }
