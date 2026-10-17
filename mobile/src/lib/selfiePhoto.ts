@@ -11,3 +11,8 @@ export function setSelfiePhoto(value: string | null) {
 export function getSelfiePhoto(): string | null {
   return uri;
 }
+
+/** Hapus foto tersimpan agar tidak dipakai ulang di flow berikutnya. */
+export function clearSelfiePhoto(): void {
+  uri = null;
+}

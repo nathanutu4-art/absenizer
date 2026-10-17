@@ -143,9 +143,6 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
         isAccent && { transform: [{ scale: scaleAnim }] },
       ]}
     >
-      {isAccent ? null : (
-        <View style={[styles.shadow, { backgroundColor: colors.etchDeep }]} />
-      )}
       <TouchableOpacity
         accessibilityRole="button"
         activeOpacity={0.85}
@@ -182,14 +179,6 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
 
 const styles = StyleSheet.create({
   wrap: { position: 'relative' },
-  shadow: {
-    borderRadius: radius.button,
-    bottom: 0,
-    left: 4,
-    position: 'absolute',
-    right: 0,
-    top: 4,
-  },
   button: {
     alignItems: 'center',
     borderColor: colors.etchDeep,

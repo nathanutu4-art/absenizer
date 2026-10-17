@@ -14,18 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { AppIcon } from '../src/components/AppIcon';
 import { PlateButton } from '../src/components/PlateButton';
-import { StampChip } from '../src/components/StampChip';
 import { supabase } from '../src/lib/supabase';
 import { isSupabaseConfigured, resolveMyRole } from '../src/lib/db';
 import { SESSION_KEY, type DemoRole } from '../src/lib/session';
 import { showToast } from '../src/components/Toast';
 import { colors, fontFamily, serifFamily, spacing } from '../src/theme';
-
-const ROLE_OPTIONS: { value: DemoRole; label: string }[] = [
-  { value: 'karyawan', label: 'Karyawan' },
-  { value: 'pic', label: 'PIC' },
-  { value: 'hr', label: 'HR' },
-];
 
 /**
  * Login — glass liquid UI seperti dashboard: background abstrak indigo
@@ -35,7 +28,6 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
-  const [role, setRole] = useState<DemoRole>('karyawan');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,24 +41,22 @@ export default function LoginScreen() {
     }
   );
 
-  async function persistSession(
-    userId: string,
-    email: string | undefined,
-    fallbackRole: DemoRole,
-  ) {
+  async function persistSession(userId: string, email: string | undefined) {
+    // Role murni dari database; default 'karyawan' bila tidak terkonfigurasi.
+    const defaultRole: DemoRole = 'karyawan';
     await SecureStore.setItemAsync(
       SESSION_KEY,
       JSON.stringify({
         userId,
         email,
-        role: fallbackRole,
+        role: defaultRole,
         remember,
         demo: false,
       }),
     );
     if (isSupabaseConfigured()) {
-      const resolvedRole = await resolveMyRole(fallbackRole);
-      if (resolvedRole !== fallbackRole) {
+      const resolvedRole = await resolveMyRole(defaultRole);
+      if (resolvedRole !== defaultRole) {
         await SecureStore.setItemAsync(
           SESSION_KEY,
           JSON.stringify({
@@ -83,45 +73,40 @@ export default function LoginScreen() {
     router.replace('/(tabs)/home');
   }
 
+  /** Terjemahkan error auth umum ke bahasa Indonesia. */
+  function mapAuthError(e: unknown): string {
+    if (!(e instanceof Error)) return 'Gagal masuk. Periksa koneksi Anda.';
+    const msg = e.message.toLowerCase();
+    if (msg.includes('invalid login credentials'))
+      return 'Email atau kata sandi salah.';
+    if (msg.includes('email not confirmed'))
+      return 'Email belum dikonfirmasi. Hubungi HR.';
+    if (msg.includes('network') || msg.includes('fetch'))
+      return 'Tidak ada koneksi internet.';
+    return 'Gagal masuk. Periksa koneksi Anda.';
+  }
+
   async function handleLogin() {
     setError(null);
-    if (!email.trim() || !password) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
       setError('Masukkan email perusahaan dan kata sandi Anda.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setError('Format email tidak valid.');
       return;
     }
     setLoading(true);
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: trimmedEmail,
         password,
       });
       if (authError) throw authError;
-      await persistSession(data.user.id, data.user.email, role);
+      await persistSession(data.user.id, data.user.email);
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : 'Gagal masuk. Periksa koneksi Anda.',
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleDemoLogin() {
-    setError(null);
-    setLoading(true);
-    try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: 'prasta@gosit.us',
-        password: 'Passbiasa1',
-      });
-      if (authError) throw authError;
-      await persistSession(data.user.id, data.user.email, role);
-    } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : 'Gagal masuk sebagai demo. Periksa koneksi Anda.',
-      );
+      setError(mapAuthError(e));
     } finally {
       setLoading(false);
     }
@@ -195,29 +180,6 @@ export default function LoginScreen() {
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.label}>Masuk sebagai</Text>
-              <View style={styles.roleRow}>
-                {ROLE_OPTIONS.map((opt) => {
-                  const active = role === opt.value;
-                  return (
-                    <TouchableOpacity
-                      accessibilityRole="button"
-                      activeOpacity={0.85}
-                      key={opt.value}
-                      onPress={() => setRole(opt.value)}
-                      style={styles.roleChip}
-                    >
-                      <StampChip
-                        backgroundColor={active ? 'rgba(246,140,80,0.45)' : '#eef1f6'}
-                        color={active ? '#ffffff' : colors.ink2}
-                      >
-                        {opt.label}
-                      </StampChip>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
               <PlateButton
@@ -228,15 +190,6 @@ export default function LoginScreen() {
               >
                 {loading ? 'Memuat…' : 'Masuk'}
               </PlateButton>
-              <TouchableOpacity
-                disabled={loading}
-                onPress={handleDemoLogin}
-                style={styles.demoLinkWrap}
-              >
-                <Text style={styles.demoLink}>
-                  {loading ? 'Memuat…' : 'Masuk sebagai Demo (prasta@gosit.us)'}
-                </Text>
-              </TouchableOpacity>
               <Text style={styles.hint}>
                 Belum punya akun? Hubungi Admin HR — akun dibuatkan oleh HR.
               </Text>
@@ -342,8 +295,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   forgot: { color: '#f68c50', fontFamily: fontFamily('600'), fontSize: 13 },
-  roleRow: { flexDirection: 'row', marginTop: 2 },
-  roleChip: { marginRight: spacing.sm },
   error: {
     color: '#ff8a8a',
     fontFamily: fontFamily('500'),
@@ -351,13 +302,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   loginBtn: { marginTop: spacing.lg },
-  demoLinkWrap: { alignItems: 'center', marginTop: spacing.md },
-  demoLink: {
-    color: '#f68c50',
-    fontFamily: fontFamily('600'),
-    fontSize: 14,
-    textDecorationLine: 'underline',
-  },
   hint: {
     color: colors.ink3,
     fontFamily: fontFamily('400'),

@@ -88,6 +88,7 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
     >
       <View style={styles.backdrop}>
         <Pressable
+          accessibilityLabel="Tutup detail"
           accessibilityRole="button"
           onPress={onClose}
           style={StyleSheet.absoluteFill}
@@ -107,6 +108,7 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                     </Text>
                   </View>
                   <TouchableOpacity
+                    accessibilityLabel="Tutup detail"
                     accessibilityRole="button"
                     onPress={onClose}
                     style={styles.closeBtn}
@@ -391,13 +393,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginBottom: 8,
     textAlign: 'center',
-  },
-  map: {
-    borderColor: 'rgba(255,255,255,0.25)',
-    borderWidth: 1.5,
-    height: 180,
-    marginTop: spacing.sm,
-    width: '100%',
   },
   mapRow: {
     flexDirection: 'row',

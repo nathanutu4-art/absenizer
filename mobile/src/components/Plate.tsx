@@ -30,15 +30,13 @@ interface Props {
  */
 export function Plate({ children, style, shadowColor, shadowOffset = plateShadow, glass = false, glow = false, tintColor, solidColor }: Props) {
   // Kartu solid: background warna solid.
-  // borderColor mengikuti solidColor bila biru login (#0255b3), default biru logo.
   if (solidColor) {
-    const isLoginBlue = solidColor.toLowerCase() === '#0255b3';
     return (
       <View
         style={[
           {
             backgroundColor: solidColor,
-            borderColor: isLoginBlue ? 'rgba(255,255,255,0.25)' : 'rgba(1,86,179,0.22)',
+            borderColor: 'rgba(1,86,179,0.22)',
             borderRadius: 12,
             borderWidth: 1,
             overflow: 'hidden',
