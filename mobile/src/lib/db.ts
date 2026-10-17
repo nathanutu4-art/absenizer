@@ -280,7 +280,7 @@ export async function getMyEmployeeId(): Promise<string | null> {
   try {
     const session = await getSession();
     if (!session || session.demo) return null;
-    const { userId, email } = session;
+    const { userId } = session;
     if (userId) {
       const { data } = await supabase
         .from('employees')
@@ -290,15 +290,8 @@ export async function getMyEmployeeId(): Promise<string | null> {
       const id = (data as { id?: string } | null)?.id;
       if (id) return id;
     }
-    if (email) {
-      const { data } = await supabase
-        .from('employees')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle();
-      const id = (data as { id?: string } | null)?.id;
-      if (id) return id;
-    }
+    // M3: Hapus fallback email — user_id adalah join key yang benar.
+    // Jangan tebak via email agar tidak salah orang.
     return null;
   } catch {
     return null;
@@ -401,6 +394,18 @@ export async function saveAttendance(input: AttendanceInput): Promise<boolean> {
     const now = new Date();
     const date = jakartaToday();
 
+    // C1: Tolak duplikat — jangan timpa clock-in yang sudah ada.
+    const { data: existing } = await supabase
+      .from('attendance')
+      .select('id, clock_in_at')
+      .eq('employee_id', employeeId)
+      .eq('date', date)
+      .maybeSingle();
+    if (existing && (existing as { clock_in_at?: string }).clock_in_at) {
+      console.warn('[saveAttendance] sudah clock-in hari ini, tolak duplikat');
+      return false;
+    }
+
     const { data, error } = await supabase
       .from('attendance')
       .upsert(
@@ -476,6 +481,10 @@ function base64ToBytes(base64: string): Uint8Array {
     const e2 = chars.indexOf(clean[i + 1] ?? '');
     const e3 = chars.indexOf(clean[i + 2] ?? '');
     const e4 = chars.indexOf(clean[i + 3] ?? '');
+    // L1: Validasi karakter — jangan hasilkan byte korup diam-diam.
+    if (e1 < 0 || e2 < 0 || e3 < 0 || e4 < 0) {
+      throw new Error('Invalid base64');
+    }
     const c1 = (e1 << 2) | (e2 >> 4);
     const c2 = ((e2 & 15) << 4) | (e3 >> 2);
     const c3 = ((e3 & 3) << 6) | e4;
@@ -492,15 +501,15 @@ export async function uploadSelfie(
   kind: 'in' | 'out',
 ): Promise<string | null> {
   if (!isSupabaseConfigured()) {
-    showToast('Debug: supabase tidak terkonfigurasi');
+    console.warn('[uploadSelfie] supabase tidak terkonfigurasi');
     return null;
   }
   if (!localUri) {
-    showToast('Debug: localUri kosong (foto tidak tersimpan)');
+    console.warn('[uploadSelfie] localUri kosong');
     return null;
   }
   if (!employeeId) {
-    showToast('Debug: employeeId kosong');
+    console.warn('[uploadSelfie] employeeId kosong');
     return null;
   }
   try {
@@ -510,7 +519,7 @@ export async function uploadSelfie(
       encoding: FileSystem.EncodingType.Base64,
     });
     if (!base64) {
-      showToast('Debug: file selfie kosong');
+      console.warn('[uploadSelfie] file selfie kosong');
       return null;
     }
     const bytes = base64ToBytes(base64);
@@ -519,12 +528,12 @@ export async function uploadSelfie(
       .from('selfies')
       .upload(path, bytes, { contentType: 'image/jpeg', upsert: true });
     if (error) {
-      showToast(`Debug upload: ${error.message}`);
+      console.warn('[uploadSelfie] upload error:', error.message);
       return null;
     }
     return path;
   } catch (e) {
-    showToast(`Debug upload ex: ${e instanceof Error ? e.message : 'unknown'}`);
+    console.warn('[uploadSelfie] exception:', e instanceof Error ? e.message : 'unknown');
     return null;
   }
 }
@@ -735,9 +744,8 @@ export async function getMyLeaveBalance(): Promise<LeaveBalance | null> {
   const employeeId = await getMyEmployeeId();
   if (!employeeId) return null;
   try {
-    const year = new Date(
-      new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }),
-    ).getFullYear();
+    // M4: Ambil tahun Jakarta dengan cara yang tidak bergantung locale.
+    const year = Number(jakartaToday().slice(0, 4));
     const { data, error } = await supabase
       .from('leave_balances')
       .select('cuti_quota, cuti_used, ijin_quota, ijin_used')

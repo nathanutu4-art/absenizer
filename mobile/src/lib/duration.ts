@@ -19,8 +19,9 @@ export function calcDuration(
 ): string {
   const a = jamToMinutes(inTime);
   const b = jamToMinutes(outTime);
-  if (a === null || b === null || b < a) return '--';
-  const diff = b - a;
+  if (a === null || b === null) return '--';
+  // M2: Shift lewat tengah malam — clock-out dianggap hari berikutnya.
+  const diff = b < a ? b + 1440 - a : b - a;
   const h = Math.floor(diff / 60);
   const m = diff % 60;
   return `${h}j ${m}m`;
