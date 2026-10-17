@@ -178,10 +178,6 @@ export default function ConfirmScreen() {
     let selfieUrl: string | null = null;
     try {
       selfieUrl = await uploadSelfie(photoUri, employeeId, isOut ? 'out' : 'in');
-      // TEMP DEBUG: hapus setelah masalah selfie teratasi
-      if (!selfieUrl) {
-        showToast('DEBUG: uploadSelfie return null (upload gagal)');
-      }
     } catch {
       showToast('Foto gagal diunggah, absensi tetap tercatat.');
     }
