@@ -14,7 +14,7 @@ interface Props {
 
 /**
  * Tombol Setujui / Tolak untuk satu pengajuan.
- * Keputusan dicatat di tabel approvals (decided_by = karyawan HR pertama,
+ * Keputusan dicatat di tabel approvals (decided_by = karyawan HR yang login,
  * taken_over_by_hr = true) + jejak di audit_log. Penolakan wajib ada catatan.
  */
 export default function RequestActions({
@@ -45,12 +45,22 @@ export default function RequestActions({
 
   /**
    * Kurangi kuota cuti/ijin karyawan di leave_balances untuk tahun pengajuan.
-   * Sakit tidak menyentuh kuota. Gagal di sini tidak menggagalkan persetujuan.
+   * Sakit tidak menyentuh kuota. Idempoten: bila sudah ada >1 approval untuk
+   * request ini, pengurangan dilewati (cegah potong ganda saat retry).
+   * Gagal di sini tidak menggagalkan persetujuan.
    */
   async function applyLeaveBalance(
     sb: ReturnType<typeof getSupabase>,
     leaveRequestId: string
   ): Promise<void> {
+    // Cek idempotency: approval barusan + yang lama = sudah pernah diproses.
+    const { count: apprCount, error: countErr } = await sb
+      .from("approvals")
+      .select("id", { count: "exact", head: true })
+      .eq("leave_request_id", leaveRequestId);
+    if (countErr) throw countErr;
+    if ((apprCount ?? 0) > 1) return;
+
     const { data: req, error: reqErr } = await sb
       .from("leave_requests")
       .select("employee_id, type, start_date, end_date")
@@ -108,6 +118,46 @@ export default function RequestActions({
     }
   }
 
+  /**
+   * Fallback bila RPC decide_leave_request belum dibuat di database:
+   * 3 write berurutan dengan guard status. Tidak setransaksional RPC.
+   */
+  async function decideFallback(
+    sb: ReturnType<typeof getSupabase>,
+    decision: "disetujui" | "ditolak",
+    rejectNote: string,
+  ): Promise<void> {
+    const { data: updated, error: updErr } = await sb
+      .from("leave_requests")
+      .update({ status: decision })
+      .eq("id", requestId)
+      .eq("status", "menunggu")
+      .select("id");
+    if (updErr) throw updErr;
+    if (!updated || updated.length === 0) {
+      throw new Error("Pengajuan ini sudah diproses sebelumnya.");
+    }
+    const { error: apprErr } = await sb.from("approvals").insert({
+      leave_request_id: requestId,
+      decided_by: hrEmployeeId,
+      decision,
+      note: decision === "ditolak" ? rejectNote.trim() : null,
+      taken_over_by_hr: true,
+      takeover_reason: "Diputuskan via panel admin (HR)",
+    });
+    if (apprErr) throw apprErr;
+    const { error: auditErr } = await sb.from("audit_log").insert({
+      actor_id: hrEmployeeId,
+      action: decision === "disetujui" ? "approve_pengajuan" : "reject_pengajuan",
+      entity: "leave_requests",
+      entity_id: requestId,
+      old_value: { status: "menunggu" },
+      new_value: { status: decision },
+      reason: decision === "ditolak" ? rejectNote.trim() : "Disetujui via panel admin",
+    });
+    if (auditErr) throw auditErr;
+  }
+
   async function decide(decision: "disetujui" | "ditolak", rejectNote: string) {
     if (!hrEmployeeId) {
       setError("Tidak ada karyawan HR untuk mencatat keputusan.");
@@ -122,35 +172,26 @@ export default function RequestActions({
     try {
       const sb = getSupabase();
 
-      const { error: updErr } = await sb
-        .from("leave_requests")
-        .update({ status: decision })
-        .eq("id", requestId);
-      if (updErr) throw updErr;
-
-      const { error: apprErr } = await sb.from("approvals").insert({
-        leave_request_id: requestId,
-        decided_by: hrEmployeeId,
-        decision,
-        note: decision === "ditolak" ? rejectNote.trim() : null,
-        taken_over_by_hr: true,
-        takeover_reason: "Diputuskan via panel admin (HR)",
+      // Satu transaksi via RPC: update status (guard "menunggu") + insert
+      // approvals + insert audit_log. RPC: supabase/decide-request.sql.
+      // Fallback ke 3 write berurutan bila function belum ada di DB.
+      const rpcRes = await sb.rpc("decide_leave_request", {
+        p_request_id: requestId,
+        p_decision: decision,
+        p_hr_employee_id: hrEmployeeId,
+        p_note: decision === "ditolak" ? rejectNote.trim() : null,
       });
-      if (apprErr) throw apprErr;
-
-      const { error: auditErr } = await sb.from("audit_log").insert({
-        actor_id: hrEmployeeId,
-        action: decision === "disetujui" ? "approve_pengajuan" : "reject_pengajuan",
-        entity: "leave_requests",
-        entity_id: requestId,
-        old_value: { status: "menunggu" },
-        new_value: { status: decision },
-        reason:
-          decision === "ditolak"
-            ? rejectNote.trim()
-            : "Disetujui via panel admin",
-      });
-      if (auditErr) throw auditErr;
+      if (rpcRes.error) {
+        if (/sudah diproses|tidak ditemukan/i.test(rpcRes.error.message)) {
+          setError("Pengajuan ini sudah diproses sebelumnya.");
+          return;
+        }
+        if (/function.*does not exist|not found/i.test(rpcRes.error.message)) {
+          await decideFallback(sb, decision, rejectNote);
+        } else {
+          throw rpcRes.error;
+        }
+      }
 
       // Persetujuan cuti/ijin mengurangi kuota — gagal di sini hanya peringatan.
       if (decision === "disetujui") {

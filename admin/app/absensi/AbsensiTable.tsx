@@ -93,6 +93,16 @@ export default function AbsensiTable({ month, stats, attendance, leaves }: Props
   const router = useRouter();
   const [detailId, setDetailId] = useState<string | null>(null);
 
+  // Tutup modal dengan tombol Escape.
+  useEffect(() => {
+    if (!detailId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDetailId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [detailId]);
+
   const detail = detailId ? stats.find((s) => s.employee_id === detailId) : null;
   const attRows = detailId ? (attendance[detailId] ?? []) : [];
   const leaveRows = detailId ? (leaves[detailId] ?? []) : [];

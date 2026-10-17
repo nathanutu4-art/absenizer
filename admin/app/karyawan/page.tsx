@@ -32,10 +32,10 @@ export default async function KaryawanPage() {
 
       <div className="notice">
         <strong>Akun login otomatis:</strong> setiap karyawan baru langsung
-        dibuatkan akun login dengan kata sandi default{" "}
-        <strong>secret123</strong> — minta karyawan menggantinya di halaman
-        Profil aplikasi. Setelah menambah karyawan, Anda akan keluar dan perlu
-        login kembali sebagai HR.
+        dibuatkan akun login dengan kata sandi acak yang kuat — kata sandi
+        hanya ditampilkan sekali setelah karyawan ditambahkan, catat dan
+        sampaikan ke karyawan. Setelah menambah karyawan, Anda akan keluar dan
+        perlu login kembali sebagai HR.
       </div>
 
       {error && (

@@ -10,10 +10,29 @@ interface Props {
   employees: Employee[];
 }
 
-/** Gambar dummy bila karyawan tidak mengunggah foto. */
-const DUMMY_PHOTO = "/dummy-avatar.jpg";
+/**
+ * Placeholder SVG inline bila karyawan tidak mengunggah foto
+ * (menggantikan /dummy-avatar.jpg yang tidak ada di repo).
+ */
+const DUMMY_PHOTO =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">` +
+      `<rect width="160" height="160" fill="#d5dce8"/>` +
+      `<circle cx="80" cy="62" r="26" fill="#9aa3b5"/>` +
+      `<path d="M32 138c8-30 26-44 48-44s40 14 48 44" fill="#9aa3b5"/>` +
+      `</svg>`,
+  );
 /** Batas ukuran file foto. */
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+/** Buat kata sandi acak yang kuat untuk akun karyawan baru. */
+function generatePassword(): string {
+  const lower = Math.random().toString(36).slice(2, 10);
+  const upper = Math.random().toString(36).slice(2, 6).toUpperCase();
+  const digits = String(Math.floor(1000 + Math.random() * 9000));
+  return `${lower}${upper}${digits}`;
+}
 
 const EMPTY = {
   full_name: "",
@@ -221,6 +240,8 @@ export default function EmployeeManager({ employees }: Props) {
         const res = await saveEmployeeRow(sb, payload, editing.id);
         if (res.error) throw res.error;
         setMessage(doneMsg("Data karyawan diperbarui."));
+        setShowForm(false);
+        router.refresh();
       } else {
         // 1) Buat baris karyawan dulu.
         const saved = await saveEmployeeRow(sb, payload, null);
@@ -228,15 +249,21 @@ export default function EmployeeManager({ employees }: Props) {
         const insertedId = saved.id;
         if (!insertedId) throw new Error("Gagal membuat data karyawan.");
 
-        // 2) Buatkan akun login dengan kata sandi default "secret123".
+        // 2) Buatkan akun login dengan kata sandi ACAK yang kuat.
+        //    Kata sandi hanya ditampilkan SEKALI di bawah — catat sekarang,
+        //    tidak disimpan di mana pun setelah pesan ini hilang.
         //    Bila email sudah terdaftar di Authentication, pakai akun itu
         //    (tidak dibuat duplikat). signUp yang berhasil mengalihkan sesi
         //    ke user baru → admin perlu login kembali.
+        //    TODO(#5): pindahkan pembuatan user ke Next.js Route Handler
+        //    dengan service_role key (server-only) agar email signup tidak
+        //    perlu aktif project-wide.
+        const newPassword = generatePassword();
         let sessionSwitched = false;
         try {
           const { data: authData, error: authErr } = await sb.auth.signUp({
             email: payload.email,
-            password: "secret123",
+            password: newPassword,
             options: { data: { full_name: payload.full_name } },
           });
           if (authErr) throw authErr;
@@ -254,9 +281,12 @@ export default function EmployeeManager({ employees }: Props) {
           }
           setMessage(
             identities.length > 0
-              ? doneMsg(
-                  `Karyawan ditambahkan. Akun login: ${payload.email} / kata sandi "secret123".`,
-                )
+              ? {
+                  kind: "warning" as const,
+                  text:
+                    `Karyawan ditambahkan. Akun login: ${payload.email} / kata sandi: ${newPassword}. ` +
+                    `CATAT SEKARANG — kata sandi ini tidak akan ditampilkan lagi.`,
+                }
               : doneMsg(
                   `Karyawan ditambahkan. Akun ${payload.email} sudah ada di Authentication — dipakai yang itu (kata sandi tidak diubah).`,
                 ),

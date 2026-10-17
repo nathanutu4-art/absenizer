@@ -115,6 +115,21 @@ export default function SettingsForm({ initial }: Props) {
       setSaving(false);
       return;
     }
+    const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+    for (const [label, value] of [
+      ["Indigo", palette.indigo],
+      ["Apricot", palette.apricot],
+      ["Olive", palette.olive],
+    ] as const) {
+      if (!HEX_RE.test(value.trim())) {
+        setMessage({
+          kind: "error",
+          text: `Warna ${label} tidak valid — gunakan format hex #RRGGBB (contoh #051230).`,
+        });
+        setSaving(false);
+        return;
+      }
+    }
 
     /** true bila error menandakan kolom kuota belum ada (migrasi belum jalan). */
     function isMissingQuotaColumn(err: unknown): boolean {

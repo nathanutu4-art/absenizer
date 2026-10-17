@@ -1,4 +1,4 @@
-import { getSupabase } from "@/lib/supabase";
+import { createServerSupabase, getMyEmployee } from "@/lib/supabase";
 import type { Employee, LeaveRequest } from "@/lib/types";
 import RequestActions from "./RequestActions";
 import {
@@ -11,13 +11,14 @@ import {
 export const dynamic = "force-dynamic";
 
 async function getData() {
-  const sb = getSupabase();
-  const [reqRes, empRes] = await Promise.all([
+  const sb = await createServerSupabase();
+  const [reqRes, empRes, me] = await Promise.all([
     sb
       .from("leave_requests")
       .select("*")
       .order("created_at", { ascending: false }),
     sb.from("employees").select("id, full_name, is_hr"),
+    getMyEmployee(sb),
   ]);
   if (reqRes.error) throw new Error(reqRes.error.message);
   if (empRes.error) throw new Error(empRes.error.message);
@@ -28,7 +29,13 @@ async function getData() {
     "id" | "full_name" | "is_hr"
   >[];
   const nameById = new Map(employees.map((e) => [e.id, e.full_name]));
-  const hrEmployee = employees.find((e) => e.is_hr) ?? null;
+  // decided_by / actor_id memakai user yang sedang login — bukan HR pertama.
+  const hrEmployee = me
+    ? ({ id: me.id, full_name: me.full_name, is_hr: true } as Pick<
+        Employee,
+        "id" | "full_name" | "is_hr"
+      >)
+    : null;
 
   return { requests, nameById, hrEmployee };
 }
@@ -69,8 +76,8 @@ export default async function PengajuanPage() {
 
       {data && !data.hrEmployee && (
         <div className="notice">
-          Belum ada karyawan bertanda HR. Persetujuan membutuhkan satu akun HR —
-          buat/ubah di halaman <a href="/karyawan">Karyawan</a> terlebih dahulu.
+          Akun login tidak terhubung ke data karyawan. Persetujuan membutuhkan
+          akun HR — hubungkan di halaman <a href="/karyawan">Karyawan</a> terlebih dahulu.
         </div>
       )}
 
