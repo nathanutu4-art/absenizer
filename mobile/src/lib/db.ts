@@ -477,20 +477,25 @@ function base64ToBytes(base64: string): Uint8Array {
   const out = new Uint8Array(outLen);
   let p = 0;
   for (let i = 0; i < clean.length; i += 4) {
-    const e1 = chars.indexOf(clean[i] ?? '');
-    const e2 = chars.indexOf(clean[i + 1] ?? '');
-    const e3 = chars.indexOf(clean[i + 2] ?? '');
-    const e4 = chars.indexOf(clean[i + 3] ?? '');
-    // L1: Validasi karakter — jangan hasilkan byte korup diam-diam.
+    // L1: Validasi karakter — tangani '=' padding dengan benar.
+    // '=' hanya valid di posisi 3-4 (e3/e4), bukan di e1/e2.
+    const c1 = clean[i] ?? '';
+    const c2 = clean[i + 1] ?? '';
+    const c3 = clean[i + 2] ?? '';
+    const c4 = clean[i + 3] ?? '';
+    const e1 = chars.indexOf(c1);
+    const e2 = chars.indexOf(c2);
+    const e3 = c3 === '=' ? 0 : chars.indexOf(c3);
+    const e4 = c4 === '=' ? 0 : chars.indexOf(c4);
     if (e1 < 0 || e2 < 0 || e3 < 0 || e4 < 0) {
       throw new Error('Invalid base64');
     }
-    const c1 = (e1 << 2) | (e2 >> 4);
-    const c2 = ((e2 & 15) << 4) | (e3 >> 2);
-    const c3 = ((e3 & 3) << 6) | e4;
-    out[p++] = c1;
-    if (p < outLen) out[p++] = c2;
-    if (p < outLen) out[p++] = c3;
+    const b1 = (e1 << 2) | (e2 >> 4);
+    const b2 = ((e2 & 15) << 4) | (e3 >> 2);
+    const b3 = ((e3 & 3) << 6) | e4;
+    out[p++] = b1;
+    if (p < outLen) out[p++] = b2;
+    if (p < outLen) out[p++] = b3;
   }
   return out;
 }
