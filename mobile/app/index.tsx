@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React, { useEffect } from 'react';
 import { getSession } from '../src/lib/session';
+import { getCompanySettings } from '../src/lib/db';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PlateButton } from '../src/components/PlateButton';
@@ -15,12 +16,18 @@ import { colors, fontFamily, serifFamily, spacing } from '../src/theme';
  */
 export default function OpeningScreen() {
   // Auto-login: sesi valid langsung ke home, lewati opening.
+  // Dapat dimatikan dari admin panel (company_settings.auto_login_enabled).
   useEffect(() => {
     (async () => {
       const session = await getSession();
-      if (session?.userId) {
-        router.replace('/(tabs)/home');
+      if (!session?.userId) return;
+      try {
+        const settings = await getCompanySettings();
+        if (!settings.autoLoginEnabled) return;
+      } catch {
+        // Bila gagal baca setting, tetap auto-login (perilaku default).
       }
+      router.replace('/(tabs)/home');
     })();
   }, []);
 

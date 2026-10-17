@@ -37,6 +37,9 @@ export default function SettingsForm({ initial }: Props) {
   const [ijinQuota, setIjinQuota] = useState(
     initial?.ijin_quota_default != null ? String(initial.ijin_quota_default) : "12"
   );
+  const [autoLogin, setAutoLogin] = useState(
+    initial?.auto_login_enabled ?? true
+  );
   const DEFAULT_PALETTE = {
     name: "Wada No. 211 — Indigo",
     indigo: "#051230",
@@ -89,6 +92,7 @@ export default function SettingsForm({ initial }: Props) {
       ijin_quota_default: Number(ijinQuota),
     };
     const palettePayload = { theme_palette: palette };
+    const autoLoginPayload = { auto_login_enabled: autoLogin };
 
     if (
       !payload.office_name ||
@@ -147,6 +151,12 @@ export default function SettingsForm({ initial }: Props) {
       return msg.includes("42703") || msg.includes("theme_palette");
     }
 
+    /** true bila error menandakan kolom auto_login_enabled belum ada. */
+    function isMissingAutoLoginColumn(err: unknown): boolean {
+      const msg = err instanceof Error ? err.message : String(err);
+      return msg.includes("42703") || msg.includes("auto_login_enabled");
+    }
+
     async function saveRow(row: Record<string, unknown>) {
       const sb = getSupabase();
       if (initial) {
@@ -163,16 +173,18 @@ export default function SettingsForm({ initial }: Props) {
 
     try {
       try {
-        await saveRow({ ...payload, ...quotaPayload, ...palettePayload });
+        await saveRow({ ...payload, ...quotaPayload, ...palettePayload, ...autoLoginPayload });
       } catch (quotaErr) {
-        if (!isMissingQuotaColumn(quotaErr) && !isMissingPaletteColumn(quotaErr))
+        if (!isMissingQuotaColumn(quotaErr) && !isMissingPaletteColumn(quotaErr) && !isMissingAutoLoginColumn(quotaErr))
           throw quotaErr;
-        // Kolom kuota/palet belum ada — simpan sisanya, beri petunjuk migrasi.
+        // Kolom kuota/palet/auto-login belum ada — simpan sisanya, beri petunjuk migrasi.
         const missing: string[] = [];
         if (isMissingQuotaColumn(quotaErr))
           missing.push("supabase/migration-quota-defaults.sql");
         if (isMissingPaletteColumn(quotaErr))
           missing.push("supabase/migration-theme-palette.sql");
+        if (isMissingAutoLoginColumn(quotaErr))
+          missing.push("supabase/add-auto-login-setting.sql");
         try {
           await saveRow(payload);
         } catch {
@@ -337,6 +349,27 @@ export default function SettingsForm({ initial }: Props) {
           Dipakai sebagai kuota awal karyawan baru di aplikasi. Sakit tidak
           mengurangi kuota.
         </p>
+      </div>
+
+      <div className="card">
+        <h2>Aplikasi Mobile</h2>
+        <div className="field">
+          <label htmlFor="auto_login" style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+            <input
+              id="auto_login"
+              type="checkbox"
+              checked={autoLogin}
+              onChange={(e) => setAutoLogin(e.target.checked)}
+              style={{ width: "auto" }}
+            />
+            Auto-login aktif
+          </label>
+          <p className="hint">
+            Bila aktif, aplikasi langsung ke dashboard saat dibuka tanpa lewat
+            halaman masuk &amp; login (selama sesi masih valid). Berlaku setelah
+            aplikasi dibuka ulang.
+          </p>
+        </div>
       </div>
 
       <div className="card">

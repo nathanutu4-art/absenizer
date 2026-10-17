@@ -65,6 +65,8 @@ export interface CompanySettings {
   /** Kuota default tahunan (HR dapat mengubah di admin panel). */
   cutiQuotaDefault: number;
   ijinQuotaDefault: number;
+  /** Auto-login aktif/mati (diatur dari admin panel). */
+  autoLoginEnabled: boolean;
 }
 
 export const DEMO_SETTINGS: CompanySettings = {
@@ -76,6 +78,7 @@ export const DEMO_SETTINGS: CompanySettings = {
   workEnd: WORK_END,
   cutiQuotaDefault: 12,
   ijinQuotaDefault: 12,
+  autoLoginEnabled: true,
 };
 
 /** "09:00:00" -> "09.00" */
@@ -94,7 +97,7 @@ export async function getCompanySettings(): Promise<CompanySettings> {
     const full = await supabase
       .from('company_settings')
       .select(
-        'office_name, office_lat, office_lng, geofence_radius_m, work_start, work_end, cuti_quota_default, ijin_quota_default',
+        'office_name, office_lat, office_lng, geofence_radius_m, work_start, work_end, cuti_quota_default, ijin_quota_default, auto_login_enabled',
       )
       .eq('is_active', true)
       .limit(1)
@@ -121,6 +124,7 @@ export async function getCompanySettings(): Promise<CompanySettings> {
       work_end?: string | null;
       cuti_quota_default?: number | null;
       ijin_quota_default?: number | null;
+      auto_login_enabled?: boolean | null;
     };
     return {
       officeName: row.office_name ?? DEMO_SETTINGS.officeName,
@@ -131,6 +135,7 @@ export async function getCompanySettings(): Promise<CompanySettings> {
       workEnd: formatJam(row.work_end) ?? DEMO_SETTINGS.workEnd,
       cutiQuotaDefault: Number(row.cuti_quota_default) || 12,
       ijinQuotaDefault: Number(row.ijin_quota_default) || 12,
+      autoLoginEnabled: row.auto_login_enabled ?? true,
     };
   } catch {
     return DEMO_SETTINGS;
