@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Plate } from './Plate';
+import { LiquidGlassCard } from './LiquidGlassCard';
 import { Skeleton } from './Skeleton';
 import { StampChip } from './StampChip';
 import type { HistoryRow } from '../data/demo';
@@ -25,11 +26,11 @@ interface Props {
 }
 
 /** Baris label–nilai di dalam popup. */
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value, dark }: { label: string; value: string; dark?: boolean }) {
   return (
     <View style={styles.detailRow}>
-      <Text style={styles.detailLabel}>{label}</Text>
-      <Text style={styles.detailValue}>{value}</Text>
+      <Text style={[styles.detailLabel, dark && styles.detailLabelDark]}>{label}</Text>
+      <Text style={[styles.detailValue, dark && styles.detailValueDark]}>{value}</Text>
     </View>
   );
 }
@@ -149,10 +150,17 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                     {/* Dua kolom: kiri Clock In, kanan Clock Out */}
                     <View style={styles.columnsRow}>
                       {/* Kolom kiri: Clock In */}
-                      <View style={styles.column}>
+                      <LiquidGlassCard
+                        tint="light"
+                        intensity={50}
+                        borderRadius={12}
+                        pressable={false}
+                        style={styles.column}
+                        contentStyle={styles.columnContent}
+                      >
                         <Text style={styles.columnTitle}>Masuk</Text>
-                        <DetailRow label="Jam" value={row.clockIn} />
-                        <Text style={styles.sectionLabel}>Foto Selfie</Text>
+                        <DetailRow label="Jam" value={row.clockIn}  dark />
+                        <Text style={styles.sectionLabelDark}>Foto Selfie</Text>
                         {photoLoading ? (
                           <Skeleton width="100%" height={180} borderRadius={2} />
                         ) : selfieInUrl ? (
@@ -169,10 +177,11 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                             </Text>
                           </View>
                         )}
-                        <Text style={styles.sectionLabel}>Lokasi</Text>
+                        <Text style={styles.sectionLabelDark}>Lokasi</Text>
                         <DetailRow
                           label="Koordinat"
                           value={locationText(row.clockInLat, row.clockInLng)}
+                          dark
                         />
                         {row.clockInLat != null && row.clockInLng != null ? (
                           mapReady ? (
@@ -206,12 +215,19 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                             </Text>
                           </View>
                         )}
-                      </View>
+                      </LiquidGlassCard>
                       {/* Kolom kanan: Clock Out */}
-                      <View style={styles.column}>
+                      <LiquidGlassCard
+                        tint="light"
+                        intensity={50}
+                        borderRadius={12}
+                        pressable={false}
+                        style={styles.column}
+                        contentStyle={styles.columnContent}
+                      >
                         <Text style={styles.columnTitle}>Pulang</Text>
-                        <DetailRow label="Jam" value={row.clockOut} />
-                        <Text style={styles.sectionLabel}>Foto Selfie</Text>
+                        <DetailRow label="Jam" value={row.clockOut}  dark />
+                        <Text style={styles.sectionLabelDark}>Foto Selfie</Text>
                         {photoLoading ? (
                           <Skeleton width="100%" height={180} borderRadius={2} />
                         ) : row.clockOut === '-' ? (
@@ -235,10 +251,11 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                             </Text>
                           </View>
                         )}
-                        <Text style={styles.sectionLabel}>Lokasi</Text>
+                        <Text style={styles.sectionLabelDark}>Lokasi</Text>
                         <DetailRow
                           label="Koordinat"
                           value={locationText(row.clockOutLat, row.clockOutLng)}
+                          dark
                         />
                         {row.clockOutLat != null && row.clockOutLng != null ? (
                           mapReady ? (
@@ -272,7 +289,7 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
                             </Text>
                           </View>
                         )}
-                      </View>
+                      </LiquidGlassCard>
                     </View>
                   </>
                 ) : null}
@@ -338,11 +355,13 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily('600'),
     fontSize: 13,
   },
+  detailLabelDark: { color: 'rgba(5,18,48,0.65)' },
   detailValue: {
     color: '#ffffff',
     fontFamily: fontFamily('700'),
     fontSize: 13,
   },
+  detailValueDark: { color: colors.ink },
   sectionLabel: {
     color: '#ffffff',
     fontFamily: serifFamily('800'),
@@ -350,14 +369,22 @@ const styles = StyleSheet.create({
     marginBottom: 2,
     marginTop: spacing.md,
   },
+  sectionLabelDark: {
+    color: colors.ink,
+    fontFamily: serifFamily('800'),
+    fontSize: 13,
+    marginBottom: 2,
+    marginTop: spacing.sm,
+  },
   columnsRow: {
     flexDirection: 'row',
     gap: spacing.md,
     marginTop: spacing.sm,
   },
   column: { flex: 1 },
+  columnContent: { padding: spacing.sm },
   columnTitle: {
-    color: '#ffffff',
+    color: colors.ink,
     fontFamily: serifFamily('800'),
     fontSize: 15,
     marginBottom: spacing.sm,
@@ -377,15 +404,16 @@ const styles = StyleSheet.create({
   },
   photoEmpty: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(5,18,48,0.04)',
+    borderColor: 'rgba(5,18,48,0.25)',
     borderStyle: 'dashed',
     borderWidth: 1.5,
+    borderRadius: 8,
     height: 180,
     justifyContent: 'center',
   },
   photoEmptyText: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(5,18,48,0.55)',
     fontFamily: fontFamily('500'),
     fontSize: 12,
   },
