@@ -1,4 +1,5 @@
-import { createServerSupabase, getMyEmployee } from "@/lib/supabase";
+import { getMyEmployee } from "@/lib/supabase";
+import { createServerSupabase } from "@/lib/supabase-server";
 import type { Employee, LeaveRequest } from "@/lib/types";
 import RequestActions from "./RequestActions";
 import {

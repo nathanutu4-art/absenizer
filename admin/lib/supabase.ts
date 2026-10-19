@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createBrowserClient, createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { createBrowserClient } from "@supabase/ssr";
 
 let browserCached: SupabaseClient | null = null;
 
@@ -20,31 +19,6 @@ export function getSupabase(): SupabaseClient {
   const { url, anonKey } = env();
   browserCached = createBrowserClient(url, anonKey);
   return browserCached;
-}
-
-/**
- * Client untuk Server Component / Route Handler — membaca sesi dari cookie
- * request. WAJIB await (cookies() async di Next 15).
- */
-export async function createServerSupabase(): Promise<SupabaseClient> {
-  const { url, anonKey } = env();
-  const cookieStore = await cookies();
-  return createServerClient(url, anonKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet) {
-        try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          );
-        } catch {
-          // Dipanggil dari Server Component (read-only) — aman diabaikan.
-        }
-      },
-    },
-  });
 }
 
 /**
