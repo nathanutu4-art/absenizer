@@ -49,6 +49,12 @@ const EMPTY = {
   is_active: true,
 };
 
+/**
+ * Pengelola data karyawan (Client Component): tabel karyawan + formulir
+ * tambah/ubah. Menambah karyawan juga membuatkan akun login Supabase dengan
+ * kata sandi acak yang hanya ditampilkan sekali.
+ * Props: employees — daftar karyawan dari server (KaryawanPage).
+ */
 export default function EmployeeManager({ employees }: Props) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
@@ -71,6 +77,7 @@ export default function EmployeeManager({ employees }: Props) {
     };
   }, [photoPreview]);
 
+  /** Buka formulir kosong untuk menambah karyawan baru. */
   function openAdd() {
     setEditing(null);
     setForm(EMPTY);
@@ -80,6 +87,7 @@ export default function EmployeeManager({ employees }: Props) {
     setShowForm(true);
   }
 
+  /** Buka formulir terisi data karyawan terpilih untuk diubah. */
   function openEdit(emp: Employee) {
     setEditing(emp);
     setForm({
@@ -102,10 +110,15 @@ export default function EmployeeManager({ employees }: Props) {
     setShowForm(true);
   }
 
+  /** Perbarui satu field formulir secara immutable. */
   function set<K extends keyof typeof EMPTY>(key: K, value: (typeof EMPTY)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  /**
+   * Tangani pilihan file foto: tolak file > 5 MB, buat URL pratinjau lokal,
+   * dan cabut object URL lama agar tidak bocor memori.
+   */
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
     if (f && f.size > MAX_PHOTO_BYTES) {
@@ -188,6 +201,12 @@ export default function EmployeeManager({ employees }: Props) {
     }
   }
 
+  /**
+   * Simpan formulir: validasi wajib → selesaikan foto (unggah/dummy/lama)
+   * → simpan baris karyawan. Untuk karyawan baru, lanjutkan membuat akun
+   * login (kata sandi acak, tampil sekali); gagal membuat akun memicu
+   * rollback baris karyawan.
+   */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -232,6 +251,7 @@ export default function EmployeeManager({ employees }: Props) {
       is_active: form.is_active,
     };
 
+    /** Gabungkan pesan sukses dengan peringatan foto bila ada. */
     const doneMsg = (base: string) =>
       photoWarning ? { kind: "warning" as const, text: `${base} ${photoWarning}` } : { kind: "ok" as const, text: base };
 
@@ -315,6 +335,7 @@ export default function EmployeeManager({ employees }: Props) {
     }
   }
 
+  /** Nama PIC dari id karyawan; "—" bila tidak ditemukan. */
   const picName = (id: string | null) =>
     employees.find((e) => e.id === id)?.full_name ?? "—";
 

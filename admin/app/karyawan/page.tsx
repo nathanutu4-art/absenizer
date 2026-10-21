@@ -4,6 +4,10 @@ import EmployeeManager from "./EmployeeManager";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Ambil semua karyawan (termasuk nonaktif) terurut nama dari tabel employees.
+ * Melempar Error bila query gagal.
+ */
 async function getEmployees(): Promise<Employee[]> {
   const sb = getSupabase();
   const { data, error } = await sb
@@ -14,6 +18,10 @@ async function getEmployees(): Promise<Employee[]> {
   return data ?? [];
 }
 
+/**
+ * Halaman Karyawan (Server Component): memuat daftar karyawan lalu
+ * menyerahkannya ke EmployeeManager (client) untuk tambah/ubah data.
+ */
 export default async function KaryawanPage() {
   let employees: Employee[] = [];
   let error: string | null = null;

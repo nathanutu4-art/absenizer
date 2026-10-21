@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   description: "Panel admin HR untuk aplikasi absensi Absenizer",
 };
 
+/**
+ * Layout akar (Server Component): membungkus semua halaman dengan Shell
+ * (penjaga akses + sidebar/topbar) dan metadata panel admin.
+ */
 export default function RootLayout({
   children,
 }: {

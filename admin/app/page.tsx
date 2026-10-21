@@ -3,6 +3,11 @@ import { getSupabase, todayJakarta } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Ambil tiga angka ringkasan dashboard secara paralel: total karyawan aktif,
+ * jumlah clock-in hari ini (Asia/Jakarta), dan pengajuan berstatus menunggu.
+ * Melempar Error bila salah satu query gagal.
+ */
 async function getStats() {
   const sb = getSupabase();
   const today = todayJakarta();
@@ -34,6 +39,10 @@ async function getStats() {
   };
 }
 
+/**
+ * Halaman Dashboard (Server Component, selalu dinamis): kartu statistik
+ * hari ini + tautan aksi cepat; kegagalan koneksi ditampilkan sebagai notice.
+ */
 export default async function DashboardPage() {
   let stats: Awaited<ReturnType<typeof getStats>> | null = null;
   let error: string | null = null;

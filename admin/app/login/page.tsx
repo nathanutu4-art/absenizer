@@ -14,6 +14,11 @@ export default function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Proses login: autentikasi Supabase, lalu pastikan akun terhubung ke
+   * karyawan is_hr — non-HR langsung di-signOut. Mode setup (tabel employees
+   * masih kosong) mengizinkan masuk untuk mendaftarkan HR pertama.
+   */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);

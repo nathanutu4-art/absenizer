@@ -7,6 +7,10 @@ import AbsensiTable, {
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Hitung tanggal awal & akhir (YYYY-MM-DD) dari bulan "YYYY-MM" untuk
+ * membatasi query rekap per bulan.
+ */
 function monthBounds(month: string) {
   const [y, m] = month.split("-").map(Number);
   const lastDay = new Date(y, m, 0).getDate();
@@ -20,6 +24,12 @@ interface PageProps {
   searchParams: Promise<{ month?: string }>;
 }
 
+/**
+ * Halaman Log Absensi (Server Component): mengambil karyawan aktif,
+ * attendance, dan pengajuan disetujui pada bulan terpilih (?month=YYYY-MM,
+ * default bulan berjalan), lalu mengagregasi hitungan hadir/ijin/cuti/sakit
+ * per karyawan untuk dirender AbsensiTable.
+ */
 export default async function AbsensiPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const raw = sp.month ?? "";

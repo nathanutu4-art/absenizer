@@ -4,6 +4,10 @@ import { formatWaktu } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Ambil 100 audit_log terbaru + peta id→nama karyawan untuk menampilkan
+ * nama pelaku. Melempar Error bila query gagal.
+ */
 async function getLogs() {
   const sb = getSupabase();
   const [logRes, empRes] = await Promise.all([
@@ -27,12 +31,17 @@ async function getLogs() {
   return { logs, nameById };
 }
 
+/** Ringkas nilai JSON untuk sel tabel: maksimal 60 karakter; null → "—". */
 function shortJson(value: unknown): string {
   if (value === null || value === undefined) return "—";
   const s = JSON.stringify(value);
   return s.length > 60 ? s.slice(0, 60) + "…" : s;
 }
 
+/**
+ * Halaman Audit Log (Server Component, baca-saja): tabel jejak aksi dengan
+ * pelaku, entitas, ringkasan perubahan, dan alasan.
+ */
 export default async function AuditPage() {
   let data: Awaited<ReturnType<typeof getLogs>> | null = null;
   let error: string | null = null;

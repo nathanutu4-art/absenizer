@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { formatTanggal } from "@/lib/types";
 
+/** Ringkasan bulanan satu karyawan: jumlah hadir, ijin, cuti, sakit. */
 export interface EmployeeStat {
   employee_id: string;
   full_name: string;
@@ -15,6 +16,7 @@ export interface EmployeeStat {
   sakit: number;
 }
 
+/** Satu baris attendance: jam clock in/out, status telat, path selfie, dan koordinat. */
 export interface AttendanceRow {
   employee_id: string;
   date: string;
@@ -28,6 +30,7 @@ export interface AttendanceRow {
   clock_out_lng: number | null;
 }
 
+/** Satu pengajuan disetujui yang ditampilkan di modal detail karyawan. */
 export interface LeaveRow {
   employee_id: string;
   type: "cuti" | "ijin" | "sakit";
@@ -49,6 +52,7 @@ const TYPE_LABEL: Record<LeaveRow["type"], string> = {
   sakit: "Sakit",
 };
 
+/** Format timestamp ISO ke jam "HH.mm" zona Asia/Jakarta; null → "—". */
 function jam(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleTimeString("id-ID", {
@@ -58,6 +62,7 @@ function jam(iso: string | null): string {
   });
 }
 
+/** Bangun tautan Google Maps dari koordinat; null bila koordinat tidak lengkap. */
 function mapsUrl(lat: number | null, lng: number | null): string | null {
   if (lat == null || lng == null) return null;
   return `https://www.google.com/maps?q=${lat},${lng}`;
@@ -89,6 +94,12 @@ function SelfieThumb({ path }: { path: string | null }) {
   );
 }
 
+/**
+ * Tabel rekap absensi bulanan (Client Component). Props berasal dari
+ * AbsensiPage (server): stats teragregasi + baris attendance & pengajuan
+ * per karyawan. Klik "Detail" membuka modal berisi riwayat harian,
+ * thumbnail selfie (signed URL), dan tautan lokasi.
+ */
 export default function AbsensiTable({ month, stats, attendance, leaves }: Props) {
   const router = useRouter();
   const [detailId, setDetailId] = useState<string | null>(null);
