@@ -147,6 +147,10 @@ export default function ProfileScreen() {
     ['Lama Bekerja', me.tenure],
   ];
 
+  /**
+   * Handler keluar akun: tampilkan konfirmasi; bila disetujui, hapus sesi
+   * (clearSession) dan navigasi mengganti ke halaman login.
+   */
   async function handleLogout() {
     Alert.alert(
       'Keluar dari akun?',
@@ -165,6 +169,11 @@ export default function ProfileScreen() {
     );
   }
 
+  /**
+   * Handler simpan kata sandi baru: validasi panjang minimum (6) dan
+   * kecocokan konfirmasi, lalu perbarui lewat Supabase Auth updateUser;
+   * hasil (sukses/gagal) ditampilkan sebagai pesan di kartu.
+   */
   async function handleChangePassword() {
     setPwMsg(null);
     if (newPass.length < 6) {

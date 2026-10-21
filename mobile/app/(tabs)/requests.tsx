@@ -67,6 +67,7 @@ export default function RequestsScreen() {
   const [requests, setRequests] = useState<LeaveRequest[]>(MY_REQUESTS);
   const [me, setMe] = useState<Employee | null>(null);
 
+  /** Muat ulang daftar pengajuan saya dari DB; dipakai setelah pengajuan baru terkirim. */
   const reloadRequests = useCallback(() => {
     getMyLeaveRequests().then((rows) => {
       if (rows.length > 0) setRequests(rows);
@@ -159,6 +160,12 @@ function parseTanggalID(s: string): string | null {
   return `${m[3] ?? ''}-${mon}-${(m[1] ?? '').padStart(2, '0')}`;
 }
 
+/**
+ * Formulir pengajuan baru: pilih jenis (cuti/ijin/sakit), rentang tanggal,
+ * alasan, dan lampiran surat dokter (wajib untuk sakit). Ijin mendukung
+ * opsi setengah hari. Props: onSubmitted dipanggil setelah kirim berhasil
+ * agar daftar pengajuan dimuat ulang.
+ */
 function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [type, setType] = useState<RequestType>('cuti');
   const [startDate, setStartDate] = useState('14 Okt 2026');
@@ -169,6 +176,11 @@ function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
+  /**
+   * Handler kirim pengajuan: validasi alasan, lampiran (untuk sakit), dan
+   * format tanggal, lalu kirim ke DB lewat submitLeaveRequest; kegagalan
+   * server ditampilkan sebagai error tanpa mereset formulir.
+   */
   async function handleSubmit() {
     if (sending) return;
     if (!reason.trim()) {
@@ -361,6 +373,11 @@ function HatchBar({ progress, color }: { progress: number; color: string }) {
 }
 
 /** --- Segmen: Sisa Kuota --- */
+/**
+ * Segmen Sisa Kuota: kartu kuota cuti/ijin/sakit dengan bilah progres.
+ * Sesi real membaca saldo dari leave_balances (fallback default
+ * company_settings); sesi demo memakai data demo.
+ */
 function QuotaTab() {
   // Sesi demo: QUOTAS demo. Sesi real: saldo dari database (leave_balances),
   // fallback ke default dari company_settings bila baris belum ada.
@@ -446,6 +463,7 @@ function QuotaTab() {
   );
 }
 
+/** Satu baris riwayat pemakaian kuota: label periode + chip status. */
 function UsageRow({
   label,
   value,
@@ -467,6 +485,7 @@ function UsageRow({
 }
 
 /** --- Segmen: Pengajuanku --- */
+/** Segmen Pengajuanku: daftar pengajuan milik pengguna (RequestRow per item). */
 function MyRequestsTab({
   requests,
   employee,
@@ -483,6 +502,11 @@ function MyRequestsTab({
   );
 }
 
+/**
+ * Satu kartu pengajuan: avatar, jenis + rentang tanggal, alasan, tanggal
+ * pengajuan, dan chip status. Bila data karyawan tidak diberikan, diambil
+ * dari data demo berdasarkan employeeId.
+ */
 export function RequestRow({
   request,
   employee,

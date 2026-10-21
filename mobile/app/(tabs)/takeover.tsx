@@ -86,6 +86,11 @@ export default function TakeoverScreen() {
   );
 }
 
+/**
+ * Satu baris pengajuan untuk HR: avatar, nama, jenis + rentang, tanggal
+ * pengajuan, chip Eskalasi/Diambil Alih. Ketuk → navigasi ke detail HR
+ * (/hr/detail).
+ */
 export function TakeoverRow({ request }: { request: LeaveRequest }) {
   const employee = getEmployee(request.employeeId);
   const taken = !!request.takenOverBy;
