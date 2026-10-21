@@ -16,14 +16,20 @@ interface ClockState {
 let state: ClockState = { phase: 'in', inTime: null, outTime: null, flags: [] };
 const listeners = new Set<() => void>();
 
+/** Beri tahu semua subscriber bahwa state berubah (memicu render ulang). */
 function emit() {
   listeners.forEach((l) => l());
 }
 
+/** Ambil snapshot state clock saat ini (dipakai useSyncExternalStore). */
 export function getClockState(): ClockState {
   return state;
 }
 
+/**
+ * Daftarkan listener perubahan state.
+ * Mengembalikan fungsi unsubscribe untuk berhenti berlangganan.
+ */
 export function subscribeClock(fn: () => void): () => void {
   listeners.add(fn);
   return () => {
@@ -66,6 +72,7 @@ export function resetClock(): void {
   emit();
 }
 
+/** Hook React: baca state clock dan render ulang otomatis saat berubah. */
 export function useClockState(): ClockState {
   return useSyncExternalStore(subscribeClock, getClockState);
 }

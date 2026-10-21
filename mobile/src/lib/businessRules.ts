@@ -144,6 +144,7 @@ export type ReminderType = (typeof REMINDER_TYPES)[number];
 // Penanda absensi (AttendanceFlag)
 // ---------------------------------------------------------------------------
 
+/** Daftar kode penanda absensi yang dikenal sistem. */
 export const FLAG_TYPES = [
   'di_luar_area', // BR-06
   'wajah_tidak_cocok', // BR-10

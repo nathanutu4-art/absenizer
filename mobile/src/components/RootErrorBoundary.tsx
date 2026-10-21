@@ -19,14 +19,17 @@ export class RootErrorBoundary extends React.Component<
 > {
   state: State = { hasError: false };
 
+  /** Tandai state error agar render() menampilkan layar pemulihan. */
   static getDerivedStateFromError(): State {
     return { hasError: true };
   }
 
+  /** Tangkap galat render anak; cukup ditangani diam-diam di sini. */
   componentDidCatch() {
     // Sengaja tidak melempar ulang — cukup tampilkan layar aman.
   }
 
+  /** Reset state error agar anak dirender ulang (tombol "Coba Lagi"). */
   private handleReset = () => {
     this.setState({ hasError: false });
   };

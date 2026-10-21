@@ -62,6 +62,11 @@ export function RequestDetail({ request, title, hrMode = false }: Props) {
   const pending = request.status === 'menunggu';
   const chip = STATUS_CHIP[request.status];
 
+  /**
+   * Terapkan keputusan persetujuan/penolakan.
+   * Penolakan wajib disertai catatan; keberhasilan ditandai toast
+   * (mode HR menyebut pengambilalihan teraudit) lalu kembali ke layar sebelumnya.
+   */
   function decide(approved: boolean) {
     if (!approved && !note.trim()) {
       setError('Penolakan wajib disertai catatan.');

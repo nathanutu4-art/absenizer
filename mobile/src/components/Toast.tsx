@@ -10,6 +10,10 @@ export function showToast(message: string): void {
   listeners.forEach((l) => l(message));
 }
 
+/**
+ * Daftarkan pendengar pesan toast; mengembalikan fungsi unsubscribe
+ * untuk membersihkan pendaftaran saat komponen dilepas.
+ */
 function subscribe(fn: Listener): () => void {
   listeners.add(fn);
   return () => {
