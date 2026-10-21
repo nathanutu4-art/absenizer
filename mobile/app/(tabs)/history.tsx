@@ -216,6 +216,7 @@ export default function HistoryScreen() {
   );
 }
 
+/** Petakan nama tone ringkasan ke warna tema yang sesuai. */
 function toneColor(tone: string): string {
   return tone === 'green'
     ? colors.green

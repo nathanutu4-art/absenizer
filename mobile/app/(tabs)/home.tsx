@@ -58,6 +58,7 @@ const ClockDisplay = React.memo(function ClockDisplay() {
   return <Text style={styles.clockTime}>{wib} WIB</Text>;
 });
 
+/** Format tanggal hari ini lengkap (hari, tanggal, bulan, tahun) zona WIB. */
 function todayLine(): string {
   return new Intl.DateTimeFormat('id-ID', {
     weekday: 'long',
@@ -68,6 +69,7 @@ function todayLine(): string {
   }).format(new Date());
 }
 
+/** Format jam saat ini singkat (HH.MM) zona WIB. */
 function nowShort(): string {
   return new Intl.DateTimeFormat('id-ID', {
     hour: '2-digit',
@@ -104,6 +106,13 @@ function SectionTitle({ children, onBlue }: { children: React.ReactNode; onBlue?
   );
 }
 
+/**
+ * Layar Beranda: sapaan + foto pengguna login, kartu status absensi hari
+ * ini (jam masuk/pulang/durasi dari DB), tombol medali Clock In/Out,
+ * jam kerja & lokasi kantor, pintasan per peran, serta seksi peran
+ * (sisa kuota karyawan / jumlah menunggu PIC / eskalasi HR) dan
+ * aktivitas terakhir. Data dimuat dari db.ts sesuai sesi (demo/real).
+ */
 export default function HomeScreen() {
   const [role, setRole] = useState<DemoRole>('karyawan');
   const clock = useClockState();
@@ -258,6 +267,10 @@ export default function HomeScreen() {
 
   // Guard anti double-tap: cegah push route ganda.
   const navigating = useRef(false);
+  /**
+   * Handler ketuk medali jam: navigasi ke alur selfie clock-in
+   * (kind=out saat fase pulang); fase selesai hanya menampilkan toast.
+   */
   function handleClockPress() {
     if (navigating.current) return;
     navigating.current = true;

@@ -79,6 +79,10 @@ export default function ApprovalsScreen() {
   );
 }
 
+/**
+ * Satu baris pengajuan untuk PIC: avatar, nama, jenis + rentang, tanggal
+ * pengajuan, chip status. Ketuk → navigasi ke detail PIC (/pic/detail).
+ */
 export function ApprovalRow({ request }: { request: LeaveRequest }) {
   const employee = getEmployee(request.employeeId);
   const chip = STATUS_CHIP[request.status];
