@@ -11,6 +11,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Ambil semua pengajuan (terbaru dulu) + daftar karyawan untuk peta nama,
+ * dan tentukan karyawan HR yang sedang login (dari sesi server) sebagai
+ * pencatat keputusan (decided_by / actor_id).
+ */
 async function getData() {
   const sb = await createServerSupabase();
   const [reqRes, empRes, me] = await Promise.all([
@@ -41,18 +46,24 @@ async function getData() {
   return { requests, nameById, hrEmployee };
 }
 
+/** Kelas badge warna per status pengajuan. */
 const STATUS_BADGE: Record<string, string> = {
   menunggu: "badge-yellow",
   disetujui: "badge-green",
   ditolak: "badge-red",
 };
 
+/** Kelas badge warna per jenis pengajuan. */
 const TYPE_BADGE: Record<string, string> = {
   cuti: "badge-blue",
   ijin: "badge-yellow",
   sakit: "badge-red",
 };
 
+/**
+ * Halaman Pengajuan (Server Component): tabel cuti/ijin/sakit dengan badge
+ * status dan tombol aksi RequestActions untuk yang masih menunggu.
+ */
 export default async function PengajuanPage() {
   let data: Awaited<ReturnType<typeof getData>> | null = null;
   let error: string | null = null;

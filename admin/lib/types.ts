@@ -1,5 +1,6 @@
 /** Tipe baris sesuai ~/workspace/absenizer/supabase/schema.sql */
 
+/** Baris tabel employees — data karyawan; pic_id = atasan langsung (PIC), is_hr/is_top_boss menandai peran khusus. */
 export interface Employee {
   id: string;
   user_id: string | null;
@@ -19,6 +20,7 @@ export interface Employee {
   created_at: string;
 }
 
+/** Baris tabel company_settings — pengaturan perusahaan aktif: titik kantor, geofence, jam kerja, kuota default, dan tema. */
 export interface CompanySettings {
   id: string;
   office_name: string;
@@ -40,9 +42,12 @@ export interface CompanySettings {
   auto_login_enabled: boolean | null;
 }
 
+/** Jenis pengajuan ketidakhadiran. */
 export type LeaveType = "cuti" | "ijin" | "sakit";
+/** Status alur persetujuan pengajuan: menunggu → disetujui/ditolak. */
 export type LeaveStatus = "menunggu" | "disetujui" | "ditolak";
 
+/** Baris tabel leave_requests — pengajuan cuti/ijin/sakit beserta status persetujuannya. */
 export interface LeaveRequest {
   id: string;
   employee_id: string;
@@ -57,6 +62,7 @@ export interface LeaveRequest {
   created_at: string;
 }
 
+/** Baris tabel audit_log — jejak aksi penting (persetujuan, koreksi, pengambilalihan keputusan). */
 export interface AuditLog {
   id: string;
   actor_id: string | null;
@@ -69,18 +75,24 @@ export interface AuditLog {
   created_at: string;
 }
 
+/** Label tampil Bahasa Indonesia untuk setiap jenis pengajuan. */
 export const LEAVE_TYPE_LABEL: Record<LeaveType, string> = {
   cuti: "Cuti",
   ijin: "Ijin",
   sakit: "Sakit",
 };
 
+/** Label tampil Bahasa Indonesia untuk setiap status pengajuan. */
 export const LEAVE_STATUS_LABEL: Record<LeaveStatus, string> = {
   menunggu: "Menunggu",
   disetujui: "Disetujui",
   ditolak: "Ditolak",
 };
 
+/**
+ * Format tanggal ISO menjadi "12 Jan 2026" (id-ID); string tanggal saja
+ * (YYYY-MM-DD) diperlakukan sebagai tengah malam lokal. Null → "—".
+ */
 export function formatTanggal(iso: string | null): string {
   if (!iso) return "—";
   const d = new Date(iso.length <= 10 ? iso + "T00:00:00" : iso);
@@ -91,6 +103,9 @@ export function formatTanggal(iso: string | null): string {
   });
 }
 
+/**
+ * Format timestamp ISO menjadi tanggal + jam (id-ID). Null → "—".
+ */
 export function formatWaktu(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString("id-ID", {

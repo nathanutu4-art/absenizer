@@ -158,6 +158,12 @@ export default function RequestActions({
     if (auditErr) throw auditErr;
   }
 
+  /**
+   * Eksekusi keputusan: utamakan RPC decide_leave_request (satu transaksi:
+   * update status + approvals + audit_log); fallback ke decideFallback bila
+   * function belum ada di DB. Persetujuan cuti/ijin dilanjutkan dengan
+   * pemotongan kuota (applyLeaveBalance) — kegagalannya hanya peringatan.
+   */
   async function decide(decision: "disetujui" | "ditolak", rejectNote: string) {
     if (!hrEmployeeId) {
       setError("Tidak ada karyawan HR untuk mencatat keputusan.");

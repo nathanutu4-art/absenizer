@@ -13,6 +13,7 @@ const NAV = [
   { href: "/pengaturan", label: "Pengaturan", icon: "gear" },
 ] as const;
 
+/** Ikon SVG garis untuk menu navigasi, dipilih dari nama (grid/clock/users/file/shield/gear). */
 function Icon({ name }: { name: string }) {
   const common = {
     viewBox: "0 0 24 24",
@@ -74,10 +75,15 @@ function Icon({ name }: { name: string }) {
   }
 }
 
+/**
+ * Bilah navigasi samping (Client Component): brand, menu utama dengan
+ * penanda halaman aktif, dan tombol keluar (signOut → /login).
+ */
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  /** Keluar dari sesi Supabase lalu kembali ke halaman login. */
   async function handleLogout() {
     await getSupabase().auth.signOut();
     router.replace("/login");

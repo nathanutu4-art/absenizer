@@ -3,6 +3,10 @@ import { createBrowserClient } from "@supabase/ssr";
 
 let browserCached: SupabaseClient | null = null;
 
+/**
+ * Baca URL & anon key Supabase dari env publik (NEXT_PUBLIC_*).
+ * Mengembalikan string kosong bila env belum diisi agar pemanggilan tidak crash.
+ */
 function env() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";

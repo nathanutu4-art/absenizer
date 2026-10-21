@@ -4,6 +4,10 @@ import SettingsForm from "./SettingsForm";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Ambil baris company_settings aktif terbaru (is_active, updated_at desc).
+ * Mengembalikan null bila belum ada pengaturan.
+ */
 async function getSettings(): Promise<CompanySettings | null> {
   const sb = getSupabase();
   const { data, error } = await sb
@@ -17,6 +21,10 @@ async function getSettings(): Promise<CompanySettings | null> {
   return data;
 }
 
+/**
+ * Halaman Pengaturan (Server Component): memuat pengaturan perusahaan lalu
+ * menyerahkannya ke SettingsForm (client) untuk diedit.
+ */
 export default async function PengaturanPage() {
   let settings: CompanySettings | null = null;
   let error: string | null = null;

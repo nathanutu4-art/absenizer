@@ -8,6 +8,12 @@ interface Props {
   initial: CompanySettings | null;
 }
 
+/**
+ * Formulir pengaturan perusahaan (Client Component): titik kantor &
+ * geofence, jam kerja, kuota cuti/ijin default, toggle auto-login aplikasi
+ * mobile, dan palet warna. Props: initial — pengaturan aktif saat ini
+ * (null bila belum ada).
+ */
 export default function SettingsForm({ initial }: Props) {
   const [officeName, setOfficeName] = useState(initial?.office_name ?? "");
   const [officeLat, setOfficeLat] = useState(
@@ -70,6 +76,12 @@ export default function SettingsForm({ initial }: Props) {
         )}`
       : null;
 
+  /**
+   * Validasi lalu simpan seluruh pengaturan. Kolom dari migrasi opsional
+   * (kuota, palet, auto-login) yang belum ada di DB tidak menggagalkan
+   * penyimpanan kolom inti — sebagai gantinya tampil peringatan berisi
+   * file migrasi yang harus dijalankan.
+   */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -157,6 +169,7 @@ export default function SettingsForm({ initial }: Props) {
       return msg.includes("42703") || msg.includes("auto_login_enabled");
     }
 
+    /** Simpan satu baris pengaturan: update baris aktif, atau insert bila belum ada. */
     async function saveRow(row: Record<string, unknown>) {
       const sb = getSupabase();
       if (initial) {

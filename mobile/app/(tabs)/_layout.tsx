@@ -16,6 +16,7 @@ import { colors, fontFamily, isGlassMode } from '../../src/theme';
  * - PIC: Beranda, Persetujuan (badge = jumlah menunggu), Tim, Profil
  * - HR: Beranda, Ambil Alih (badge = jumlah eskalasi), Tim, Profil
  */
+/** Pembuat renderer ikon tab: ikon putih bercahaya saat fokus, redup saat tidak. */
 function tabIcon(name: IconName) {
   return ({ focused }: { focused: boolean }) => (
     <View style={[styles.iconGlass, focused && styles.iconGlassActive]}>
@@ -61,6 +62,12 @@ const badgeStyle = {
   fontSize: 9,
 } as const;
 
+/**
+ * Layout tab utama: membaca peran aktif dari sesi, lalu menampilkan/
+ * menyembunyikan tab sesuai peran (Riwayat & Pengajuan hanya karyawan,
+ * Persetujuan hanya PIC, Ambil Alih hanya HR) beserta badge jumlah
+ * pengajuan menunggu/eskalasi. Mengembalikan null selama peran dimuat.
+ */
 export default function TabsLayout() {
   const [role, setRole] = useState<DemoRole | null>(null);
   const pathname = usePathname();
