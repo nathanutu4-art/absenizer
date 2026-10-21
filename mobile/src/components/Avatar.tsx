@@ -51,6 +51,10 @@ const RING_COLORS = {
   ijin: colors.yellowRing,
 } as const;
 
+/**
+ * Ambil inisial nama: huruf pertama kata pertama + huruf pertama kata
+ * terakhir (maks. 2 huruf), huruf kapital. Dipakai Avatar bila tidak ada foto.
+ */
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
   const first = parts[0]?.[0] ?? '';

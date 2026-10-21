@@ -41,6 +41,11 @@ export default function LoginScreen() {
     }
   );
 
+  /**
+   * Simpan sesi login ke SecureStore lalu navigasi ke Beranda.
+   * Role awal 'karyawan'; bila Supabase terkonfigurasi, role diselesaikan
+   * ulang dari database lewat resolveMyRole dan sesi ditulis ulang bila beda.
+   */
   async function persistSession(userId: string, email: string | undefined) {
     // Role murni dari database; default 'karyawan' bila tidak terkonfigurasi.
     const defaultRole: DemoRole = 'karyawan';
@@ -86,6 +91,11 @@ export default function LoginScreen() {
     return 'Gagal masuk. Periksa koneksi Anda.';
   }
 
+  /**
+   * Handler tombol Masuk: validasi email & kata sandi, autentikasi via
+   * Supabase Auth (signInWithPassword), lalu persistSession; error
+   * ditampilkan dalam Bahasa Indonesia lewat mapAuthError.
+   */
   async function handleLogin() {
     setError(null);
     const trimmedEmail = email.trim();

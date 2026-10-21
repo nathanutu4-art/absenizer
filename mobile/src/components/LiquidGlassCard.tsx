@@ -54,6 +54,10 @@ export function LiquidGlassCard({
   const scale = useRef(new Animated.Value(1)).current;
   const sheenOpacity = useRef(new Animated.Value(1)).current;
 
+  /**
+   * Saat kartu mulai ditekan: perkecil skala ke 0,98 dan redupkan sheen.
+   * Dilewati bila prop pressable=false.
+   */
   const handlePressIn = () => {
     if (!pressable) return;
     Animated.parallel([
@@ -71,6 +75,9 @@ export function LiquidGlassCard({
     ]).start();
   };
 
+  /**
+   * Saat tekanan dilepas: kembalikan skala dan opasitas sheen ke keadaan semula.
+   */
   const handlePressOut = () => {
     if (!pressable) return;
     Animated.parallel([

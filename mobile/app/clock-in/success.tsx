@@ -128,6 +128,7 @@ export default function SuccessScreen() {
   );
 }
 
+/** Format tanggal hari ini lengkap (hari, tanggal, bulan, tahun) zona WIB. */
 function todayLong(): string {
   return new Intl.DateTimeFormat('id-ID', {
     weekday: 'long',

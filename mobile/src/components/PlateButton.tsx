@@ -52,6 +52,10 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const [pressed, setPressed] = useState(false);
 
+  /**
+   * Saat tombol mulai ditekan: nyalakan animasi halo (mode kaca) dan,
+   * untuk varian accent, perkecil skala ke 0,96.
+   */
   const handlePressIn = () => {
     setPressed(true);
     Animated.timing(glowAnim, {
@@ -69,6 +73,10 @@ export function PlateButton({ children, onPress, variant = 'primary', style, dis
     }
   };
 
+  /**
+   * Saat tekanan dilepas: matikan animasi halo dan kembalikan
+   * skala varian accent ke 1.
+   */
   const handlePressOut = () => {
     setPressed(false);
     Animated.timing(glowAnim, {

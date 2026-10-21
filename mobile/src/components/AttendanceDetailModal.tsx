@@ -74,6 +74,10 @@ export function AttendanceDetailModal({ row, onClose }: Props) {
   }, [row]);
 
   const duration = row ? calcDuration(row.clockIn, row.clockOut) : '--';
+  /**
+   * Format koordinat menjadi teks "lat, lng" (4 desimal);
+   * tampilkan "Tidak tercatat" bila koordinat tidak tersedia.
+   */
   const locationText = (lat?: number | null, lng?: number | null) =>
     lat != null && lng != null
       ? `${lat.toFixed(4)}, ${lng.toFixed(4)}`
