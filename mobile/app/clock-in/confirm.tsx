@@ -147,6 +147,12 @@ export default function ConfirmScreen() {
       ? `GPS ±${Math.round(coords.accuracy ?? 0)} m`
       : 'Mencari GPS…';
 
+  /**
+   * Handler konfirmasi: wajib ada selfie, unggah foto ke Storage, lalu
+   * simpan absensi ke DB (saveAttendance/saveClockOut) — hanya bila simpan
+   * sukses status lokal dicatat dan navigasi diganti ke layar sukses;
+   * kegagalan menampilkan toast dan tetap di layar ini.
+   */
   async function handleConfirm() {
     if (busy) return;
     setBusy(true);

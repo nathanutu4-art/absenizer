@@ -37,6 +37,11 @@ export default function SelfieScreen() {
     clearSelfiePhoto();
   }, []);
 
+  /**
+   * Handler tombol shutter: ambil foto dengan kamera depan, simpan URI-nya
+   * lewat setSelfiePhoto, lalu lanjut ke layar konfirmasi (kind diteruskan
+   * untuk clock-out). Gagal ambil foto → toast, tetap di layar ini.
+   */
   async function handleShutter() {
     if (busy) return;
     setBusy(true);

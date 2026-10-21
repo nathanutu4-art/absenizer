@@ -84,6 +84,7 @@ function birthdaysThisMonth(list: Employee[]): Birthday[] {
     .map(({ day: _day, ...rest }) => rest);
 }
 
+/** Warna ring avatar seksi "Sedang Tidak Masuk" menurut status karyawan. */
 function awayRingColor(status: Employee['status']): string {
   return status === 'sakit'
     ? colors.red
@@ -315,6 +316,7 @@ export default function TeamScreen() {
   );
 }
 
+/** Judul seksi dengan garis ganda khas gaya ukiran. */
 function SectionTitle({ label }: { label: string }) {
   return (
     <View style={styles.sectionHead}>
@@ -325,6 +327,7 @@ function SectionTitle({ label }: { label: string }) {
   );
 }
 
+/** Titik legenda berwarna + label untuk keterangan status tidak masuk. */
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
     <View style={styles.legendItem}>

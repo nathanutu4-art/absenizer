@@ -55,6 +55,10 @@ export default function LivenessScreen() {
     outputRange: ['0deg', '360deg'],
   });
 
+  /**
+   * Handler tombol "Saya Sudah Berkedip": putar animasi arc verifikasi,
+   * lalu navigasi ke layar konfirmasi (param simFace diteruskan bila ada).
+   */
   function handleDone() {
     if (busy) return;
     setBusy(true);
