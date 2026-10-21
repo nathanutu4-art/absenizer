@@ -3,11 +3,13 @@
  * Dipakai untuk validasi radius GEOFENCE_RADIUS_M terhadap titik kantor (BR-05).
  */
 
+/** Titik koordinat geografis (derajat lintang & bujur). */
 export interface LatLng {
   latitude: number;
   longitude: number;
 }
 
+/** Radius rata-rata bumi dalam meter, untuk rumus haversine. */
 const EARTH_RADIUS_M = 6_371_000;
 
 /** Jarak dalam meter antara dua titik koordinat (rumus haversine). */

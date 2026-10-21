@@ -69,6 +69,7 @@ export interface CompanySettings {
   autoLoginEnabled: boolean;
 }
 
+/** Pengaturan perusahaan versi demo — dipakai sebagai fallback & mode demo. */
 export const DEMO_SETTINGS: CompanySettings = {
   officeName: OFFICE_NAME,
   officeLat: OFFICE_COORD.latitude,
@@ -202,11 +203,16 @@ interface DbEmployeeRow {
   is_active: boolean;
 }
 
+/** Nama bulan lengkap Bahasa Indonesia (indeks 0 = Januari). */
 const MONTHS_ID = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
 ];
 
+/**
+ * Uraikan tanggal ISO "YYYY-MM-DD" menjadi komponen {y, m, d}.
+ * Mengembalikan null bila input kosong atau komponennya tidak valid.
+ */
 function parseISODate(iso: string | null): { y: number; m: number; d: number } | null {
   if (!iso) return null;
   const [y, m, d] = iso.split('-').map(Number);
@@ -221,6 +227,11 @@ function gradientFor(id: string): AvatarGradientId {
   return String((h % 12) + 1).padStart(2, '0') as AvatarGradientId;
 }
 
+/**
+ * Hitung label bulan bergabung dan masa kerja dari tanggal masuk (ISO).
+ * Mengembalikan { joinDate: "Oktober 2026", tenure: "2 tahun 3 bulan" };
+ * keduanya "—" bila tanggal masuk tidak valid.
+ */
 function tenureSejak(joinISO: string): { joinDate: string; tenure: string } {
   const p = parseISODate(joinISO);
   if (!p) return { joinDate: '—', tenure: '—' };
@@ -238,6 +249,11 @@ function tenureSejak(joinISO: string): { joinDate: string; tenure: string } {
   return { joinDate, tenure: parts.length > 0 ? parts.join(' ') : 'kurang dari sebulan' };
 }
 
+/**
+ * Petakan baris tabel `employees` (snake_case) ke tipe Employee aplikasi:
+ * format tanggal lahir & masa kerja, gradient avatar, dan peran diturunkan
+ * dari kolom DB.
+ */
 function mapDbEmployee(row: DbEmployeeRow): Employee {
   const b = parseISODate(row.birth_date);
   const { joinDate, tenure } = tenureSejak(row.join_date);
@@ -664,11 +680,16 @@ export async function submitLeaveRequest(
   }
 }
 
+/** Nama bulan singkat Bahasa Indonesia (indeks 0 = Jan). */
 const SHORT_MONTHS_ID = [
   'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
   'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
 ];
 
+/**
+ * Format rentang tanggal pengajuan menjadi label ringkas Bahasa Indonesia,
+ * mis. "13 Okt 2026 – 15 Okt 2026"; satu tanggal saja bila mulai = selesai.
+ */
 function formatDateRange(startISO: string, endISO: string): string {
   const s = parseISODate(startISO);
   const e = parseISODate(endISO);
@@ -678,6 +699,10 @@ function formatDateRange(startISO: string, endISO: string): string {
   return `${a} – ${e.d} ${SHORT_MONTHS_ID[e.m - 1]} ${e.y}`;
 }
 
+/**
+ * Format timestamp ISO pengajuan menjadi "13 Okt 2026 • 08.30"
+ * (zona Asia/Jakarta). Mengembalikan string asli bila parsing gagal.
+ */
 function formatSubmittedAt(iso: string): string {
   try {
     const d = new Date(iso);
@@ -784,8 +809,10 @@ export async function getMyLeaveBalance(): Promise<LeaveBalance | null> {
 // Riwayat kehadiran & ketidakhadiran
 // ---------------------------------------------------------------------------
 
+/** Nama hari singkat (indeks mengikuti getUTCDay: 0 = Minggu). */
 const HARI_PENDEK = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
 
+/** Label tampilan untuk setiap flag_type dari tabel attendance_flags. */
 const FLAG_LABEL: Record<string, string> = {
   di_luar_area: 'Di Luar Area',
   wajah_tidak_cocok: 'Wajah Tidak Cocok',

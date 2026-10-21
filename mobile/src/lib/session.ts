@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
+/** Kunci penyimpanan sesi login di SecureStore. */
 export const SESSION_KEY = 'absenizer_session';
 
 export type DemoRole = 'karyawan' | 'pic' | 'hr';
@@ -28,6 +29,7 @@ export async function getActiveRole(): Promise<DemoRole> {
   return session?.role ?? 'karyawan';
 }
 
+/** Hapus sesi tersimpan (logout) dari SecureStore. */
 export async function clearSession(): Promise<void> {
   await SecureStore.deleteItemAsync(SESSION_KEY);
 }

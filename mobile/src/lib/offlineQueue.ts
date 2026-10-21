@@ -33,6 +33,11 @@ export interface QueuedClockEvent {
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
+/**
+ * Buka (sekali saja) database SQLite antrean dan pastikan tabel
+ * `clock_outbox` beserta indeksnya ada. Mengembalikan promise koneksi
+ * yang di-cache untuk dipakai ulang.
+ */
 function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (!dbPromise) {
     dbPromise = (async () => {

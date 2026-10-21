@@ -4,10 +4,12 @@
  */
 let uri: string | null = null;
 
+/** Simpan URI foto selfie hasil jepretan kamera untuk dipakai layar berikutnya. */
 export function setSelfiePhoto(value: string | null) {
   uri = value;
 }
 
+/** Ambil URI foto selfie yang sedang ditampung; null bila belum ada. */
 export function getSelfiePhoto(): string | null {
   return uri;
 }
